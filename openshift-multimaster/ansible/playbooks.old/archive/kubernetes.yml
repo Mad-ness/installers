@@ -1,0 +1,33 @@
+- hosts: k8s-all
+  become: true
+  gather_facts: false
+  tasks:
+  - name: Installing Kubernetes repo
+    copy:
+        content: |
+            [kubernetes]
+            name=Kubernetes
+            baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+            enabled=1
+            gpgcheck=1
+            repo_gpgcheck=1
+            gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
+                    https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+        dest: /etc/yum.repos.d/kubernetes.repo
+        owner: 'root'
+        group: 'root'
+        mode: '0644'
+
+
+  - name: Install required Kubernetes packages
+    yum: name='{{ item }}' state=present
+    with_items:
+    - kubelet
+    - kubeadm
+    - kubectl
+
+  - name: Make Kubelet service enabled and running
+    service: name=kubelet enabled=on state=started
+
+
+#  - name: Updating 

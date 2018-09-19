@@ -1,0 +1,36 @@
+- hosts: 
+    - master_nodes
+    - infra_nodes
+    - app_nodes
+  become: true
+  tags:
+    - master_nodes
+    - infra_nodes
+    - app_nodes
+    - all
+  gather_facts: false
+  tasks:
+
+  - name: Install updates
+    yum: name='*' state=latest
+
+  - name: Install required packages
+    yum: name='{{ item }}'
+    with_items:
+      - NetworkManager
+      - wget
+      - git
+      - net-tools
+      - bind-utils
+      - yum-utils
+      - iptables-services
+      - bridge-utils
+      - bash-completion
+      - kexec-tools
+      - sos
+      - psacct
+      - docker
+
+  - name: Ensure NetworkManager
+    service: name=NetworkManager state=started enabled=on
+

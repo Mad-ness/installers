@@ -1,0 +1,217 @@
+- hosts: all
+  become: true
+  gather_facts: true
+  tasks:
+  - set_fact:
+        net1_ip: "{{ ansible_default_ipv4.address }}"
+
+
+  - name: Configuring DNS server(s) on management host(s)
+    block:
+    - name: Install Bind (DNS)
+      yum: name=bind state=present
+      tags:
+      - bind-config
+
+    - name: Configure /etc/named.conf
+      copy:
+          dest: /etc/named.conf
+          content: |
+              options {
+              	listen-on port 53 { 127.0.0.1; 0.0.0.0/0; };
+              	//listen-on-v6 port 53 { ::1; };
+              	directory 	"/var/named";
+              	dump-file 	"/var/named/data/cache_dump.db";
+              	statistics-file "/var/named/data/named_stats.txt";
+              	memstatistics-file "/var/named/data/named_mem_stats.txt";
+              	allow-query     { localhost; 0.0.0.0/0; };
+                  check-names master ignore;
+                  check-names slave ignore;
+                  check-names response ignore;
+              	recursion yes;
+                forward first;
+                forwarders { 10.189.136.37; 10.189.136.165; };
+              	dnssec-enable yes;
+              	dnssec-validation yes;
+              	bindkeys-file "/etc/named.iscdlv.key";
+              	managed-keys-directory "/var/named/dynamic";
+              	pid-file "/run/named/named.pid";
+              	session-keyfile "/run/named/session.key";
+              };
+              logging {
+                      channel default_debug {
+                              file "data/named.run";
+                              severity dynamic;
+                      };
+              };
+              zone "." IN {
+              	type hint;
+              	file "named.ca";
+              };
+              include "/etc/named.rfc1912.zones";
+              include "/etc/named.root.key";
+              include "myzones.conf";
+          owner: root
+          group: named
+          mode: '0640'
+      notify:
+      - restart_named
+      tags:
+      - bind-config
+  
+    - name: Setting some temporary facts
+      set_fact:
+        rev_zone_net: "{{ ansible_default_ipv4.address.split('.')[::-1][1:] | join('.') }}"
+      tags:
+      - bind-config
+  
+    - name: Create zones file
+      copy:
+          dest: /var/named/myzones.conf
+          content: |
+              zone "{{ rev_zone_net }}.in-addr.arpa." IN {
+                  type master;
+                  file "{{ rev_zone_net }}.in-addr.arpa.zone";
+                  allow-update { none; };
+              };
+              
+              zone "{{ domain_name }}" IN {
+                  type master;
+                  file "{{ domain_name }}.zone";
+                  allow-update { none; };
+              };
+          owner: root
+          group: named
+          mode: '0640'
+      notify:
+      - restart_named
+      tags:
+      - bind-config
+  
+  
+    - name: Create a direct zone ({{ domain_name }})
+      copy:
+          dest: /var/named/{{ domain_name }}.zone
+          content: |
+              $TTL 86400
+              $ORIGIN {{ domain_name }}.
+              @       IN      SOA     ns.{{ domain_name }}. root.{{ domain_name }}. (
+                      2014092222    ; Serial
+                          3h        ; Refresh
+                          1h        ; Retry
+                          1w        ; Expiry
+                          3h        ; TTL
+                          )
+              
+              	IN	NS	ns.{{ domain_name }}.
+              	IN	A	{{ ansible_default_ipv4.address }}
+              ns	IN	A	{{ ansible_default_ipv4.address }}
+              {% for host in groups['loadbalancers'] %}
+              *.cloudapps 300 IN  A {{ hostvars[host].ansible_default_ipv4.address }}
+              {% endfor %}
+              {% for host in groups['all'] %}
+              {{ host.split('.')[0] }}  IN A  {{ hostvars[host].ansible_default_ipv4.address }}
+              {% endfor %}
+          owner: root
+          group: named
+          mode: '0644'
+      notify:
+      - restart_named
+      tags:
+      - bind-config
+  
+    - name: Create a reverse zone ({{ rev_zone_net }})
+      copy:
+          dest: "/var/named/{{ rev_zone_net }}.in-addr.arpa.zone"
+          content: |
+              $TTL 86400
+              $ORIGIN {{ rev_zone_net }}.in-addr.arpa.
+              @       IN      SOA     ns.{{ domain_name }}. root.{{ domain_name }}. (
+                      2014092222    ; Serial
+                          3h        ; Refresh
+                          1h        ; Retry
+                          1w        ; Expiry
+                          3h        ; TTL
+                          )
+              
+              	IN	NS	ns.{{ domain_name }}.
+              	IN	A	{{ ansible_default_ipv4.address }}
+              {{ ansible_default_ipv4.address.split('.')[-1] }}	PTR		ns.{{ domain_name }}.
+              {% for host in groups['all'] %}
+              {{ hostvars[host].ansible_default_ipv4.address.split('.')[-1] }} PTR  {{ hostvars[host].inventory_hostname }}.{{ domain_name }}.
+              {% endfor %}
+          owner: root
+          group: named
+          mode: '0644'
+      notify:
+      - restart_named
+      tags:
+      - bind-config
+
+    when: inventory_hostname in groups['management']
+
+  - name: Enabled Bind
+    when: inventory_hostname in groups['management']
+    service: name=named state=started enabled=on
+
+  handlers:
+    - name: restart_named
+      service: name=named state=restarted enabled=on
+
+
+- hosts:
+    - master_nodes
+    - infra_nodes
+    - app_nodes
+  become: yes
+  gather_facts: yes
+  tasks:
+
+  - name: Remove unneeded DNS entries in /etc/*/ifcfg-eth0
+    lineinfile:
+        path: /etc/sysconfig/network-scripts/ifcfg-eth0
+        regexp: '^DNS.*$'
+        state: absent
+
+  - name: Get ip addresses of DNS (management server(s))
+    set_fact:
+        dns_ips: '{{ groups["management"] | map("extract", hostvars, "ansible_default_ipv4") | list }}'
+    tags:
+    - dns
+
+  - debug: var=dns_ips
+    tags:
+    - dns
+
+  - name: Add a needed line in /etc/sysconfig/network-scripts/ifcfg-eth0
+    lineinfile:
+        path: /etc/sysconfig/network-scripts/ifcfg-eth0
+        regexp: '^PEERDNS.*$'
+        line: 'PEERDNS=no'
+        state: present
+    notify:
+    - reload_network
+
+  - name: Updating dns clients's dns settings
+    lineinfile:
+        path: /etc/sysconfig/network-scripts/ifcfg-eth0
+        regexp: '^DNS.*$'
+        line: 'DNS{{ id+1 }}={{ item.address }}'
+    loop: '{{ dns_ips }}'
+    loop_control: 
+        index_var: id
+    notify:
+        - reload_network
+
+  - name: Updating /etc/resolv.conf
+    copy:
+        content: |
+            search novalocal {{ domain_name }}
+            {% for d in dns_ips %}
+            nameserver {{ d.address }}
+            {% endfor %}
+        dest: /etc/resolv.conf
+  handlers:
+  - name: reload_network
+    service: name=network state=reloaded
+

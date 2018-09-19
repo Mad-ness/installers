@@ -1,0 +1,11 @@
+- hosts: ocp_nodes
+  become: true
+  gather_facts: false
+  tasks:
+  - name: Install Docker
+    yum: name=docker state=present
+
+  - name: Make Docker enabled and run
+    service: name=docker state=started enabled=on
+
+

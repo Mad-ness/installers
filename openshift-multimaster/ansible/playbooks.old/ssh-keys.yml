@@ -1,0 +1,93 @@
+- hosts: all
+  become: true
+  gather_facts: no
+  vars:
+    local_sshkey: ~/tmp/id_rsa
+  tasks:
+  - name: Generate a ssh key
+    become: false
+    command: ssh-keygen -t rsa -f {{ local_sshkey }} -N ''
+    args:
+        creates: "{{ local_sshkey }}"
+    run_once: true
+    delegate_to: localhost
+
+  - name: Ensure .ssh directory exists
+    file:
+        state: directory
+        path: ~/.ssh/
+        owner: root
+        group: root
+        mode: '0700'
+
+
+
+
+  - name: Making ssh key pair
+    block:
+      - name: Check if ssh key pair already exists
+        shell: |
+            if [ ! -f ~/.ssh/id_rsa -o ! -f ~/.ssh/id_rsa.pub ]; then
+                rm -f ~/.ssh/id_rsa ~/.ssh/id_rsa.pub 
+                exit 1
+            else
+                exit 0
+            fi
+        ignore_errors: yes
+        register: sshpair_exist
+
+      - name: Generate ssh key pair if needed
+        command: ssh-keygen -t rsa -f ~/.ssh/id_rsa -N ''
+        when: sshpair_exist.rc != 0
+    
+      - name: Retrieve a public ssh keys
+        fetch:
+            src: ~/.ssh/id_rsa.pub
+            dest: ~/tmp/
+            flat: yes
+
+    when: inventory_hostname in groups['management']
+
+
+  - name: Get a public key into a variable
+    set_fact:
+        sshpair_pubkey: "{{ lookup('file', '~/tmp/id_rsa.pub') }}"
+
+#  - debug: var=sshpair_pubkey
+
+
+  - name: Distribute public ssh key to the managed hosts
+    authorized_key:
+        key: "{{ sshpair_pubkey }}"
+        manage_dir: yes
+        user: root
+
+  - block:
+    - name: Get a private key into a variable
+      set_fact:
+          sshpair_privkey: "{{ lookup('file', '~/tmp/id_rsa') }}"
+
+    - name: Distribute private ssh key to the managed hosts
+      copy:
+        dest: ~/.ssh/id_rsa
+        content: "{{ sshpair_privkey }}"
+        owner: root
+        group: root
+        mode: '0400' 
+    when: inventory_hostname in groups['management']
+
+  - name: Update /etc/ssh/sshd_config
+    lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "{{ item.one }}"
+        line:   "{{ item.to }}"
+    with_items:
+    - { one: '^\s*PermitRootLogin .*$', to: 'PermitRootLogin yes' }
+    - { one: '^\s*PasswordAuthentication .*$', to: 'PasswordAuthentication yes' }
+    notify:
+    - restart_ssh
+
+  handlers:
+    - name: restart_ssh
+      service: name=sshd state=reloaded
+

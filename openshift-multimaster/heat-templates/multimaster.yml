@@ -1,0 +1,642 @@
+heat_template_version: 2018-03-02
+description: Stack for deploying OpenShift
+
+parameters:
+# --- images
+    buildhost_image:
+        type: string
+        label: Image name or ID
+        description: Image to used for creating a buildhost instance
+        default: CentOS-7
+    infra_image:
+        type: string
+        label: Image name or ID
+        description: Image to used for creating an Infra instance
+        default: CentOS-7
+    master_image:
+        type: string
+        label: Image name or ID
+        description: Image to used for creating a Master instance
+        default: CentOS-7
+    appnode_image:
+        type: string
+        label: Image name or ID
+        description: Image to used for creating an AppNode instance
+        default: CentOS-7
+    storagenode_image:
+        type: string
+        label: Image name or ID
+        description: Image to used for creating a StorageNode instance
+        default: CentOS-7
+# --- flavors
+    buildhost_flavor:
+        type: string
+        label: Flavor
+        description: Flavor to run a build instance
+        default: d1.os-service
+    infra_flavor:
+        type: string
+        label: Flavor
+        description: Flavor to run an Infra instance
+        default: d1.os-master
+    master_flavor:
+        type: string
+        label: Flavor
+        description: Flavor to run a Master instance
+        default: d1.os-master
+    appnode_flavor:
+        type: string
+        label: Flavor
+        description: Flavor to run an AppNode instance
+        default: d1.os-master
+    storagenode_flavor:
+        type: string
+        label: Flavor
+        description: Flavor to run a StorageNode instance
+        default: n1.large
+# --- public networks
+    api_network:
+        type: string
+        label: API Network
+        description: External network to get access to API
+        default: ipsystems-management
+    storage_network_cidr:
+        type: string
+        label: Storage Network CIDR
+        default: 10.0.0.0/24
+    storage_network_allocationpool_start:
+        type: string
+        label: Allocate IP addresses in Storage Network from this IP
+        default: 10.0.0.10
+    storage_network_allocationpool_end:
+        type: string
+        label: Allocate IP addresses in Storage Network to this IP
+        default: 10.0.0.254
+    api_subnet_cidr:
+        type: string
+        label: The CIDR of a subnet where API ports will be attached to
+        default: 10.189.132.0/25
+        description: Make sure this subnet exists
+
+    volume_type:
+        type: string
+        label: Ceph Storage volume type
+        description: Volume Type CephStorage
+        default: CephStorage
+    storage_volume_size:
+        type: number
+        label: A Storage volume size
+        description: Size of a volume
+        default: 30
+
+resources:
+
+    storagenode1_vol1: { type: "OS::Cinder::Volume", properties: { name: storage1-vol1, size: { get_param: storage_volume_size }, volume_type: { get_param: volume_type }}}
+    storagenode1_vol2: { type: "OS::Cinder::Volume", properties: { name: storage1-vol2, size: { get_param: storage_volume_size }, volume_type: { get_param: volume_type }}}
+    storagenode1_vol3: { type: "OS::Cinder::Volume", properties: { name: storage1-vol3, size: { get_param: storage_volume_size }, volume_type: { get_param: volume_type }}}
+
+    storagenode2_vol1: { type: "OS::Cinder::Volume", properties: { name: storage2-vol1, size: { get_param: storage_volume_size }, volume_type: { get_param: volume_type }}}
+    storagenode2_vol2: { type: "OS::Cinder::Volume", properties: { name: storage2-vol2, size: { get_param: storage_volume_size }, volume_type: { get_param: volume_type }}}
+    storagenode2_vol3: { type: "OS::Cinder::Volume", properties: { name: storage2-vol3, size: { get_param: storage_volume_size }, volume_type: { get_param: volume_type }}}
+
+    storagenode3_vol1: { type: "OS::Cinder::Volume", properties: { name: storage3-vol1, size: { get_param: storage_volume_size }, volume_type: { get_param: volume_type }}}
+    storagenode3_vol2: { type: "OS::Cinder::Volume", properties: { name: storage3-vol2, size: { get_param: storage_volume_size }, volume_type: { get_param: volume_type }}}
+    storagenode3_vol3: { type: "OS::Cinder::Volume", properties: { name: storage3-vol3, size: { get_param: storage_volume_size }, volume_type: { get_param: volume_type }}}
+
+
+    storagenode1_vol1_att: { type: "OS::Cinder::VolumeAttachment", properties: { volume_id: { get_resource: storagenode1_vol1 }, instance_uuid: { get_resource: storagenode1_server }}}
+    storagenode1_vol2_att: { type: "OS::Cinder::VolumeAttachment", properties: { volume_id: { get_resource: storagenode1_vol2 }, instance_uuid: { get_resource: storagenode1_server }}}
+    storagenode1_vol3_att: { type: "OS::Cinder::VolumeAttachment", properties: { volume_id: { get_resource: storagenode1_vol3 }, instance_uuid: { get_resource: storagenode1_server }}}
+
+    storagenode2_vol1_att: { type: "OS::Cinder::VolumeAttachment", properties: { volume_id: { get_resource: storagenode2_vol1 }, instance_uuid: { get_resource: storagenode2_server }}}
+    storagenode2_vol2_att: { type: "OS::Cinder::VolumeAttachment", properties: { volume_id: { get_resource: storagenode2_vol2 }, instance_uuid: { get_resource: storagenode2_server }}}
+    storagenode2_vol3_att: { type: "OS::Cinder::VolumeAttachment", properties: { volume_id: { get_resource: storagenode2_vol3 }, instance_uuid: { get_resource: storagenode2_server }}}
+
+    storagenode3_vol1_att: { type: "OS::Cinder::VolumeAttachment", properties: { volume_id: { get_resource: storagenode3_vol1 }, instance_uuid: { get_resource: storagenode3_server }}}
+    storagenode3_vol2_att: { type: "OS::Cinder::VolumeAttachment", properties: { volume_id: { get_resource: storagenode3_vol2 }, instance_uuid: { get_resource: storagenode3_server }}}
+    storagenode3_vol3_att: { type: "OS::Cinder::VolumeAttachment", properties: { volume_id: { get_resource: storagenode3_vol3 }, instance_uuid: { get_resource: storagenode3_server }}}
+
+
+    ephemeral_sshkey:
+        type: OS::Nova::KeyPair
+        properties:
+            save_private_key: true
+            name: os_multimaster
+
+    storage_network:
+        type: OS::Neutron::Net
+        properties:
+            name: Storage Network
+
+    storage_network_subnet:
+        type: OS::Neutron::Subnet
+        depends_on: [ storage_network, ]
+        properties:
+            name: Storage Subnet 1
+            network_id: { get_resource: storage_network }
+            cidr: { get_param: storage_network_cidr }
+            gateway_ip: ""
+            allocation_pools:
+                - start: { get_param: storage_network_allocationpool_start }
+                  end: { get_param: storage_network_allocationpool_end }
+            enable_dhcp: true
+
+# --- Port bindings: Buildhost->API Network
+    buildhost_port1: { type: "OS::Neutron::Port",     properties: { network_id: { get_param: api_network }, security_groups: [
+        { get_resource: secgroup_external },
+    ]}}
+    buildhost_port2: { type: "OS::Neutron::Port",     properties: { network_id: { get_resource: storage_network }, security_groups: [
+        { get_resource: secgroup_internal },
+    ]}}
+# --- Port bindings: Master->API Network
+    master1_port1: { type: "OS::Neutron::Port",       properties: { network_id: { get_param: api_network }, security_groups: [
+        { get_resource: secgroup_external },
+        { get_resource: secgroup_node2master },
+        { get_resource: secgroup_master2master },
+        { get_resource: secgroup_2lbatmaster },
+        { get_resource: secgroup_world2master },
+        { get_resource: secgroup_internal },
+    ]}}
+    master2_port1: { type: "OS::Neutron::Port",       properties: { network_id: { get_param: api_network}, security_groups: [
+        { get_resource: secgroup_external },
+        { get_resource: secgroup_node2master },
+        { get_resource: secgroup_master2master },
+        { get_resource: secgroup_2lbatmaster },
+        { get_resource: secgroup_world2master },
+        { get_resource: secgroup_internal },
+    ]}}
+    master3_port1: { type: "OS::Neutron::Port",       properties: { network_id: { get_param: api_network }, security_groups: [
+        { get_resource: secgroup_external },
+        { get_resource: secgroup_node2master },
+        { get_resource: secgroup_master2master },
+        { get_resource: secgroup_2lbatmaster },
+        { get_resource: secgroup_world2master },
+        { get_resource: secgroup_internal },
+    ]}}
+
+# --- Port bindings: Infra->API Network
+    infra1_port1: { type: "OS::Neutron::Port",       properties: { network_id: { get_param: api_network }, security_groups: [
+        { get_resource: secgroup_external },
+        { get_resource: secgroup_world2infra },
+        { get_resource: secgroup_internal },
+    ]}}
+    infra2_port1: { type: "OS::Neutron::Port",       properties: { network_id: { get_param: api_network }, security_groups: [
+        { get_resource: secgroup_external },
+        { get_resource: secgroup_world2infra },
+        { get_resource: secgroup_internal },
+    ]}}
+    infra3_port1: { type: "OS::Neutron::Port",       properties: { network_id: { get_param: api_network }, security_groups: [
+        { get_resource: secgroup_external },
+        { get_resource: secgroup_world2infra },
+        { get_resource: secgroup_internal },
+    ]}}
+
+# --- Port bindings: AppNode->API Network
+    appnode1_port1: { type: "OS::Neutron::Port",       properties: { network_id: { get_param: api_network }, security_groups: [
+        { get_resource: secgroup_external },
+        { get_resource: secgroup_node2node },
+        { get_resource: secgroup_master2node },
+        { get_resource: secgroup_internal },
+    ]}}
+    appnode2_port1: { type: "OS::Neutron::Port",       properties: { network_id: { get_param: api_network }, security_groups: [
+        { get_resource: secgroup_external },
+        { get_resource: secgroup_node2node },
+        { get_resource: secgroup_master2node },
+        { get_resource: secgroup_internal },
+    ]}}
+    appnode3_port1: { type: "OS::Neutron::Port",       properties: { network_id: { get_param: api_network }, security_groups: [
+        { get_resource: secgroup_external },
+        { get_resource: secgroup_node2node },
+        { get_resource: secgroup_master2node },
+        { get_resource: secgroup_internal },
+    ]}}
+
+# --- Port bindings: AppNode->Storage Network
+    appnode1_port2: { type: "OS::Neutron::Port",       properties: { network_id: { get_resource: storage_network }, security_groups: [
+        { get_resource: secgroup_external },
+        { get_resource: secgroup_appnode2storage },
+        { get_resource: secgroup_internal },
+    ]}}
+    appnode2_port2: { type: "OS::Neutron::Port",       properties: { network_id: { get_resource: storage_network }, security_groups: [
+        { get_resource: secgroup_external },
+        { get_resource: secgroup_appnode2storage },
+        { get_resource: secgroup_internal },
+    ]}}
+    appnode3_port2: { type: "OS::Neutron::Port",       properties: { network_id: { get_resource: storage_network }, security_groups: [
+        { get_resource: secgroup_external },
+        { get_resource: secgroup_appnode2storage },
+        { get_resource: secgroup_internal },
+    ]}}
+
+
+# --- Port bindings: StorageNode->API Network
+    storagenode1_port1: { type: "OS::Neutron::Port",       properties: { network_id: { get_param: api_network }, security_groups: [
+        { get_resource: secgroup_external },
+        { get_resource: secgroup_node2node },
+        { get_resource: secgroup_master2node },
+        { get_resource: secgroup_internal },
+    ]}}
+    storagenode2_port1: { type: "OS::Neutron::Port",       properties: { network_id: { get_param: api_network }, security_groups: [
+        { get_resource: secgroup_external },
+        { get_resource: secgroup_node2node },
+        { get_resource: secgroup_master2node },
+        { get_resource: secgroup_internal },
+    ]}}
+    storagenode3_port1: { type: "OS::Neutron::Port",       properties: { network_id: { get_param: api_network }, security_groups: [
+        { get_resource: secgroup_external },
+        { get_resource: secgroup_node2node },
+        { get_resource: secgroup_master2node },
+        { get_resource: secgroup_internal },
+    ]}}
+
+# --- Port bindings: StorageNode->Storage Network
+    storagenode1_port2: { type: "OS::Neutron::Port",       properties: { network_id: { get_resource: storage_network }, security_groups: [
+        { get_resource: secgroup_external },
+        { get_resource: secgroup_appnode2storage },
+        { get_resource: secgroup_internal },
+    ]}}
+    storagenode2_port2: { type: "OS::Neutron::Port",       properties: { network_id: { get_resource: storage_network }, security_groups: [
+        { get_resource: secgroup_external },
+        { get_resource: secgroup_appnode2storage },
+        { get_resource: secgroup_internal },
+    ]}}
+    storagenode3_port2: { type: "OS::Neutron::Port",       properties: { network_id: { get_resource: storage_network }, security_groups: [
+        { get_resource: secgroup_external },
+        { get_resource: secgroup_appnode2storage },
+        { get_resource: secgroup_internal },
+    ]}}
+
+
+# --- SecurityGroup: AppNode->AppNode
+    secgroup_allowfromapinetwork:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            description: Allow traffic from hosts in API Network
+            name: sg-os-node-node
+            rules:
+                - { direction: ingress, ethertype: IPv4, port_range_min: 1, port_range_max: 65535, protocol: udp, remote_ip_prefix: { get_param: api_subnet_cidr }}
+                - { direction: ingress, ethertype: IPv4, port_range_min: 1, port_range_max: 65535, protocol: tcp, remote_ip_prefix: { get_param: api_subnet_cidr }}
+                - { direction: ingress, ethertype: IPv4, port_range_min: 0, port_range_max: 255, protocol: icmp,  remote_ip_prefix: { get_param: api_subnet_cidr }}
+
+
+
+# --- SecurityGroup: AppNode->Storage
+    secgroup_allow2storage:
+        type: OS::Neutron::SecurityGroup
+        depends_on: [ storage_network_subnet, ]
+        properties:
+            description: Allow traffic from AppNodes to StorageHosts
+            name: sg-os-node-node
+            rules:
+                - { direction: ingress, ethertype: IPv4, port_range_min: 2049, port_range_max: 2049, protocol: tcp, remote_ip_prefix: { get_param: storage_network_cidr }}
+                - { direction: ingress, ethertype: IPv4, port_range_min: 1, port_range_max: 65525, protocol: tcp, remote_ip_prefix: { get_param: storage_network_cidr }}
+                - { direction: ingress, ethertype: IPv4, port_range_min: 0, port_range_max: 255, protocol: icmp,  remote_ip_prefix: { get_param: storage_network_cidr }}
+
+
+# --- SecurityGroup: AppNode->AppNode
+    secgroup_node2node:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            description: Allow traffic AppNode->AppNode
+            name: sg-os-node-node
+            rules:
+                - direction: ingress
+                  ethertype: IPv4
+                  port_range_min: 4789
+                  port_range_max: 4789
+                  protocol: udp
+                  remote_mode: remote_group_id
+                  remote_group_id: { get_resource: secgroup_allowfromapinetwork }
+
+# --- SecurityGroup: AppNode->Master
+    secgroup_node2master:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            description: Allow traffic node-master
+            name: sg-os-node-master
+            rules:
+                - { direction: ingress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: udp, remote_mode: remote_group_id, remote_group_id: { get_resource: secgroup_allowfromapinetwork }}
+                - { direction: ingress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: tcp, remote_mode: remote_group_id, remote_group_id: { get_resource: secgroup_allowfromapinetwork }}
+                - { direction: ingress, ethertype: IPv4, port_range_min: 8053, port_range_max: 8053, protocol: udp, remote_mode: remote_group_id, remote_group_id: { get_resource: secgroup_allowfromapinetwork }}
+                - { direction: ingress, ethertype: IPv4, port_range_min: 8053, port_range_max: 8053, protocol: tcp, remote_mode: remote_group_id, remote_group_id: { get_resource: secgroup_allowfromapinetwork }}
+                - { direction: ingress, ethertype: IPv4, port_range_min: 4789, port_range_max: 4789, protocol: udp, remote_mode: remote_group_id, remote_group_id: { get_resource: secgroup_allowfromapinetwork }}
+                - { direction: ingress, ethertype: IPv4, port_range_min: 443, port_range_max: 443, protocol: tcp, remote_mode: remote_group_id, remote_group_id: { get_resource: secgroup_allowfromapinetwork }}
+                - { direction: ingress, ethertype: IPv4, port_range_min: 8443, port_range_max: 8443, protocol: tcp, remote_mode: remote_group_id, remote_group_id: { get_resource: secgroup_allowfromapinetwork }}
+
+# --- SecurityGroup: Master->AppNode
+    secgroup_master2node:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            description: Allow traffic master-node
+            name: sg-os-master-node
+            rules:
+                - { direction: ingress, ethertype: IPv4, port_range_min: 4789, port_range_max: 4789, protocol: udp, remote_mode: remote_group_id, remote_group_id: { get_resource: secgroup_allowfromapinetwork }}
+                - { direction: ingress, ethertype: IPv4, port_range_min: 10250, port_range_max: 10250, protocol: tcp, remote_mode: remote_group_id, remote_group_id: { get_resource: secgroup_allowfromapinetwork }}
+                - { direction: ingress, ethertype: IPv4, port_range_min: 10010, port_range_max: 10010, protocol: tcp, remote_mode: remote_group_id, remote_group_id: { get_resource: secgroup_allowfromapinetwork }}
+
+# --- SecurityGroup: Master->Master
+    secgroup_master2master:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            description: Allow traffic master-master
+            name: sg-os-master-master
+            rules:
+                - { direction: ingress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: udp, remote_mode: remote_group_id, remote_group_id: { get_resource: secgroup_allowfromapinetwork }}
+                - { direction: ingress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: tcp, remote_mode: remote_group_id, remote_group_id: { get_resource: secgroup_allowfromapinetwork }}
+                - { direction: ingress, ethertype: IPv4, port_range_min: 8053, port_range_max: 8053, protocol: udp, remote_mode: remote_group_id, remote_group_id: { get_resource: secgroup_allowfromapinetwork }}
+                - { direction: ingress, ethertype: IPv4, port_range_min: 8053, port_range_max: 8053, protocol: tcp, remote_mode: remote_group_id, remote_group_id: { get_resource: secgroup_allowfromapinetwork }}
+                - { direction: ingress, ethertype: IPv4, port_range_min: 2379, port_range_max: 2380, protocol: tcp, remote_mode: remote_group_id, remote_group_id: { get_resource: secgroup_allowfromapinetwork }}
+                - { direction: ingress, ethertype: IPv4, port_range_min: 4789, port_range_max: 4789, protocol: udp, remote_mode: remote_group_id, remote_group_id: { get_resource: secgroup_allowfromapinetwork }}
+
+# --- SecurityGroup: World->Haproxy@Master
+    secgroup_2lbatmaster:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            description: Allow traffic to haproxy@master
+            name: sg-os-lb-master
+            rules:
+                - { direction: ingress, ethertype: IPv4, port_range_min: 9000, port_range_max: 9000, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+
+# --- SecurityGroup: World->Master
+    secgroup_world2master:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            description: Allow traffic world-master
+            name: sg-os-world-master
+            rules:
+                - { direction: ingress, ethertype: IPv4, port_range_min: 443, port_range_max: 443, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+                - { direction: ingress, ethertype: IPv4, port_range_min: 8443, port_range_max: 8443, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+                - { direction: ingress, ethertype: IPv4, port_range_min: 8444, port_range_max: 8444, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+
+# --- SecurityGroup: World->Infra
+    secgroup_world2infra:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            description: Allow traffic world-infra
+            name: sg-os-world-master
+            rules:
+                - { direction: ingress, ethertype: IPv4, port_range_min: 443, port_range_max: 443, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+                - { direction: ingress, ethertype: IPv4, port_range_min: 8443, port_range_max: 8443, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+                - { direction: ingress, ethertype: IPv4, port_range_min: 8444, port_range_max: 8444, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+
+# --- SecurityGroup: AppNode->Storage
+    secgroup_appnode2storage:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            description: Allow traffic appnode-storage
+            name: sg-os-appnode-storage
+            rules:
+                - direction: ingress
+                  ethertype: IPv4
+                  port_range_min: 443
+                  port_range_max: 443
+                  protocol: tcp
+                  remote_mode: remote_group_id
+                  remote_group_id: { get_resource: secgroup_allow2storage }
+                - direction: ingress
+                  ethertype: IPv4
+                  port_range_min: 8443
+                  port_range_max: 8443
+                  protocol: tcp
+                  remote_mode: remote_group_id
+                  remote_group_id: { get_resource: secgroup_allow2storage }
+                - direction: ingress
+                  ethertype: IPv4
+                  port_range_min: 8444
+                  port_range_max: 8444
+                  protocol: tcp
+                  remote_mode: remote_group_id
+                  remote_group_id: { get_resource: secgroup_allow2storage }
+
+# --- SecurityGroup: External Access to Hosts
+    secgroup_external:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            description: OpenShift external access rules
+            name: sg-external-rules
+            rules:
+                - { direction: ingress, ethertype: IPv4, port_range_max: 22, port_range_min: 22, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+                - { direction: ingress, ethertype: IPv4, port_range_min: 0, port_range_max: 255, protocol: icmp, remote_ip_prefix: 0.0.0.0/0 }
+                - { direction: egress, ethertype: IPv4, port_range_min: 0, port_range_max: 255, protocol: icmp, remote_ip_prefix: 0.0.0.0/0 }
+                - { direction: egress, ethertype: IPv4, port_range_min: 1, port_range_max: 65535, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+                - { direction: egress, ethertype: IPv4, port_range_min: 1, port_range_max: 65535, protocol: udp, remote_ip_prefix: 0.0.0.0/0 }
+
+# --- SecurityGroup: Internal Access to Hosts
+    secgroup_internal:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            description: OpenShift internal rules (allow all)
+            name: sg-internal-rules
+            rules:
+                - { direction: ingress, ethertype: IPv4, port_range_min: 1, port_range_max: 65535, protocol: tcp, remote_mode: remote_group_id, remote_group_id: { get_resource: secgroup_allowfromapinetwork }}
+                - { direction: ingress, ethertype: IPv4, port_range_min: 1, port_range_max: 65535, protocol: udp, remote_mode: remote_group_id, remote_group_id: { get_resource: secgroup_allowfromapinetwork }}
+                - { direction: ingress, ethertype: IPv4, port_range_min: 0, port_range_max: 255, protocol: icmp, remote_mode: remote_group_id, remote_group_id: { get_resource: secgroup_allowfromapinetwork }}
+
+# --- ServerGroups: Masters, Infras, AppNodes
+    sg_masters:
+        type: OS::Nova::ServerGroup
+        properties:
+            name: sg_masters
+            policies:
+            - anti-affinity
+
+    sg_infras:
+        type: OS::Nova::ServerGroup
+        properties:
+            name: sg_infras
+            policies:
+            - anti-affinity
+
+    sg_appnodes:
+        type: OS::Nova::ServerGroup
+        properties:
+            name: sg_appnodes
+            policies:
+            - anti-affinity
+
+    sg_storagenodes:
+        type: OS::Nova::ServerGroup
+        properties:
+            name: sg_storagenodes
+            policies:
+            - anti-affinity
+
+# --- Server: Buildhost
+    buildhost_server:
+        type: OS::Nova::Server
+        properties:
+            name: ocp_buildhost
+            image: { get_param: buildhost_image }
+            flavor: { get_param: buildhost_flavor }
+            key_name: { get_resource: ephemeral_sshkey }
+            networks: [ port: { get_resource: buildhost_port1 }, port: { get_resource: buildhost_port2 }]
+
+
+# --- Server: Masters
+    master1_server:
+        type: OS::Nova::Server
+        properties:
+            name: ocp_master1
+            image: { get_param: master_image }
+            flavor: { get_param: master_flavor }
+            key_name: { get_resource: ephemeral_sshkey }
+            networks: [ port: { get_resource: master1_port1 }]
+            scheduler_hints: { group: { get_resource: sg_masters }}
+    master2_server:
+        type: OS::Nova::Server
+        properties:
+            name: ocp_master2
+            image: { get_param: master_image }
+            flavor: { get_param: master_flavor }
+            key_name: { get_resource: ephemeral_sshkey }
+            networks: [ port: { get_resource: master2_port1 }]
+            scheduler_hints: { group: { get_resource: sg_masters }}
+    master3_server:
+        type: OS::Nova::Server
+        properties:
+            name: ocp_master3
+            image: { get_param: master_image }
+            flavor: { get_param: master_flavor }
+            key_name: { get_resource: ephemeral_sshkey }
+            networks: [ port: { get_resource: master3_port1 }]
+            scheduler_hints: { group: { get_resource: sg_masters }}
+
+# --- Server: Infra
+    infra1_server:
+        type: OS::Nova::Server
+        properties:
+            name: ocp_infra1
+            image: { get_param: infra_image }
+            flavor: { get_param: infra_flavor }
+            key_name: { get_resource: ephemeral_sshkey }
+            networks: [ port: { get_resource: infra1_port1 }]
+            scheduler_hints: { group: { get_resource: sg_infras }}
+    infra2_server:
+        type: OS::Nova::Server
+        properties:
+            name: ocp_infra2
+            image: { get_param: infra_image }
+            flavor: { get_param: infra_flavor }
+            key_name: { get_resource: ephemeral_sshkey }
+            networks: [ port: { get_resource: infra2_port1 }]
+            scheduler_hints: { group: { get_resource: sg_infras }}
+    infra3_server:
+        type: OS::Nova::Server
+        properties:
+            name: ocp_infra3
+            image: { get_param: infra_image }
+            flavor: { get_param: infra_flavor }
+            key_name: { get_resource: ephemeral_sshkey }
+            networks: [ port: { get_resource: infra3_port1 }]
+            scheduler_hints: { group: { get_resource: sg_infras }}
+
+# --- Server: AppNode
+    appnode1_server:
+        type: OS::Nova::Server
+        properties:
+            name: ocp_appnode1
+            image: { get_param: appnode_image }
+            flavor: { get_param: appnode_flavor }
+            key_name: { get_resource: ephemeral_sshkey }
+            networks: [ port: { get_resource: appnode1_port1 }, port: { get_resource: appnode1_port2 }]
+            scheduler_hints: { group: { get_resource: sg_appnodes }}
+    appnode2_server:
+        type: OS::Nova::Server
+        properties:
+            name: ocp_appnode2
+            image: { get_param: appnode_image }
+            flavor: { get_param: appnode_flavor }
+            key_name: { get_resource: ephemeral_sshkey }
+            networks: [ port: { get_resource: appnode2_port1 }, port: { get_resource: appnode2_port2 }]
+            scheduler_hints: { group: { get_resource: sg_appnodes }}
+    appnode3_server:
+        type: OS::Nova::Server
+        properties:
+            name: ocp_appnode3
+            image: { get_param: appnode_image }
+            flavor: { get_param: appnode_flavor }
+            key_name: { get_resource: ephemeral_sshkey }
+            networks: [ port: { get_resource: appnode3_port1 }, port: { get_resource: appnode3_port2 }]
+            scheduler_hints: { group: { get_resource: sg_appnodes }}
+
+# --- Server: StorageNode
+    storagenode1_server:
+        type: OS::Nova::Server
+        properties:
+            name: ocp_storagenode1
+            image: { get_param: storagenode_image }
+            flavor: { get_param: storagenode_flavor }
+            key_name: { get_resource: ephemeral_sshkey }
+            networks: [ port: { get_resource: storagenode1_port1 }, port: { get_resource: storagenode1_port2 }]
+            scheduler_hints: { group: { get_resource: sg_storagenodes }}
+    storagenode2_server:
+        type: OS::Nova::Server
+        properties:
+            name: ocp_storagenode2
+            image: { get_param: storagenode_image }
+            flavor: { get_param: storagenode_flavor }
+            key_name: { get_resource: ephemeral_sshkey }
+            networks: [ port: { get_resource: storagenode2_port1 }, port: { get_resource: storagenode2_port2 }]
+            scheduler_hints: { group: { get_resource: sg_storagenodes }}
+    storagenode3_server:
+        type: OS::Nova::Server
+        properties:
+            name: ocp_storagenode3
+            image: { get_param: storagenode_image }
+            flavor: { get_param: storagenode_flavor }
+            key_name: { get_resource: ephemeral_sshkey }
+            networks: [ port: { get_resource: storagenode3_port1 }, port: { get_resource: storagenode3_port2 }]
+            scheduler_hints: { group: { get_resource: sg_storagenodes }}
+
+# --- All Outputs
+outputs:
+    private_key: { value: { get_attr: [ ephemeral_sshkey, private_key ]}}
+    buildhost_ip1: { value: { get_attr: [ buildhost_server, first_address ]}}
+    buildhost_ip2: { value: { get_attr: [ buildhost_server, addresses, { get_param: api_network }, 0, addr ]}}
+    buildhost_console_url: { value: { get_attr: [ buildhost_server, console_urls, novnc ]}}
+
+    master1_ip1: { value: { get_attr: [ master1_server, first_address ]}}
+    master1_console_url: { value: { get_attr: [ master1_server, console_urls, novnc ]}}
+
+    master2_ip1: { value: { get_attr: [ master2_server, first_address ]}}
+    master2_console_url: { value: { get_attr: [ master2_server, console_urls, novnc ]}}
+
+    master3_ip1: { value: { get_attr: [ master3_server, first_address ]}}
+    master3_console_url: { value: { get_attr: [ master3_server, console_urls, novnc ]}}
+
+
+    infra1_ip1: { value: { get_attr: [ infra1_server, networks, { get_param: api_network }, 0 ]}}
+    infra1_console_url: { value: { get_attr: [ infra1_server, console_urls, novnc ]}}
+
+    infra2_ip1: { value: { get_attr: [ infra2_server, networks, { get_param: api_network }, 0 ]}}
+    infra2_console_url: { value: { get_attr: [ infra2_server, console_urls, novnc ]}}
+
+    infra3_ip1: { value: { get_attr: [ infra3_server, networks, { get_param: api_network }, 0 ]}}
+    infra3_console_url: { value: { get_attr: [ infra3_server, console_urls, novnc ]}}
+
+
+    appnode1_ip1: { value: { get_attr: [ appnode1_server, networks, { get_param: api_network }, 0 ]}}
+    appnode1_ip2: { value: { get_attr: [ appnode1_server, addresses, { get_attr: [ storage_network, name ]}, 0, addr ]}}
+    appnode1_console_url: { value: { get_attr: [ appnode1_server, console_urls, novnc ]}}
+
+    appnode2_ip1: { value: { get_attr: [ appnode2_server, networks, { get_param: api_network }, 0 ]}}
+    appnode2_ip2: { value: { get_attr: [ appnode2_server, addresses, { get_attr: [ storage_network, name ]}, 0, addr ]}}
+    appnode2_console_url: { value: { get_attr: [ appnode2_server, console_urls, novnc ]}}
+
+    appnode3_ip1: { value: { get_attr: [ appnode3_server, networks, { get_param: api_network }, 0 ]}}
+    appnode3_ip2: { value: { get_attr: [ appnode3_server, addresses, { get_attr: [ storage_network, name ]}, 0, addr ]}}
+    appnode3_console_url: { value: { get_attr: [ appnode3_server, console_urls, novnc ]}}
+
+
+    storagenode1_ip1: { value: { get_attr: [ storagenode1_server, networks, { get_param: api_network }, 0 ]}}
+    storagenode1_ip2: { value: { get_attr: [ storagenode1_server, addresses, { get_attr: [ storage_network, name ]}, 0, addr ]}}
+    storagenode1_console_url: { value: { get_attr: [ storagenode1_server, console_urls, novnc ]}}
+
+    storagenode2_ip1: { value: { get_attr: [ storagenode2_server, networks, { get_param: api_network }, 0 ]}}
+    storagenode2_ip2: { value: { get_attr: [ storagenode2_server, addresses, { get_attr: [ storage_network, name ]}, 0, addr ]}}
+    storagenode2_console_url: { value: { get_attr: [ storagenode2_server, console_urls, novnc ]}}
+
+    storagenode3_ip1: { value: { get_attr: [ storagenode3_server, networks, { get_param: api_network }, 0 ]}}
+    storagenode3_ip2: { value: { get_attr: [ storagenode3_server, addresses, { get_attr: [ storage_network, name ]}, 0, addr ]}}
+    storagenode3_console_url: { value: { get_attr: [ storagenode3_server, console_urls, novnc ]}}
+

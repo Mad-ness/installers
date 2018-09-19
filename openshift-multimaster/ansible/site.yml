@@ -1,0 +1,10 @@
+- import_playbook: playbooks/common-packages.yml
+- import_playbook: playbooks/manage-packages.yml
+- import_playbook: playbooks/install-openshift-ansible.yml
+- import_playbook: playbooks/dns-config.yml
+
+
+# - include: playbooks/custom.yml
+# - include: playbooks/docker.yaml
+# - include: playbooks/kubernetes.yml
+
