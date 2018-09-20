@@ -147,6 +147,13 @@ resources:
     ]}}
     buildhost_port2: { type: "OS::Neutron::Port",     properties: { network_id: { get_resource: storage_network }, security_groups: [
         { get_resource: secgroup_internal },
+        { get_resource: secgroup_allowfromapinetwork },
+    ]}}
+
+# --- Port bindings: dnsserver_port1
+    dnsserver_port1: { type: "OS::Neutron::Port",     properties: { network_id: { get_param: api_network }, security_groups: [
+        { get_resource: secgroup_external },
+        { get_resource: secgroup_allowfromapinetwork },
     ]}}
 # --- Port bindings: Master->API Network
     master1_port1: { type: "OS::Neutron::Port",       properties: { network_id: { get_param: api_network }, security_groups: [
@@ -156,6 +163,8 @@ resources:
         { get_resource: secgroup_2lbatmaster },
         { get_resource: secgroup_world2master },
         { get_resource: secgroup_internal },
+        { get_resource: secgroup_allowfromapinetwork },
+
     ]}}
     master2_port1: { type: "OS::Neutron::Port",       properties: { network_id: { get_param: api_network}, security_groups: [
         { get_resource: secgroup_external },
@@ -164,6 +173,7 @@ resources:
         { get_resource: secgroup_2lbatmaster },
         { get_resource: secgroup_world2master },
         { get_resource: secgroup_internal },
+        { get_resource: secgroup_allowfromapinetwork },
     ]}}
     master3_port1: { type: "OS::Neutron::Port",       properties: { network_id: { get_param: api_network }, security_groups: [
         { get_resource: secgroup_external },
@@ -172,6 +182,7 @@ resources:
         { get_resource: secgroup_2lbatmaster },
         { get_resource: secgroup_world2master },
         { get_resource: secgroup_internal },
+        { get_resource: secgroup_allowfromapinetwork },
     ]}}
 
 # --- Port bindings: Infra->API Network
@@ -179,16 +190,19 @@ resources:
         { get_resource: secgroup_external },
         { get_resource: secgroup_world2infra },
         { get_resource: secgroup_internal },
+        { get_resource: secgroup_allowfromapinetwork },
     ]}}
     infra2_port1: { type: "OS::Neutron::Port",       properties: { network_id: { get_param: api_network }, security_groups: [
         { get_resource: secgroup_external },
         { get_resource: secgroup_world2infra },
         { get_resource: secgroup_internal },
+        { get_resource: secgroup_allowfromapinetwork },
     ]}}
     infra3_port1: { type: "OS::Neutron::Port",       properties: { network_id: { get_param: api_network }, security_groups: [
         { get_resource: secgroup_external },
         { get_resource: secgroup_world2infra },
         { get_resource: secgroup_internal },
+        { get_resource: secgroup_allowfromapinetwork },
     ]}}
 
 # --- Port bindings: AppNode->API Network
@@ -197,18 +211,21 @@ resources:
         { get_resource: secgroup_node2node },
         { get_resource: secgroup_master2node },
         { get_resource: secgroup_internal },
+        { get_resource: secgroup_allowfromapinetwork },
     ]}}
     appnode2_port1: { type: "OS::Neutron::Port",       properties: { network_id: { get_param: api_network }, security_groups: [
         { get_resource: secgroup_external },
         { get_resource: secgroup_node2node },
         { get_resource: secgroup_master2node },
         { get_resource: secgroup_internal },
+        { get_resource: secgroup_allowfromapinetwork },
     ]}}
     appnode3_port1: { type: "OS::Neutron::Port",       properties: { network_id: { get_param: api_network }, security_groups: [
         { get_resource: secgroup_external },
         { get_resource: secgroup_node2node },
         { get_resource: secgroup_master2node },
         { get_resource: secgroup_internal },
+        { get_resource: secgroup_allowfromapinetwork },
     ]}}
 
 # --- Port bindings: AppNode->Storage Network
@@ -216,16 +233,19 @@ resources:
         { get_resource: secgroup_external },
         { get_resource: secgroup_appnode2storage },
         { get_resource: secgroup_internal },
+        { get_resource: secgroup_allowfromapinetwork },
     ]}}
     appnode2_port2: { type: "OS::Neutron::Port",       properties: { network_id: { get_resource: storage_network }, security_groups: [
         { get_resource: secgroup_external },
         { get_resource: secgroup_appnode2storage },
         { get_resource: secgroup_internal },
+        { get_resource: secgroup_allowfromapinetwork },
     ]}}
     appnode3_port2: { type: "OS::Neutron::Port",       properties: { network_id: { get_resource: storage_network }, security_groups: [
         { get_resource: secgroup_external },
         { get_resource: secgroup_appnode2storage },
         { get_resource: secgroup_internal },
+        { get_resource: secgroup_allowfromapinetwork },
     ]}}
 
 
@@ -235,18 +255,21 @@ resources:
         { get_resource: secgroup_node2node },
         { get_resource: secgroup_master2node },
         { get_resource: secgroup_internal },
+        { get_resource: secgroup_allowfromapinetwork },
     ]}}
     storagenode2_port1: { type: "OS::Neutron::Port",       properties: { network_id: { get_param: api_network }, security_groups: [
         { get_resource: secgroup_external },
         { get_resource: secgroup_node2node },
         { get_resource: secgroup_master2node },
         { get_resource: secgroup_internal },
+        { get_resource: secgroup_allowfromapinetwork },
     ]}}
     storagenode3_port1: { type: "OS::Neutron::Port",       properties: { network_id: { get_param: api_network }, security_groups: [
         { get_resource: secgroup_external },
         { get_resource: secgroup_node2node },
         { get_resource: secgroup_master2node },
         { get_resource: secgroup_internal },
+        { get_resource: secgroup_allowfromapinetwork },
     ]}}
 
 # --- Port bindings: StorageNode->Storage Network
@@ -254,16 +277,19 @@ resources:
         { get_resource: secgroup_external },
         { get_resource: secgroup_appnode2storage },
         { get_resource: secgroup_internal },
+        { get_resource: secgroup_allowfromapinetwork },
     ]}}
     storagenode2_port2: { type: "OS::Neutron::Port",       properties: { network_id: { get_resource: storage_network }, security_groups: [
         { get_resource: secgroup_external },
         { get_resource: secgroup_appnode2storage },
         { get_resource: secgroup_internal },
+        { get_resource: secgroup_allowfromapinetwork },
     ]}}
     storagenode3_port2: { type: "OS::Neutron::Port",       properties: { network_id: { get_resource: storage_network }, security_groups: [
         { get_resource: secgroup_external },
         { get_resource: secgroup_appnode2storage },
         { get_resource: secgroup_internal },
+        { get_resource: secgroup_allowfromapinetwork },
     ]}}
 
 
@@ -274,9 +300,9 @@ resources:
             description: Allow traffic from hosts in API Network
             name: sg-os-node-node
             rules:
-                - { direction: ingress, ethertype: IPv4, port_range_min: 1, port_range_max: 65535, protocol: udp, remote_ip_prefix: { get_param: api_subnet_cidr }}
-                - { direction: ingress, ethertype: IPv4, port_range_min: 1, port_range_max: 65535, protocol: tcp, remote_ip_prefix: { get_param: api_subnet_cidr }}
-                - { direction: ingress, ethertype: IPv4, port_range_min: 0, port_range_max: 255, protocol: icmp,  remote_ip_prefix: { get_param: api_subnet_cidr }}
+                - { direction: ingress, ethertype: IPv4, protocol: udp, remote_ip_prefix: { get_param: api_subnet_cidr }}
+                - { direction: ingress, ethertype: IPv4, protocol: tcp, remote_ip_prefix: { get_param: api_subnet_cidr }}
+                - { direction: ingress, ethertype: IPv4, protocol: icmp,  remote_ip_prefix: { get_param: api_subnet_cidr }}
 
 
 
@@ -365,6 +391,7 @@ resources:
             name: sg-os-world-master
             rules:
                 - { direction: ingress, ethertype: IPv4, port_range_min: 443, port_range_max: 443, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+                - { direction: ingress, ethertype: IPv4, port_range_min: 2380, port_range_max: 2380, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
                 - { direction: ingress, ethertype: IPv4, port_range_min: 8443, port_range_max: 8443, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
                 - { direction: ingress, ethertype: IPv4, port_range_min: 8444, port_range_max: 8444, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
 
@@ -416,6 +443,7 @@ resources:
             name: sg-external-rules
             rules:
                 - { direction: ingress, ethertype: IPv4, port_range_max: 22, port_range_min: 22, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+                - { direction: ingress, ethertype: IPv4, port_range_max: 53, port_range_min: 53, protocol: udp, remote_ip_prefix: 0.0.0.0/0 }
                 - { direction: ingress, ethertype: IPv4, port_range_min: 0, port_range_max: 255, protocol: icmp, remote_ip_prefix: 0.0.0.0/0 }
                 - { direction: egress, ethertype: IPv4, port_range_min: 0, port_range_max: 255, protocol: icmp, remote_ip_prefix: 0.0.0.0/0 }
                 - { direction: egress, ethertype: IPv4, port_range_min: 1, port_range_max: 65535, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
@@ -470,6 +498,16 @@ resources:
             flavor: { get_param: buildhost_flavor }
             key_name: { get_resource: ephemeral_sshkey }
             networks: [ port: { get_resource: buildhost_port1 }, port: { get_resource: buildhost_port2 }]
+
+# --- Server: DNSServer
+    dnsserver_server:
+        type: OS::Nova::Server
+        properties:
+            name: ocp_dnsserver
+            image: { get_param: buildhost_image }
+            flavor: { get_param: buildhost_flavor }
+            key_name: { get_resource: ephemeral_sshkey }
+            networks: [ port: { get_resource: dnsserver_port1 }]
 
 
 # --- Server: Masters
@@ -598,6 +636,9 @@ outputs:
     master1_ip1: { value: { get_attr: [ master1_server, first_address ]}}
     master1_console_url: { value: { get_attr: [ master1_server, console_urls, novnc ]}}
 
+    dnsserver_ip1: { value: { get_attr: [ dnsserver_server, first_address ]}}
+    dnsserver_console_url: { value: { get_attr: [ dnsserver_server, console_urls, novnc ]}}
+
     master2_ip1: { value: { get_attr: [ master2_server, first_address ]}}
     master2_console_url: { value: { get_attr: [ master2_server, console_urls, novnc ]}}
 
@@ -639,4 +680,3 @@ outputs:
     storagenode3_ip1: { value: { get_attr: [ storagenode3_server, networks, { get_param: api_network }, 0 ]}}
     storagenode3_ip2: { value: { get_attr: [ storagenode3_server, addresses, { get_attr: [ storage_network, name ]}, 0, addr ]}}
     storagenode3_console_url: { value: { get_attr: [ storagenode3_server, console_urls, novnc ]}}
-

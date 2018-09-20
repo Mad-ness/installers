@@ -18,6 +18,17 @@
   - name: Set hostname
     hostname: name='{{ inventory_hostname }}.{{ domain_name }}'
 
+  - name: Reboot hosts
+    shell: "sleep 5 && reboot"
+    async: 1
+    poll: 0
+ 
+  - name: Wait for the reboot to complete
+    connection_timeout: 20
+    sleep: 5
+    delay: 5
+    timeout: 300
+
 - hosts: master_nodes,infra_nodes,app_nodes
   become: true
   gather_facts: false

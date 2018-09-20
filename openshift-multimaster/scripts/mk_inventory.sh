@@ -37,12 +37,24 @@ all:
                 ansible_user: centos
                 openshift_hosted_registry_storage_kind: glusterfs
                 openshift_deployment_type: origin
-        loadbalancers:
+                openshift_disable_check: 
+                  - docker_image_availability
+                  - memory_availability
+#                  - disk_availability
+#                  - package_availability
+#                  - package_version
+        dns_servers:
+            hosts:
+                dns_server: { ansible_host: $( get_value dnsserver_ip1 )}
+        loadbalancer_nodes:
             children:
                 management:
         management:
             hosts:
                 buildhost: { ansible_host: $( get_value buildhost_ip1 )}
+        lb:
+            children:
+                loadbalancer_nodes:
         app_nodes:
             hosts:
                 node1: { ansible_host: $( get_value appnode1_ip1 )}

@@ -1,4 +1,4 @@
-- hosts: all
+- hosts: dns_servers
   become: true
   gather_facts: true
   tasks:
@@ -96,7 +96,7 @@
               $TTL 86400
               $ORIGIN {{ domain_name }}.
               @       IN      SOA     ns.{{ domain_name }}. root.{{ domain_name }}. (
-                      2014092222    ; Serial
+                          01        ; Serial
                           3h        ; Refresh
                           1h        ; Retry
                           1w        ; Expiry
@@ -106,7 +106,7 @@
               	IN	NS	ns.{{ domain_name }}.
               	IN	A	{{ ansible_default_ipv4.address }}
               ns	IN	A	{{ ansible_default_ipv4.address }}
-              {% for host in groups['loadbalancers'] %}
+              {% for host in groups['loadbalancer_nodes'] %}
               *.cloudapps 300 IN  A {{ hostvars[host].ansible_default_ipv4.address }}
               {% endfor %}
               {% for host in groups['all'] %}
@@ -127,7 +127,7 @@
               $TTL 86400
               $ORIGIN {{ rev_zone_net }}.in-addr.arpa.
               @       IN      SOA     ns.{{ domain_name }}. root.{{ domain_name }}. (
-                      2014092222    ; Serial
+                          01        ; Serial
                           3h        ; Refresh
                           1h        ; Retry
                           1w        ; Expiry
@@ -148,21 +148,20 @@
       tags:
       - bind-config
 
-    when: inventory_hostname in groups['management']
-
-  - name: Enabled Bind
-    when: inventory_hostname in groups['management']
-    service: name=named state=started enabled=on
+    - name: Enabled Bind
+      service: name=named state=started enabled=on
+    when: inventory_hostname in groups['dns_servers']
 
   handlers:
     - name: restart_named
       service: name=named state=restarted enabled=on
 
 
-- hosts:
-    - master_nodes
-    - infra_nodes
-    - app_nodes
+- hosts: all
+#    - master_nodes
+#    - infra_nodes
+#    - app_nodes
+#    - all
   become: yes
   gather_facts: yes
   tasks:
@@ -175,7 +174,7 @@
 
   - name: Get ip addresses of DNS (management server(s))
     set_fact:
-        dns_ips: '{{ groups["management"] | map("extract", hostvars, "ansible_default_ipv4") | list }}'
+        dns_ips: '{{ groups["dns_servers"] | map("extract", hostvars, "ansible_default_ipv4") | list }}'
     tags:
     - dns
 
@@ -195,7 +194,7 @@
   - name: Updating dns clients's dns settings
     lineinfile:
         path: /etc/sysconfig/network-scripts/ifcfg-eth0
-        regexp: '^DNS.*$'
+        regexp: '^DNS{{ id+1 }}=.*$'
         line: 'DNS{{ id+1 }}={{ item.address }}'
     loop: '{{ dns_ips }}'
     loop_control: 
@@ -213,5 +212,6 @@
         dest: /etc/resolv.conf
   handlers:
   - name: reload_network
-    service: name=network state=reloaded
+    set_fact: one=1
+#    service: name=network state=reloaded
 
