@@ -1,3 +1,21 @@
+#!/usr/bin/env bash
+
+stackname=test
+
+function get_value() {
+    key="$1"
+    openstack stack output show "$stackname" $key -f value | tail -1 | tr '\n' ' '
+}
+function get_value2() {
+    key="$1"
+    openstack stack output show "$stackname" $key -f value | sed 1,2d
+}
+
+cat << SSH_PRIV_KEY > "$(stackname).key"
+$( get_value2 private_key )
+SSH_PRIV_KEY
+
+cat << INVENTORY
 all:
     vars:
         ansible_ssh_user: centos
@@ -54,41 +72,43 @@ all:
                 openshift_storage_glusterfs_registry_block_storageclass_default: false
                 openshift_storage_glusterfs_registry_block_host_vol_size: 20
         dns_servers:
-            hosts:
-                dns_server: { ansible_host: 10.189.132.27 }
+            # hosts:
+            #     dns_server: { ansible_host: $( get_value dnsserver_ip1 )}
+            children:
+                master_nodes:
             vars:
-                lbfqdn_ip: 10.189.132.28
+                lbfqdn_ip: $( get_value cluster_vip_ip1 )
         loadbalancer_nodes:
             children:
                 masters:
         management:
             hosts:
-                buildhost: { ansible_host: 10.189.132.7 }
+                buildhost: { ansible_host: $( get_value buildhost_ip1 )}
         lb:
             children:
                 loadbalancer_nodes:
         app_nodes:
             hosts:
-                node1: { ansible_host: 10.189.132.21 }
-                node2: { ansible_host: 10.189.132.32 }
-                node3: { ansible_host: 10.189.132.31 }
+                node1: { ansible_host: $( get_value appnode1_ip1 )}
+                node2: { ansible_host: $( get_value appnode2_ip1 )}
+                node3: { ansible_host: $( get_value appnode3_ip1 )}
             vars:
                 openshift_node_group_name: "node-config-compute"
             children:
                 storage_nodes:
         master_nodes:
             hosts:
-                master1: { ansible_host: 10.189.132.38 }
-                master2: { ansible_host: 10.189.132.34 }
-                master3: { ansible_host: 10.189.132.37 }
+                master1: { ansible_host: $( get_value master1_ip1 )}
+                master2: { ansible_host: $( get_value master2_ip1 )}
+                master3: { ansible_host: $( get_value master3_ip1 )}
             vars:
                 openshift_node_group_name: "node-config-master"
                 openshift_schedulable: True
         infra_nodes:
             hosts:
-                infra1: { ansible_host: 10.189.132.39 }
-                infra2: { ansible_host: 10.189.132.11 }
-                infra3: { ansible_host: 10.189.132.35 }
+                infra1: { ansible_host: $( get_value infra1_ip1 )}
+                infra2: { ansible_host: $( get_value infra2_ip1 )}
+                infra3: { ansible_host: $( get_value infra3_ip1 )}
             vars:
                 openshift_node_group_name: "node-config-infra"
         nodes:
@@ -98,10 +118,14 @@ all:
                 master_nodes:
         storage_nodes:
             hosts:
-                storage1: { ansible_host: 10.189.132.20 }
-                storage2: { ansible_host: 10.189.132.9 }
-                storage3: { ansible_host: 10.189.132.33 }
+                storage1: { ansible_host: $( get_value storagenode1_ip1 )}
+                storage2: { ansible_host: $( get_value storagenode2_ip1 )}
+                storage3: { ansible_host: $( get_value storagenode3_ip1 )}
             vars:
-                glusterfs_devices: [ "/dev/vdc", "/dev/vdb", "/dev/vdd" ]
+                glusterfs_devices: [ "/dev/vdc", "/dev/vde", "/dev/vdd" ]
                 openshift_node_group_name: "node-config-infra"
+
+INVENTORY
+
+echo "# Find the private key in $(stackname).key"
 

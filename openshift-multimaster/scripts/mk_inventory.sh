@@ -21,6 +21,7 @@ all:
         ansible_become: True
         openshift_deployment_type: origin
         domain_name: novalocal
+        loadbalancer_fqdn: console.okd.local
     children:
         masters: { children: { master_nodes: }}
         etcd: { children: { master_nodes: }}
@@ -40,8 +41,8 @@ all:
                     challenge: true
                     kind: HTPasswdPasswordIdentityProvider
                     filename: '/etc/origin/htpasswd'
-                openshift_master_cluster_hostname: console.okd.local
-                openshift_master_cluster_public_hostname: console.okd.local
+                openshift_master_cluster_hostname: "{{ loadbalancer_fqdn }}"
+                openshift_master_cluster_public_hostname: "{{ loadbalancer_fqdn }}"
                 ansible_user: centos
                 openshift_deployment_type: origin
                 openshift_disable_check: 
@@ -71,9 +72,11 @@ all:
         dns_servers:
             hosts:
                 dns_server: { ansible_host: $( get_value dnsserver_ip1 )}
+            vars:
+                lbfqdn_ip: $( get_value cluster_vip_ip1 )
         loadbalancer_nodes:
             children:
-                management:
+                masters:
         management:
             hosts:
                 buildhost: { ansible_host: $( get_value buildhost_ip1 )}

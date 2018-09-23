@@ -89,6 +89,13 @@ parameters:
         description: Size of a volume
         default: 30
 
+    master_userdata:
+        type: string
+        description: Post deployment operations on master hosts
+        default: |
+        #!/usr/bin/env bash
+        yum update -y || true
+        label: Master userdata
 resources:
 
     storagenode1_vol1: { type: "OS::Cinder::Volume", properties: { name: storage1-vol1, size: { get_param: storage_volume_size }, volume_type: { get_param: volume_type }}}
@@ -504,6 +511,7 @@ resources:
             flavor: { get_param: buildhost_flavor }
             key_name: { get_resource: ephemeral_sshkey }
             networks: [ port: { get_resource: buildhost_port1 }, port: { get_resource: buildhost_port2 }]
+            user_data: { get_param: master_userdata }
 
 # --- Server: DNSServer
     dnsserver_server:
@@ -514,6 +522,7 @@ resources:
             flavor: { get_param: buildhost_flavor }
             key_name: { get_resource: ephemeral_sshkey }
             networks: [ port: { get_resource: dnsserver_port1 }]
+            user_data: { get_param: master_userdata }
 
 
 # --- Server: Masters
@@ -526,6 +535,8 @@ resources:
             key_name: { get_resource: ephemeral_sshkey }
             networks: [ port: { get_resource: master1_port1 }]
             scheduler_hints: { group: { get_resource: sg_masters }}
+            user_data: { get_param: master_userdata }
+
     master2_server:
         type: OS::Nova::Server
         properties:
@@ -535,6 +546,8 @@ resources:
             key_name: { get_resource: ephemeral_sshkey }
             networks: [ port: { get_resource: master2_port1 }]
             scheduler_hints: { group: { get_resource: sg_masters }}
+            user_data: { get_param: master_userdata }
+
     master3_server:
         type: OS::Nova::Server
         properties:
@@ -544,6 +557,7 @@ resources:
             key_name: { get_resource: ephemeral_sshkey }
             networks: [ port: { get_resource: master3_port1 }]
             scheduler_hints: { group: { get_resource: sg_masters }}
+            user_data: { get_param: master_userdata }
 
 # --- Server: Infra
     infra1_server:
@@ -555,6 +569,8 @@ resources:
             key_name: { get_resource: ephemeral_sshkey }
             networks: [ port: { get_resource: infra1_port1 }]
             scheduler_hints: { group: { get_resource: sg_infras }}
+            user_data: { get_param: master_userdata }
+
     infra2_server:
         type: OS::Nova::Server
         properties:
@@ -564,6 +580,8 @@ resources:
             key_name: { get_resource: ephemeral_sshkey }
             networks: [ port: { get_resource: infra2_port1 }]
             scheduler_hints: { group: { get_resource: sg_infras }}
+            user_data: { get_param: master_userdata }
+
     infra3_server:
         type: OS::Nova::Server
         properties:
@@ -573,6 +591,8 @@ resources:
             key_name: { get_resource: ephemeral_sshkey }
             networks: [ port: { get_resource: infra3_port1 }]
             scheduler_hints: { group: { get_resource: sg_infras }}
+            user_data: { get_param: master_userdata }
+
 
 # --- Server: AppNode
     appnode1_server:
@@ -584,6 +604,8 @@ resources:
             key_name: { get_resource: ephemeral_sshkey }
             networks: [ port: { get_resource: appnode1_port1 }, port: { get_resource: appnode1_port2 }]
             scheduler_hints: { group: { get_resource: sg_appnodes }}
+            user_data: { get_param: master_userdata }
+
     appnode2_server:
         type: OS::Nova::Server
         properties:
@@ -593,6 +615,8 @@ resources:
             key_name: { get_resource: ephemeral_sshkey }
             networks: [ port: { get_resource: appnode2_port1 }, port: { get_resource: appnode2_port2 }]
             scheduler_hints: { group: { get_resource: sg_appnodes }}
+            user_data: { get_param: master_userdata }
+
     appnode3_server:
         type: OS::Nova::Server
         properties:
@@ -602,6 +626,7 @@ resources:
             key_name: { get_resource: ephemeral_sshkey }
             networks: [ port: { get_resource: appnode3_port1 }, port: { get_resource: appnode3_port2 }]
             scheduler_hints: { group: { get_resource: sg_appnodes }}
+            user_data: { get_param: master_userdata }
 
 # --- Server: StorageNode
     storagenode1_server:

@@ -1,0 +1,189 @@
+heat_template_version: 2018-03-02
+description: A template for creating master nodes
+
+parameters:
+    image:
+        type: string
+        label: Image name or ID
+        description: Image used to create an instance from
+    flavor:
+        type: string
+        label: Flavor
+        description: Flavor to set a proper set of resources
+    key_name:
+        type: string
+        label: Key name
+        description: Name of key-pair to be installed on a created server
+    public_network:
+        #type: comma_delimited_list
+        type: string
+        label: The public network
+        description: The server is being attached to the specified network
+    cluster_vip_allowed_tcp_ports:
+        type: comma_delimited_list
+        label: Allowed TCP ports
+        description: Allowed TCP ports that is being accessing on a cluster vIP
+        default: "443,6443,8443"
+
+    master_port1_allowed_tcp_ports:
+        type: comma_delimited_list
+        label: Allowed TCP ports
+        description: Allowed TCP ports that is being accessing on a master port1
+        default: "22,443,6443,8443"
+    master_port1_allowed_udp_ports:
+        type: comma_delimited_list
+        label: Allowed UDP ports
+        description: Allowed UDP ports that is being accessing on a master port1
+        default: "53,953"
+
+resources:
+
+    sg_cluster_port:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            name: sg_cluster_vip
+            description: Rules to access the only allowed traffic on a cluster vIP
+            rules:
+                repeat:
+                    for_each:
+                        <%port%>: { get_param: cluster_vip_allowed_tcp_ports }
+                    template:
+                        direction: ingress
+                        ethertype: IPv4
+                        port_range_min: <%port%>
+                        port_range_max: <%port%>
+                        protocol: tcp
+                        remote_ip_prefix: 0.0.0.0/0
+
+    sg_masters_port1_tcpports:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            name: sg_masters_port1_tcpports
+            description: Rules to access the only allowed traffic on a master port1 by TCP ports
+            rules:
+                repeat:
+                    for_each:
+                        <%port%>: { get_param: master_port1_allowed_tcp_ports }
+                    template:
+                        direction: ingress
+                        ethertype: IPv4
+                        port_range_min: <%port%>
+                        port_range_max: <%port%>
+                        protocol: tcp
+                        remote_ip_prefix: 0.0.0.0/0
+
+    sg_masters_port1_udpports:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            name: sg_masters_port1_udpports
+            description: Rules to access the only allowed traffic on a master port1 by UDP ports
+            rules:
+                repeat:
+                    for_each:
+                        <%port%>: { get_param: master_port1_allowed_udp_ports }
+                    template:
+                        direction: ingress
+                        ethertype: IPv4
+                        port_range_min: <%port%>
+                        port_range_max: <%port%>
+                        protocol: udp
+                        remote_ip_prefix: 0.0.0.0/0
+
+    sg_masters_port1_icmpports:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            name: sg_masters_port1_icmpports
+            description: Rules to access the only allowed traffic on a master port1 by ICMP ports
+            rules:
+              - direction: ingress
+                ethertype: IPv4
+                protocol: icmp
+                remote_ip_prefix: 0.0.0.0/0
+
+
+    cluster_vip_port:
+        type: OS::Neutron::Port
+        properties:
+            name: master_cluster_vip
+            network_id: { get_param: public_network }
+            security_groups:
+            - { get_resource: sg_cluster_port }
+
+    master1_port1:
+        type: OS::Neutron::Port
+        properties:
+            name: master1_port1
+            network_id: { get_param: public_network }
+            security_groups:
+            - { get_resource: sg_masters_port1_tcpports }
+            - { get_resource: sg_masters_port1_udpports }
+            - { get_resource: sg_masters_port1_icmpports }
+            allowed_address_pairs:
+            - ip_address: { get_attr: [ cluster_vip_port, fixed_ips, 0, ip_address ]}
+
+    master2_port1:
+        type: OS::Neutron::Port
+        properties:
+            name: master2_port1
+            network_id: { get_param: public_network }
+            security_groups:
+            - { get_resource: sg_masters_port1_tcpports }
+            - { get_resource: sg_masters_port1_udpports }
+            - { get_resource: sg_masters_port1_icmpports }
+            allowed_address_pairs:
+            - ip_address: { get_attr: [ cluster_vip_port, fixed_ips, 0, ip_address ]}
+
+
+    master3_port1:
+        type: OS::Neutron::Port
+        properties:
+            name: master3_port1
+            network_id: { get_param: public_network }
+            security_groups:
+            - { get_resource: sg_masters_port1_tcpports }
+            - { get_resource: sg_masters_port1_udpports }
+            - { get_resource: sg_masters_port1_icmpports }
+            allowed_address_pairs:
+            - ip_address: { get_attr: [ cluster_vip_port, fixed_ips, 0, ip_address ]}
+
+
+    master1:
+        type: OS::Nova::Server
+        properties:
+            name: ocp2_master1
+            image: { get_param: image }
+            flavor: { get_param: flavor }
+            key_name: { get_param: key_name }
+            networks: [ port: { get_resource: master1_port1 }]
+    master2:
+        type: OS::Nova::Server
+        properties:
+            name: ocp2_master2
+            image: { get_param: image }
+            flavor: { get_param: flavor }
+            key_name: { get_param: key_name }
+            networks: [ port: { get_resource: master2_port1 }]
+    master3:
+        type: OS::Nova::Server
+        properties:
+            name: ocp2_master3
+            image: { get_param: image }
+            flavor: { get_param: flavor }
+            key_name: { get_param: key_name }
+            networks: [ port: { get_resource: master3_port1 }]
+
+outputs:
+    cluster_vip:
+        description: Cluster vIP
+        value: { get_attr: [ cluster_vip_port, fixed_ips, 0, ip_address ]}
+    master1_ip1:
+        description: Master1 IP address
+        value: { get_attr: [ master1, first_address ]}
+    master2_ip1:
+        description: Master2 IP address
+        value: { get_attr: [ master2, first_address ]}
+    master3_ip1:
+        description: Master3 IP address
+        value: { get_attr: [ master3, first_address ]}
+
+

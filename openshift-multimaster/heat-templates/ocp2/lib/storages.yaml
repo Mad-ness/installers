@@ -1,0 +1,190 @@
+heat_template_version: 2018-03-02
+description: A template for creating storage nodes
+
+parameters:
+    image:
+        type: string
+        label: Image name or ID
+        description: Image used to create an instance from
+    flavor:
+        type: string
+        label: Flavor
+        description: Flavor to set a proper set of resources
+    key_name:
+        type: string
+        label: Key name
+        description: Name of key-pair to be installed on a created server
+    public_network:
+        #type: comma_delimited_list
+        type: string
+        label: The public network
+        description: The server is being attached to the specified network
+
+    storage_port1_allowed_tcp_ports:
+        type: comma_delimited_list
+        label: Allowed TCP ports
+        description: Allowed TCP ports that is being accessing on a storage port1
+        default: "22,2049"
+    storage_port1_allowed_udp_ports:
+        type: comma_delimited_list
+        label: Allowed UDP ports
+        description: Allowed UDP ports that is being accessing on a storage port1
+        default: "111"
+
+    storage_volume_size:
+        type: number
+        label: Size of a single volume
+        default: 30
+        description: Specify size (GB) of a single volume
+
+    volume_type:
+        type: string
+        label: Ceph Storage volume type
+        description: Volume Type CephStorage
+        default: CephStorage
+
+resources:
+
+    sg_storages_port1_tcpports:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            name: sg_storages_port1_tcpports
+            description: Rules to access the only allowed traffic on a storage port1 by TCP ports
+            rules:
+                repeat:
+                    for_each:
+                        <%port%>: { get_param: storage_port1_allowed_tcp_ports }
+                    template:
+                        direction: ingress
+                        ethertype: IPv4
+                        port_range_min: <%port%>
+                        port_range_max: <%port%>
+                        protocol: tcp
+                        remote_ip_prefix: 0.0.0.0/0
+
+    sg_storages_port1_udpports:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            name: sg_storages_port1_udpports
+            description: Rules to access the only allowed traffic on a storage port1 by UDP ports
+            rules:
+                repeat:
+                    for_each:
+                        <%port%>: { get_param: storage_port1_allowed_udp_ports }
+                    template:
+                        direction: ingress
+                        ethertype: IPv4
+                        port_range_min: <%port%>
+                        port_range_max: <%port%>
+                        protocol: udp
+                        remote_ip_prefix: 0.0.0.0/0
+
+    sg_storages_port1_icmpports:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            name: sg_storages_port1_icmpports
+            description: Rules to access the only allowed traffic on a storage port1 by ICMP ports
+            rules:
+              - direction: ingress
+                ethertype: IPv4
+                protocol: icmp
+                remote_ip_prefix: 0.0.0.0/0
+
+
+    storage1_port1:
+        type: OS::Neutron::Port
+        properties:
+            name: storage1_port1
+            network_id: { get_param: public_network }
+            security_groups:
+            - { get_resource: sg_storages_port1_tcpports }
+            - { get_resource: sg_storages_port1_udpports }
+            - { get_resource: sg_storages_port1_icmpports }
+
+    storage2_port1:
+        type: OS::Neutron::Port
+        properties:
+            name: storage2_port1
+            network_id: { get_param: public_network }
+            security_groups:
+            - { get_resource: sg_storages_port1_tcpports }
+            - { get_resource: sg_storages_port1_udpports }
+            - { get_resource: sg_storages_port1_icmpports }
+
+
+    storage3_port1:
+        type: OS::Neutron::Port
+        properties:
+            name: storage3_port1
+            network_id: { get_param: public_network }
+            security_groups:
+            - { get_resource: sg_storages_port1_tcpports }
+            - { get_resource: sg_storages_port1_udpports }
+            - { get_resource: sg_storages_port1_icmpports }
+
+
+
+    storagenode1_vol1: { type: "OS::Cinder::Volume", properties: { name: storage1-vol1, size: { get_param: storage_volume_size }, volume_type: { get_param: volume_type }}}
+    storagenode1_vol2: { type: "OS::Cinder::Volume", properties: { name: storage1-vol2, size: { get_param: storage_volume_size }, volume_type: { get_param: volume_type }}}
+    storagenode1_vol3: { type: "OS::Cinder::Volume", properties: { name: storage1-vol3, size: { get_param: storage_volume_size }, volume_type: { get_param: volume_type }}}
+
+    storagenode2_vol1: { type: "OS::Cinder::Volume", properties: { name: storage2-vol1, size: { get_param: storage_volume_size }, volume_type: { get_param: volume_type }}}
+    storagenode2_vol2: { type: "OS::Cinder::Volume", properties: { name: storage2-vol2, size: { get_param: storage_volume_size }, volume_type: { get_param: volume_type }}}
+    storagenode2_vol3: { type: "OS::Cinder::Volume", properties: { name: storage2-vol3, size: { get_param: storage_volume_size }, volume_type: { get_param: volume_type }}}
+
+    storagenode3_vol1: { type: "OS::Cinder::Volume", properties: { name: storage3-vol1, size: { get_param: storage_volume_size }, volume_type: { get_param: volume_type }}}
+    storagenode3_vol2: { type: "OS::Cinder::Volume", properties: { name: storage3-vol2, size: { get_param: storage_volume_size }, volume_type: { get_param: volume_type }}}
+    storagenode3_vol3: { type: "OS::Cinder::Volume", properties: { name: storage3-vol3, size: { get_param: storage_volume_size }, volume_type: { get_param: volume_type }}}
+
+
+    storagenode1_vol1_att: { type: "OS::Cinder::VolumeAttachment", properties: { volume_id: { get_resource: storagenode1_vol1 }, instance_uuid: { get_resource: storage1 }}}
+    storagenode1_vol2_att: { type: "OS::Cinder::VolumeAttachment", properties: { volume_id: { get_resource: storagenode1_vol2 }, instance_uuid: { get_resource: storage1 }}}
+    storagenode1_vol3_att: { type: "OS::Cinder::VolumeAttachment", properties: { volume_id: { get_resource: storagenode1_vol3 }, instance_uuid: { get_resource: storage1 }}}
+
+    storagenode2_vol1_att: { type: "OS::Cinder::VolumeAttachment", properties: { volume_id: { get_resource: storagenode2_vol1 }, instance_uuid: { get_resource: storage2 }}}
+    storagenode2_vol2_att: { type: "OS::Cinder::VolumeAttachment", properties: { volume_id: { get_resource: storagenode2_vol2 }, instance_uuid: { get_resource: storage2 }}}
+    storagenode2_vol3_att: { type: "OS::Cinder::VolumeAttachment", properties: { volume_id: { get_resource: storagenode2_vol3 }, instance_uuid: { get_resource: storage2 }}}
+
+    storagenode3_vol1_att: { type: "OS::Cinder::VolumeAttachment", properties: { volume_id: { get_resource: storagenode3_vol1 }, instance_uuid: { get_resource: storage3 }}}
+    storagenode3_vol2_att: { type: "OS::Cinder::VolumeAttachment", properties: { volume_id: { get_resource: storagenode3_vol2 }, instance_uuid: { get_resource: storage3 }}}
+    storagenode3_vol3_att: { type: "OS::Cinder::VolumeAttachment", properties: { volume_id: { get_resource: storagenode3_vol3 }, instance_uuid: { get_resource: storage3 }}}
+
+
+
+
+    storage1:
+        type: OS::Nova::Server
+        properties:
+            name: ocp2_storage1
+            image: { get_param: image }
+            flavor: { get_param: flavor }
+            key_name: { get_param: key_name }
+            networks: [ port: { get_resource: storage1_port1 }]
+    storage2:
+        type: OS::Nova::Server
+        properties:
+            name: ocp2_storage2
+            image: { get_param: image }
+            flavor: { get_param: flavor }
+            key_name: { get_param: key_name }
+            networks: [ port: { get_resource: storage2_port1 }]
+    storage3:
+        type: OS::Nova::Server
+        properties:
+            name: ocp2_storage3
+            image: { get_param: image }
+            flavor: { get_param: flavor }
+            key_name: { get_param: key_name }
+            networks: [ port: { get_resource: storage3_port1 }]
+
+outputs:
+    storage1_ip1:
+        description: Storage1 IP address
+        value: { get_attr: [ storage1, first_address ]}
+    storage2_ip1:
+        description: Storage2 IP address
+        value: { get_attr: [ storage2, first_address ]}
+    storage3_ip1:
+        description: Storage3 IP address
+        value: { get_attr: [ storage3, first_address ]}
+

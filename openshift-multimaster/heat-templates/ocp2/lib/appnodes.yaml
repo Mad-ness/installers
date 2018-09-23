@@ -1,0 +1,164 @@
+heat_template_version: 2018-03-02
+description: A template for creating application nodes
+
+parameters:
+    image:
+        type: string
+        label: Image name or ID
+        description: Image used to create an instance from
+    flavor:
+        type: string
+        label: Flavor
+        description: Flavor to set a proper set of resources
+    key_name:
+        type: string
+        label: Key name
+        description: Name of key-pair to be installed on a created server
+    public_network:
+        #type: comma_delimited_list
+        type: string
+        label: The public network
+        description: The server is being attached to the specified network
+
+    appnode_port1_allowed_tcp_ports:
+        type: comma_delimited_list
+        label: Allowed TCP ports
+        description: Allowed TCP ports that is being accessing on a appnode port1
+        default: "22,2049"
+    appnode_port1_allowed_udp_ports:
+        type: comma_delimited_list
+        label: Allowed UDP ports
+        description: Allowed UDP ports that is being accessing on a appnode port1
+        default: "111"
+
+    appnode_volume_size:
+        type: number
+        label: Size of a single volume
+        default: 30
+        description: Specify size (GB) of a single volume
+
+    volume_type:
+        type: string
+        label: Ceph Storage volume type
+        description: Volume Type CephStorage
+        default: CephStorage
+
+resources:
+
+    sg_appnodes_port1_tcpports:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            name: sg_appnodes_port1_tcpports
+            description: Rules to access the only allowed traffic on a appnode port1 by TCP ports
+            rules:
+                repeat:
+                    for_each:
+                        <%port%>: { get_param: appnode_port1_allowed_tcp_ports }
+                    template:
+                        direction: ingress
+                        ethertype: IPv4
+                        port_range_min: <%port%>
+                        port_range_max: <%port%>
+                        protocol: tcp
+                        remote_ip_prefix: 0.0.0.0/0
+
+    sg_appnodes_port1_udpports:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            name: sg_appnodes_port1_udpports
+            description: Rules to access the only allowed traffic on a appnode port1 by UDP ports
+            rules:
+                repeat:
+                    for_each:
+                        <%port%>: { get_param: appnode_port1_allowed_udp_ports }
+                    template:
+                        direction: ingress
+                        ethertype: IPv4
+                        port_range_min: <%port%>
+                        port_range_max: <%port%>
+                        protocol: udp
+                        remote_ip_prefix: 0.0.0.0/0
+
+    sg_appnodes_port1_icmpports:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            name: sg_appnodes_port1_icmpports
+            description: Rules to access the only allowed traffic on a appnode port1 by ICMP ports
+            rules:
+              - direction: ingress
+                ethertype: IPv4
+                protocol: icmp
+                remote_ip_prefix: 0.0.0.0/0
+
+
+    appnode1_port1:
+        type: OS::Neutron::Port
+        properties:
+            name: appnode1_port1
+            network_id: { get_param: public_network }
+            security_groups:
+            - { get_resource: sg_appnodes_port1_tcpports }
+            - { get_resource: sg_appnodes_port1_udpports }
+            - { get_resource: sg_appnodes_port1_icmpports }
+
+    appnode2_port1:
+        type: OS::Neutron::Port
+        properties:
+            name: appnode2_port1
+            network_id: { get_param: public_network }
+            security_groups:
+            - { get_resource: sg_appnodes_port1_tcpports }
+            - { get_resource: sg_appnodes_port1_udpports }
+            - { get_resource: sg_appnodes_port1_icmpports }
+
+
+    appnode3_port1:
+        type: OS::Neutron::Port
+        properties:
+            name: appnode3_port1
+            network_id: { get_param: public_network }
+            security_groups:
+            - { get_resource: sg_appnodes_port1_tcpports }
+            - { get_resource: sg_appnodes_port1_udpports }
+            - { get_resource: sg_appnodes_port1_icmpports }
+
+
+
+
+    appnode1:
+        type: OS::Nova::Server
+        properties:
+            name: ocp2_appnode1
+            image: { get_param: image }
+            flavor: { get_param: flavor }
+            key_name: { get_param: key_name }
+            networks: [ port: { get_resource: appnode1_port1 }]
+    appnode2:
+        type: OS::Nova::Server
+        properties:
+            name: ocp2_appnode2
+            image: { get_param: image }
+            flavor: { get_param: flavor }
+            key_name: { get_param: key_name }
+            networks: [ port: { get_resource: appnode2_port1 }]
+    appnode3:
+        type: OS::Nova::Server
+        properties:
+            name: ocp2_appnode3
+            image: { get_param: image }
+            flavor: { get_param: flavor }
+            key_name: { get_param: key_name }
+            networks: [ port: { get_resource: appnode3_port1 }]
+
+outputs:
+    node1_ip1:
+        description: AppNode1 IP address
+        value: { get_attr: [ appnode1, first_address ]}
+    node2_ip1:
+        description: AppNode2 IP address
+        value: { get_attr: [ appnode2, first_address ]}
+    node3_ip1:
+        description: AppNode3 IP address
+        value: { get_attr: [ appnode3, first_address ]}
+
+
