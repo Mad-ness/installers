@@ -30,6 +30,7 @@
       - sos
       - psacct
       - docker
+      - glusterfs-fuse
 
   - name: Ensure NetworkManager
     service: name=NetworkManager state=started enabled=on

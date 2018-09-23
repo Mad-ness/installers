@@ -154,6 +154,7 @@ resources:
     dnsserver_port1: { type: "OS::Neutron::Port",     properties: { network_id: { get_param: api_network }, security_groups: [
         { get_resource: secgroup_external },
         { get_resource: secgroup_allowfromapinetwork },
+        { get_resource: secgroup_internal },
     ]}}
 # --- Port bindings: Master->API Network
     master1_port1: { type: "OS::Neutron::Port",       properties: { network_id: { get_param: api_network }, security_groups: [
@@ -164,9 +165,8 @@ resources:
         { get_resource: secgroup_world2master },
         { get_resource: secgroup_internal },
         { get_resource: secgroup_allowfromapinetwork },
-
-    ]}}
-    master2_port1: { type: "OS::Neutron::Port",       properties: { network_id: { get_param: api_network}, security_groups: [
+    ], port_security_enabled: true, allowed_address_pairs: [ ip_address: { get_attr: [ cluster_vip_port1, fixed_ips, 0, ip_address ]}]}}
+    master2_port1: { type: "OS::Neutron::Port",       properties: { network_id: { get_param: api_network }, security_groups: [
         { get_resource: secgroup_external },
         { get_resource: secgroup_node2master },
         { get_resource: secgroup_master2master },
@@ -174,7 +174,7 @@ resources:
         { get_resource: secgroup_world2master },
         { get_resource: secgroup_internal },
         { get_resource: secgroup_allowfromapinetwork },
-    ]}}
+    ], port_security_enabled: true, allowed_address_pairs: [ ip_address: { get_attr: [ cluster_vip_port1, fixed_ips, 0, ip_address ]}]}}
     master3_port1: { type: "OS::Neutron::Port",       properties: { network_id: { get_param: api_network }, security_groups: [
         { get_resource: secgroup_external },
         { get_resource: secgroup_node2master },
@@ -183,7 +183,7 @@ resources:
         { get_resource: secgroup_world2master },
         { get_resource: secgroup_internal },
         { get_resource: secgroup_allowfromapinetwork },
-    ]}}
+    ], port_security_enabled: true, allowed_address_pairs: [ ip_address: { get_attr: [ cluster_vip_port1, fixed_ips, 0, ip_address ]}]}}
 
 # --- Port bindings: Infra->API Network
     infra1_port1: { type: "OS::Neutron::Port",       properties: { network_id: { get_param: api_network }, security_groups: [
@@ -292,6 +292,11 @@ resources:
         { get_resource: secgroup_allowfromapinetwork },
     ]}}
 
+
+# --- Port bindings: Cluster IP
+    cluster_vip_port1: { type: "OS::Neutron::Port",       properties: { network_id: { get_param: api_network }, security_groups: [
+        { get_resource: secgroup_external },
+    ]}}
 
 # --- SecurityGroup: AppNode->AppNode
     secgroup_allowfromapinetwork:
@@ -443,6 +448,7 @@ resources:
             name: sg-external-rules
             rules:
                 - { direction: ingress, ethertype: IPv4, port_range_max: 22, port_range_min: 22, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+                - { direction: ingress, ethertype: IPv4, port_range_max: 8443, port_range_min: 8443, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
                 - { direction: ingress, ethertype: IPv4, port_range_max: 53, port_range_min: 53, protocol: udp, remote_ip_prefix: 0.0.0.0/0 }
                 - { direction: ingress, ethertype: IPv4, port_range_min: 0, port_range_max: 255, protocol: icmp, remote_ip_prefix: 0.0.0.0/0 }
                 - { direction: egress, ethertype: IPv4, port_range_min: 0, port_range_max: 255, protocol: icmp, remote_ip_prefix: 0.0.0.0/0 }
@@ -632,6 +638,8 @@ outputs:
     buildhost_ip1: { value: { get_attr: [ buildhost_server, first_address ]}}
     buildhost_ip2: { value: { get_attr: [ buildhost_server, addresses, { get_param: api_network }, 0, addr ]}}
     buildhost_console_url: { value: { get_attr: [ buildhost_server, console_urls, novnc ]}}
+
+    cluster_vip_ip1: { value: { get_attr: [ cluster_vip_port1, fixed_ips, 0, ip_address ]}}
 
     master1_ip1: { value: { get_attr: [ master1_server, first_address ]}}
     master1_console_url: { value: { get_attr: [ master1_server, console_urls, novnc ]}}

@@ -3,8 +3,11 @@
 - import_playbook: playbooks/manage-packages.yml
 - import_playbook: playbooks/install-openshift-ansible.yml
 - import_playbook: playbooks/dns-config.yml
+- import_playbook: playbooks/storage-packages.yml
+- import_playbook: playbooks/storage-firewall.yml
 
 
+# - import_playbook: playbooks/storage-prereq.yml
 # - include: playbooks/custom.yml
 # - include: playbooks/docker.yaml
 # - include: playbooks/kubernetes.yml

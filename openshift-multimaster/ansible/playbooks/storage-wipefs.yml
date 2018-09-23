@@ -1,0 +1,9 @@
+- hosts: storage_nodes
+  become: true
+  gather_facts: false
+  tasks:
+
+  - name: Executing wipefs on '{{ glusterfs_devices }}'
+    command: /usr/sbin/wipefs --all --force '{{ item }}'
+    loop: '{{ glusterfs_devices }}'
+

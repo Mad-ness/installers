@@ -17,12 +17,10 @@ cat << INVENTORY
 all:
     vars:
         ansible_ssh_user: centos
-        ansible_private_key_file: key
+        ansible_private_key_file: "key"
         ansible_become: True
         openshift_deployment_type: origin
         domain_name: novalocal
-        target_hosts: [ app_nodes, master_nodes, infra_nodes, storage_nodes, ]
-        management_hosts: [ management, ]
     children:
         masters: { children: { master_nodes: }}
         etcd: { children: { master_nodes: }}
@@ -33,16 +31,43 @@ all:
                 master_nodes:
                 app_nodes:
                 etcd:
+                glusterfs:
+                glusterfs_registry:
             vars:
+                openshift_master_identity_providers:
+                  - name: htpasswd_auth
+                    login: true
+                    challenge: true
+                    kind: HTPasswdPasswordIdentityProvider
+                    filename: '/etc/origin/htpasswd'
+                openshift_master_cluster_hostname: console.okd.local
+                openshift_master_cluster_public_hostname: console.okd.local
                 ansible_user: centos
-                openshift_hosted_registry_storage_kind: glusterfs
                 openshift_deployment_type: origin
                 openshift_disable_check: 
                   - docker_image_availability
                   - memory_availability
-#                  - disk_availability
-#                  - package_availability
-#                  - package_version
+                openshift_storage_glusterfs_namespace: app-storage
+                openshift_storage_glusterfs_storageclass_default: false
+                openshift_storage_glusterfs_block_deploy: true
+                openshift_storage_glusterfs_block_host_vol_size: 100
+                openshift_storage_glusterfs_block_storageclass: true
+                openshift_storage_glusterfs_block_storageclass_default: false
+                openshift_storage_glusterfs_is_native: false
+                openshift_storage_glusterfs_heketi_is_native: true
+                openshift_storage_glusterfs_heketi_executor: ssh
+                openshift_storage_glusterfs_heketi_ssh_port: 22
+                openshift_storage_glusterfs_heketi_ssh_user: centos
+                openshift_storage_glusterfs_heketi_ssh_sudo: true
+                openshift_storage_glusterfs_heketi_ssh_keyfile: "/root/deploy/openshift-ansible/key"
+                openshift_hosted_registry_storage_kind: glusterfs
+                openshift_hosted_registry_selector: 'node-role.kubernetes.io/infra=true'
+
+                openshift_storage_glusterfs_registry_namespace: infra-storage
+                openshift_storage_glusterfs_registry_block_deploy: true
+                openshift_storage_glusterfs_registry_block_storageclass: true
+                openshift_storage_glusterfs_registry_block_storageclass_default: false
+                openshift_storage_glusterfs_registry_block_host_vol_size: 20
         dns_servers:
             hosts:
                 dns_server: { ansible_host: $( get_value dnsserver_ip1 )}
@@ -62,6 +87,8 @@ all:
                 node3: { ansible_host: $( get_value appnode3_ip1 )}
             vars:
                 openshift_node_group_name: "node-config-compute"
+            children:
+                storage_nodes:
         master_nodes:
             hosts:
                 master1: { ansible_host: $( get_value master1_ip1 )}
@@ -89,6 +116,7 @@ all:
                 storage3: { ansible_host: $( get_value storagenode3_ip1 )}
             vars:
                 glusterfs_devices: [ "/dev/vdc", "/dev/vdb", "/dev/vdd" ]
-
+                openshift_node_group_name: "node-config-infra"
+ 
 INVENTORY
 

@@ -2,9 +2,16 @@
   become: true
   gather_facts: true
   tasks:
+
+  - name: Add hosts to OSEv3 group
+    add_host: 
+        name: '{{ inventory_hostname }}'
+        groups: OSEv3
+    loop: "{{ groups['dns_servers'] }}"
+
+
   - set_fact:
         net1_ip: "{{ ansible_default_ipv4.address }}"
-
 
   - name: Configuring DNS server(s) on management host(s)
     block:
@@ -107,10 +114,16 @@
               	IN	A	{{ ansible_default_ipv4.address }}
               ns	IN	A	{{ ansible_default_ipv4.address }}
               {% for host in groups['loadbalancer_nodes'] %}
-              *.cloudapps 300 IN  A {{ hostvars[host].ansible_default_ipv4.address }}
+              *.cloudapps 300 IN  A {{ hostvars[host].ansible_host }}
+              {% if openshift_master_cluster_hostname is defined or openshift_master_cluster_public_hostname is defined %}
+              {% for h in groups['lb'] %}
+              {{ openshift_master_cluster_hostname }}  IN A  {{ hostvars[h].ansible_host }}
+              {{ openshift_master_cluster_public_hostname }}  IN A  {{ hostvars[h].ansible_host }}
+              {% endfor %} 
+              {% endif %}
               {% endfor %}
               {% for host in groups['all'] %}
-              {{ host.split('.')[0] }}  IN A  {{ hostvars[host].ansible_default_ipv4.address }}
+              {{ host.split('.')[0] }}  IN A  {{ hostvars[host].ansible_host }}
               {% endfor %}
           owner: root
           group: named
@@ -119,6 +132,8 @@
       - restart_named
       tags:
       - bind-config
+
+    - debug: var=openshift_master_cluster_public_hostname
   
     - name: Create a reverse zone ({{ rev_zone_net }})
       copy:
@@ -136,9 +151,17 @@
               
               	IN	NS	ns.{{ domain_name }}.
               	IN	A	{{ ansible_default_ipv4.address }}
+              {% if openshift_master_cluster_hostname is defined or openshift_master_cluster_public_hostname is defined %}
+              {% for h in groups['lb'] %}
+              {{ hostvars[h].ansible_host.split('.')[-1] }} PTR {{ openshift_master_cluster_hostname }}
+              {% if openshift_master_cluster_hostname != openshift_master_cluster_public_hostname %}
+              {{ hostvars[h].ansible_host.split('.')[-1] }} PTR {{ openshift_master_cluster_public_hostname }}
+              {% endif %}
+              {% endfor %}
+              {% endif %}
               {{ ansible_default_ipv4.address.split('.')[-1] }}	PTR		ns.{{ domain_name }}.
               {% for host in groups['all'] %}
-              {{ hostvars[host].ansible_default_ipv4.address.split('.')[-1] }} PTR  {{ hostvars[host].inventory_hostname }}.{{ domain_name }}.
+              {{ hostvars[host].ansible_host.split('.')[-1] }} PTR  {{ hostvars[host].inventory_hostname }}.{{ domain_name }}.
               {% endfor %}
           owner: root
           group: named
