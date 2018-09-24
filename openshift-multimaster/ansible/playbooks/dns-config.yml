@@ -37,7 +37,7 @@
                   check-names response ignore;
               	recursion yes;
                 forward first;
-                ; forwarders { 10.189.136.37; 10.189.136.165; };
+                # forwarders { 10.189.136.37; 10.189.136.165; };
                 forwarders { 10.189.132.52; };
               	dnssec-enable yes;
               	dnssec-validation yes;
