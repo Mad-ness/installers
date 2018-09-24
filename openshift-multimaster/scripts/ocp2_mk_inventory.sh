@@ -11,7 +11,7 @@ function get_value2() {
     openstack stack output show "$stackname" $key -f value | sed 1,2d
 }
 
-cat << SSH_PRIV_KEY > "$(stackname).key"
+cat << SSH_PRIV_KEY > "${stackname}.key"
 $( get_value2 private_key )
 SSH_PRIV_KEY
 
