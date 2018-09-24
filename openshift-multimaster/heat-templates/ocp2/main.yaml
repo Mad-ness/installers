@@ -134,6 +134,7 @@ outputs:
     private_key: { value: { get_attr: [ ocp2_sshkey, private_key ]}}
     cluster_vip_ip1: { value: { get_attr: [ masters, cluster_vip ]}}
     buildhost_ip1: { value: { get_attr: [ services, buildhost_ip1 ]}}
+#    dnsserver_ip1: { value: { get_attr: [ services, buildhost_ip1 ]}}
 
     master1_ip1: { value: { get_attr: [ masters, master1_ip1 ]}}
     master2_ip1: { value: { get_attr: [ masters, master2_ip1 ]}}

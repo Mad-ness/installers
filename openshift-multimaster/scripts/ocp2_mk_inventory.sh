@@ -84,8 +84,10 @@ all:
 
 
         dns_servers:
-            hosts:
-                 dns_server: { ansible_host: $( get_value dnsserver_ip1 )}
+            # hosts:
+            #     dns_server: { ansible_host: $( get_value dnsserver_ip1 )}
+            children:
+                management:
             vars:
                 lbfqdn_ip: $( get_value cluster_vip_ip1 )
         loadbalancer_nodes:
