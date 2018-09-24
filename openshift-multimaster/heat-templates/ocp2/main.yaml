@@ -54,7 +54,7 @@ parameters:
         type: comma_delimited_list
         label: List of networks
         description: The server is being attached to the specified networks
-        default: [ "ipsystems-management", ]A
+        default: [ "ipsystems-management", ]
     user_data:
         type: string
         label: Software configuration
