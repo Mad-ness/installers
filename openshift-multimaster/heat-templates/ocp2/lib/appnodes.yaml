@@ -43,6 +43,12 @@ parameters:
         description: Volume Type CephStorage
         default: CephStorage
 
+    user_data: 
+        type: string
+        label: Software configuration
+        description: Put there a script that is being executing upon a server gets up
+        default: ""
+
 resources:
 
     sg_appnodes_port1_tcpports:
@@ -133,6 +139,8 @@ resources:
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
             networks: [ port: { get_resource: appnode1_port1 }]
+            user_data: { get_param: user_data }
+
     appnode2:
         type: OS::Nova::Server
         properties:
@@ -141,6 +149,8 @@ resources:
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
             networks: [ port: { get_resource: appnode2_port1 }]
+            user_data: { get_param: user_data }
+
     appnode3:
         type: OS::Nova::Server
         properties:
@@ -149,7 +159,7 @@ resources:
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
             networks: [ port: { get_resource: appnode3_port1 }]
-
+            user_data: { get_param: user_data }
 outputs:
     node1_ip1:
         description: AppNode1 IP address

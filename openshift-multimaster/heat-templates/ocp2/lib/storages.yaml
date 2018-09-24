@@ -42,6 +42,11 @@ parameters:
         label: Ceph Storage volume type
         description: Volume Type CephStorage
         default: CephStorage
+    user_data:
+        type: string
+        label: Software configuration
+        description: Put there a script that is being executing upon a server gets up
+        default: ""
 
 resources:
 
@@ -160,6 +165,7 @@ resources:
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
             networks: [ port: { get_resource: storage1_port1 }]
+            user_data: { get_param: user_data }
     storage2:
         type: OS::Nova::Server
         properties:
@@ -168,6 +174,7 @@ resources:
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
             networks: [ port: { get_resource: storage2_port1 }]
+            user_data: { get_param: user_data }
     storage3:
         type: OS::Nova::Server
         properties:
@@ -176,7 +183,7 @@ resources:
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
             networks: [ port: { get_resource: storage3_port1 }]
-
+            user_data: { get_param: user_data }
 outputs:
     storage1_ip1:
         description: Storage1 IP address

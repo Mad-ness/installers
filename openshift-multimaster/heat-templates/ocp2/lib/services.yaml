@@ -30,6 +30,11 @@ parameters:
         label: Allowed UDP ports
         description: Allowed UDP ports that is being accessing on a service port1
         default: "53"
+    user_data:
+        type: string
+        label: Software configuration
+        description: Put there a script that is being executing upon a server gets up
+        default: ""
 
 resources:
 
@@ -97,7 +102,8 @@ resources:
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
-            networks: [ port: { get_resource: buildhost_port1 }]
+            networks: [ port: { get_resource: buildhost_port1 }]    
+            user_data: { get_param: user_data }
 
 outputs:
     buildhost_ip1:

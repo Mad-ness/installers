@@ -35,6 +35,11 @@ parameters:
         label: Allowed UDP ports
         description: Allowed UDP ports that is being accessing on a master port1
         default: "53,953"
+    user_data:
+        type: string
+        label: Software configuration
+        description: Put there a script that is being executing upon a server gets up
+        default: ""
 
 resources:
 
@@ -155,6 +160,7 @@ resources:
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
             networks: [ port: { get_resource: master1_port1 }]
+            user_data: { get_param: user_data }
     master2:
         type: OS::Nova::Server
         properties:
@@ -163,6 +169,7 @@ resources:
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
             networks: [ port: { get_resource: master2_port1 }]
+            user_data: { get_param: user_data }
     master3:
         type: OS::Nova::Server
         properties:
@@ -171,6 +178,7 @@ resources:
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
             networks: [ port: { get_resource: master3_port1 }]
+            user_data: { get_param: user_data }
 
 outputs:
     cluster_vip:

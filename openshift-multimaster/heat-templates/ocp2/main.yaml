@@ -54,7 +54,16 @@ parameters:
         type: comma_delimited_list
         label: List of networks
         description: The server is being attached to the specified networks
-        default: [ "ipsystems-management", ]
+        default: [ "ipsystems-management", ]A
+    user_data:
+        type: string
+        label: Software configuration
+        default: |
+            #!/usr/bin/env bash
+            yum update -y
+            yum install -y epel-release
+            yum update -y || true
+        description: Put there a script that is being executing upon a server gets up
 
 resources:
 
@@ -74,7 +83,7 @@ resources:
             public_network: { get_param: public_network }
             port1_allowed_tcp_ports: "22,53,8053,443,8443,10250,10010,2049,2379,2380,9000,8444,1936"
             port1_allowed_udp_ports: "4789,53,8053,443,2049"
-
+            user_data: { get_param: user_data }
 
     storages:
         type: lib/storages.yaml
@@ -85,7 +94,7 @@ resources:
             public_network: { get_param: public_network }
             port1_allowed_tcp_ports: "22,53,8053,443,8443,10250,10010,2049,2379,2380,9000,8444,1936"
             port1_allowed_udp_ports: "4789,53,8053,443,2049"
-
+            user_data: { get_param: user_data }
 
     infranodes:
         type: lib/appnodes.yaml
@@ -96,7 +105,7 @@ resources:
             public_network: { get_param: public_network }
             port1_allowed_tcp_ports: "22,53,8053,443,8443,10250,10010,2049,2379,2380,9000,8444,1936"
             port1_allowed_udp_ports: "4789,53,8053,443,2049"
-
+            user_data: { get_param: user_data }
 
     services:
         type: lib/services.yaml
