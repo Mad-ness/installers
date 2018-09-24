@@ -37,12 +37,6 @@ all:
                 glusterfs:
                 glusterfs_registry:
             vars:
-                openshift_master_identity_providers:
-                  - name: htpasswd_auth
-                    login: true
-                    challenge: true
-                    kind: HTPasswdPasswordIdentityProvider
-                    filename: '/etc/origin/htpasswd'
                 openshift_master_cluster_hostname: "{{ loadbalancer_fqdn }}"
                 openshift_master_cluster_public_hostname: "{{ loadbalancer_fqdn }}"
                 ansible_user: centos
