@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-stackname=test
+stackname=${1:-test}
 
 function get_value() {
     key="$1"
