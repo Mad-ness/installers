@@ -20,12 +20,12 @@ parameters:
         label: The public network
         description: The server is being attached to the specified network
 
-    storage_port1_allowed_tcp_ports:
+    port1_allowed_tcp_ports:
         type: comma_delimited_list
         label: Allowed TCP ports
         description: Allowed TCP ports that is being accessing on a storage port1
         default: "22,2049"
-    storage_port1_allowed_udp_ports:
+    port1_allowed_udp_ports:
         type: comma_delimited_list
         label: Allowed UDP ports
         description: Allowed UDP ports that is being accessing on a storage port1
@@ -53,7 +53,7 @@ resources:
             rules:
                 repeat:
                     for_each:
-                        <%port%>: { get_param: storage_port1_allowed_tcp_ports }
+                        <%port%>: { get_param: port1_allowed_tcp_ports }
                     template:
                         direction: ingress
                         ethertype: IPv4
@@ -70,7 +70,7 @@ resources:
             rules:
                 repeat:
                     for_each:
-                        <%port%>: { get_param: storage_port1_allowed_udp_ports }
+                        <%port%>: { get_param: port1_allowed_udp_ports }
                     template:
                         direction: ingress
                         ethertype: IPv4

@@ -37,7 +37,8 @@
                   check-names response ignore;
               	recursion yes;
                 forward first;
-                forwarders { 10.189.136.37; 10.189.136.165; };
+                ; forwarders { 10.189.136.37; 10.189.136.165; };
+                forwarders { 10.189.132.52; };
               	dnssec-enable yes;
               	dnssec-validation yes;
               	bindkeys-file "/etc/named.iscdlv.key";
@@ -113,16 +114,14 @@
               	IN	NS	ns.{{ domain_name }}.
               	IN	A	{{ ansible_default_ipv4.address }}
               ns	IN	A	{{ ansible_default_ipv4.address }}
-              {% for host in groups['loadbalancer_nodes'] %}
-              ; *.cloudapps 300 IN  A {{ hostvars[host].ansible_host }}
-              {% if openshift_master_cluster_hostname is defined or openshift_master_cluster_public_hostname is defined %}
-              {% for h in groups['lb'] %}
+              {% for host in groups['masters'] %}
+              *.cloudapps 300  IN A  {{ hostvars[host].ansible_host }}
+              {% endfor %}
+              {% if openshift_master_cluster_public_hostname is defined %}
+              {% for h in groups['infra_nodes'] %}
               {{ openshift_master_cluster_hostname }}  IN A  {{ hostvars[h].ansible_host }}
-              {{ openshift_master_cluster_public_hostname }}  IN A  {{ hostvars[h].ansible_host }}
               {% endfor %} 
               {% endif %}
-              {% endfor %}
-              {{ loadbalancer_fqdn  }}  IN A  {{ lbfqdn_ip }}
               {% for host in groups['all'] %}
               {{ host.split('.')[0] }}  IN A  {{ hostvars[host].ansible_host }}
               {% endfor %}
@@ -152,15 +151,12 @@
               
               	IN	NS	ns.{{ domain_name }}.
               	IN	A	{{ ansible_default_ipv4.address }}
-              {% if openshift_master_cluster_hostname is defined or openshift_master_cluster_public_hostname is defined %}
-              {% for h in groups['lb'] %}
-              ; {{ hostvars[h].ansible_host.split('.')[-1] }} PTR {{ openshift_master_cluster_hostname }}
-              {% if openshift_master_cluster_hostname != openshift_master_cluster_public_hostname %}
-              ; {{ hostvars[h].ansible_host.split('.')[-1] }} PTR {{ openshift_master_cluster_public_hostname }}
-              {% endif %}
+              {% if openshift_master_cluster_public_hostname is defined %}
+              {% for h in groups['infra_nodes'] %}
+              {{ hostvars[h].ansible_host.split('.')[-1] }}  PTR  {{ openshift_master_cluster_hostname }}.
               {% endfor %}
               {% endif %}
-              {{ lbfqdn_ip.split('.')[-1] }}  PTR  {{ loadbalancer_fqdn }}
+              ;{{ lbfqdn_ip.split('.')[-1] }}  PTR  {{ loadbalancer_fqdn }}
               {{ ansible_default_ipv4.address.split('.')[-1] }}	PTR		ns.{{ domain_name }}.
               {% for host in groups['all'] %}
               {{ hostvars[host].ansible_host.split('.')[-1] }} PTR  {{ hostvars[host].inventory_hostname }}.{{ domain_name }}.

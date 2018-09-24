@@ -25,12 +25,12 @@ parameters:
         description: Allowed TCP ports that is being accessing on a cluster vIP
         default: "443,6443,8443"
 
-    master_port1_allowed_tcp_ports:
+    port1_allowed_tcp_ports:
         type: comma_delimited_list
         label: Allowed TCP ports
         description: Allowed TCP ports that is being accessing on a master port1
         default: "22,443,6443,8443"
-    master_port1_allowed_udp_ports:
+    port1_allowed_udp_ports:
         type: comma_delimited_list
         label: Allowed UDP ports
         description: Allowed UDP ports that is being accessing on a master port1
@@ -63,7 +63,7 @@ resources:
             rules:
                 repeat:
                     for_each:
-                        <%port%>: { get_param: master_port1_allowed_tcp_ports }
+                        <%port%>: { get_param: port1_allowed_tcp_ports }
                     template:
                         direction: ingress
                         ethertype: IPv4
@@ -80,7 +80,7 @@ resources:
             rules:
                 repeat:
                     for_each:
-                        <%port%>: { get_param: master_port1_allowed_udp_ports }
+                        <%port%>: { get_param: port1_allowed_udp_ports }
                     template:
                         direction: ingress
                         ethertype: IPv4
