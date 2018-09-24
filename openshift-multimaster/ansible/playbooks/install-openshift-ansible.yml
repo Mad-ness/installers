@@ -11,6 +11,7 @@
     openshift_ansible_version: release-3.10
     inventory_file: 'hosts.yml'
     ssh_priv_key_file: 'key'
+    freeipa_cacert_file: 'freeipa-cacert.p12'
 
   tasks:
 
@@ -39,4 +40,16 @@
         src: '../{{ ssh_priv_key_file }}'
         dest: '{{ openshift_ansible_localdir }}/{{ ssh_priv_key_file }}'
         mode: '0400'
+
+  - name: Copy Private Key file
+    copy:
+        src: '../{{ ssh_priv_key_file }}'
+        dest: '{{ openshift_ansible_localdir }}/{{ ssh_priv_key_file }}'
+        mode: '0400'
+
+  - name: Copy FreeIPA CA cert file
+    copy: 
+        src: '../{{ freeipa_cacert_file }}'
+        dest: '{{ openshift_ansible_localdir }}/{{ freeipa_cacert_file }}'
+        mode: '0644'
 

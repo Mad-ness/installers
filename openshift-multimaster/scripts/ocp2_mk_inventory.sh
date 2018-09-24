@@ -23,7 +23,7 @@ all:
         ansible_become: True
         openshift_deployment_type: origin
         domain_name: novalocal
-        loadbalancer_fqdn: console.okd.local
+        loadbalancer_fqdn: 'openshift.{{ domain_name }}'
     children:
         masters: { children: { master_nodes: }}
         etcd: { children: { master_nodes: }}

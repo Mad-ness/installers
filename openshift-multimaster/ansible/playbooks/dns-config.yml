@@ -118,8 +118,8 @@
               *.cloudapps 300  IN A  {{ hostvars[host].ansible_host }}
               {% endfor %}
               {% if openshift_master_cluster_public_hostname is defined %}
-              {% for h in groups['infra_nodes'] %}
-              {{ openshift_master_cluster_hostname }}  IN A  {{ hostvars[h].ansible_host }}
+              {% for h in groups['master_nodes'] %}
+              {{ openshift_master_cluster_hostname }}.  IN A  {{ hostvars[h].ansible_host }}
               {% endfor %} 
               {% endif %}
               {% for host in groups['all'] %}
@@ -152,11 +152,11 @@
               	IN	NS	ns.{{ domain_name }}.
               	IN	A	{{ ansible_default_ipv4.address }}
               {% if openshift_master_cluster_public_hostname is defined %}
-              {% for h in groups['infra_nodes'] %}
+              {% for h in groups['master_nodes'] %}
               {{ hostvars[h].ansible_host.split('.')[-1] }}  PTR  {{ openshift_master_cluster_hostname }}.
               {% endfor %}
               {% endif %}
-              ;{{ lbfqdn_ip.split('.')[-1] }}  PTR  {{ loadbalancer_fqdn }}
+              ;{{ lbfqdn_ip.split('.')[-1] }}  PTR  {{ loadbalancer_fqdn }}.
               {{ ansible_default_ipv4.address.split('.')[-1] }}	PTR		ns.{{ domain_name }}.
               {% for host in groups['all'] %}
               {{ hostvars[host].ansible_host.split('.')[-1] }} PTR  {{ hostvars[host].inventory_hostname }}.{{ domain_name }}.
