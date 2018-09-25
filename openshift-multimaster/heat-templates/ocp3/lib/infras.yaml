@@ -285,30 +285,30 @@ outputs:
 
     cluster_ip1:
         description: AppNode1 IP address
-        value: { get_attr: [ cluster_vip_port1, fixed_ips, 0 ]}
+        value: { get_attr: [ cluster_vip_port1, fixed_ips, 0, ip_address ]}
     cluster_ip2:
         description: AppNode1 IP address
-        value: { get_attr: [ cluster_vip_port2, fixed_ips, 0 ]}
+        value: { get_attr: [ cluster_vip_port2, fixed_ips, 0, ip_address ]}
 
 
     infra1_ip1:
         description: Infra1 Public IP address
-        value: { get_attr: [ infra1_port1, fixed_ips, 0 ]}
+        value: { get_attr: [ infra1_port1, fixed_ips, 0, ip_address ]}
     infra1_ip2:
         description: Infra1 Private IP address
-        value: { get_attr: [ infra1_port2, fixed_ips, 0 ]}
+        value: { get_attr: [ infra1_port2, fixed_ips, 0, ip_address ]}
 
     infra2_ip1:
         description: Infra2 Public IP address
-        value: { get_attr: [ infra2_port1, fixed_ips, 0 ]}
+        value: { get_attr: [ infra2_port1, fixed_ips, 0, ip_address ]}
     infra2_ip2:
         description: Infra2 Private IP address
-        value: { get_attr: [ infra2_port2, fixed_ips, 0 ]}
+        value: { get_attr: [ infra2_port2, fixed_ips, 0, ip_address ]}
 
     infra3_ip1:
         description: Infra3 Public IP address
-        value: { get_attr: [ infra3_port1, fixed_ips, 0 ]}
+        value: { get_attr: [ infra3_port1, fixed_ips, 0, ip_address ]}
     infra3_ip2:
         description: Infra3 Private IP address
-        value: { get_attr: [ infra3_port2, fixed_ips, 0 ]}
+        value: { get_attr: [ infra3_port2, fixed_ips, 0, ip_address ]}
 
