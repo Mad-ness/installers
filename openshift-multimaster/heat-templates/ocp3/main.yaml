@@ -80,7 +80,7 @@ resources:
             dns_domain: ocp.local
             shared: false
     internal_subnet:
-        type: OS:Neutron:Subnet 
+        type: OS::Neutron::Subnet 
         properties:
             name: OCP3 Internal Subnet
             allocation_pools:
