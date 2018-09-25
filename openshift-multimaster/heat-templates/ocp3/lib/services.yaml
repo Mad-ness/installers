@@ -110,9 +110,9 @@ resources:
         properties:
             network_id: { get_param: public_network }
             security_groups:
-              - { get_resource: ocp3_sg_port1_tcpports }
-              - { get_resource: ocp3_sg_port1_udpports }
-              - { get_resource: ocp3_sg_port1_icmpports }
+              - { get_resource: sg_port1_tcpports }
+              - { get_resource: sg_port1_udpports }
+              - { get_resource: sg_port1_icmpports }
     bastion_port2:
         type: OS::Neutron::Port
         properties:
