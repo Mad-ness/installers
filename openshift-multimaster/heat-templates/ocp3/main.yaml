@@ -87,7 +87,7 @@ resources:
               - start: 100.0.0.11
                 end:   100.0.0.250
             cidr: 100.0.0.0/24
-            dns_nameservers: [ '100.0.0.01', ]
+            dns_nameservers: [ '100.0.0.1', ]
             enable_dhcp: true
             gateway_ip: '100.0.0.1'
             host_routes:
