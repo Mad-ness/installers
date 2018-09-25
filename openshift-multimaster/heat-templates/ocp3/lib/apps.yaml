@@ -146,7 +146,7 @@ resources:
             - { get_resource: sg_port1_tcpports }
             - { get_resource: sg_port1_udpports }
             - { get_resource: sg_port1_icmpports }
-    app1_port2:
+    app3_port2:
         type: OS::Neutron::Port
         properties:
             network_id: { get_param: private_network }
