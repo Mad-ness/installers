@@ -24,6 +24,7 @@ all:
         openshift_deployment_type: origin
         domain_name: novalocal
         loadbalancer_fqdn: 'openshift.{{ domain_name }}'
+        loadbalancer_internal_fqdn: openshift-internal.{{ domain_name }}'
     children:
         masters: { children: { master_nodes: }}
         etcd: { children: { master_nodes: }}
@@ -37,7 +38,7 @@ all:
                 glusterfs:
                 glusterfs_registry:
             vars:
-                openshift_master_cluster_hostname: "{{ loadbalancer_fqdn }}"
+                openshift_master_cluster_hostname: "{{ loadbalancer_internal_fqdn }}"
                 openshift_master_cluster_public_hostname: "{{ loadbalancer_fqdn }}"
                 ansible_user: centos
                 openshift_deployment_type: origin
