@@ -84,7 +84,7 @@ resources:
 
 
 
-    sg_port2_allports: 
+    ocp3_sg_port2_allports: 
         type: OS::Neutron::SecurityGroup
         properties: 
             rules:
@@ -101,7 +101,7 @@ resources:
                 protocol: icmp
                 remote_ip_prefix: 0.0.0.0/0
 
-    sg_port1_tcpports:
+    ocp3_sg_port1_tcpports:
         type: OS::Neutron::SecurityGroup
         properties:
             name: sg_masters_port1_tcpports
@@ -118,7 +118,7 @@ resources:
                         protocol: tcp
                         remote_ip_prefix: 0.0.0.0/0
 
-    sg_port1_udpports:
+    ocp3_sg_port1_udpports:
         type: OS::Neutron::SecurityGroup
         properties:
             name: sg_masters_port1_udpports
@@ -135,7 +135,7 @@ resources:
                         protocol: udp
                         remote_ip_prefix: 0.0.0.0/0
 
-    sg_port1_icmpports:
+    ocp3_sg_port1_icmpports:
         type: OS::Neutron::SecurityGroup
         properties:
             name: sg_masters_port1_icmpports
@@ -161,16 +161,16 @@ resources:
             name: master1_port1
             network_id: { get_param: public_network }
             security_groups:
-            - { get_resource: sg_masters_port1_tcpports }
-            - { get_resource: sg_masters_port1_udpports }
-            - { get_resource: sg_masters_port1_icmpports }
+            - { get_resource: ocp3_sg_port1_tcpports }
+            - { get_resource: ocp3_sg_port1_udpports }
+            - { get_resource: ocp3_sg_port1_icmpports }
     master1_port2:
         type: OS::Neutron::Port
         properties:
             name: master1_port2
             network_id: { get_param: private_network }
             security_groups:
-            - { get_resource: sg_port2_allports }
+            - { get_resource: ocp3_sg_port2_allports }
 
 #            allowed_address_pairs:
 #            - ip_address: { get_attr: [ cluster_vip_port, fixed_ips, 0, ip_address ]}
@@ -181,16 +181,16 @@ resources:
             name: master2_port1
             network_id: { get_param: public_network }
             security_groups:
-            - { get_resource: sg_masters_port1_tcpports }
-            - { get_resource: sg_masters_port1_udpports }
-            - { get_resource: sg_masters_port1_icmpports }
+            - { get_resource: ocp3_sg_port1_tcpports }
+            - { get_resource: ocp3_sg_port1_udpports }
+            - { get_resource: ocp3_sg_port1_icmpports }
     master2_port2:
         type: OS::Neutron::Port
         properties:
             name: master2_port2
             network_id: { get_param: private_network }
             security_groups:
-            - { get_resource: sg_port2_allports }
+            - { get_resource: ocp3_sg_port2_allports }
 
     master3_port1:
         type: OS::Neutron::Port
@@ -198,16 +198,16 @@ resources:
             name: master3_port1
             network_id: { get_param: public_network }
             security_groups:
-            - { get_resource: sg_masters_port1_tcpports }
-            - { get_resource: sg_masters_port1_udpports }
-            - { get_resource: sg_masters_port1_icmpports }
+            - { get_resource: ocp3_sg_port1_tcpports }
+            - { get_resource: ocp3_sg_port1_udpports }
+            - { get_resource: ocp3_sg_port1_icmpports }
     master3_port2:
         type: OS::Neutron::Port
         properties:
             name: master3_port2
             network_id: { get_param: private_network }
             security_groups:
-            - { get_resource: sg_port2_allports }
+            - { get_resource: ocp3_sg_port2_allports }
 
 
 
