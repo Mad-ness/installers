@@ -23,9 +23,6 @@ all:
         private_domain: 'ocp.local'
         public_domain: 'ocp.litf4'
         ansible_private_key_file: 'key'
-        domain_name: novalocal
-#        loadbalancer_fqdn: 'openshift.{{ domain_name }}'
-#        loadbalancer_internal_fqdn: openshift-internal.{{ domain_name }}'
     children:
          local: { hosts: { 127.0.0.1: }}
          etcd: { children: { masters: }}
@@ -100,8 +97,8 @@ all:
          masters:
              hosts:
                 master1: { ansible_host: $( get_value master1_ip1 ), openshift_ip: $( get_value master1_ip2 ), openshift_hostname: 'master1.{{ private_domain }}' }
-                master2: { ansible_host: $( get_value master2_ip2 ), openshift_ip: $( get_value master2_ip2 ), openshift_hostname: 'master2.{{ private_domain }}' }
-                master3: { ansible_host: $( get_value master3_ip3 ), openshift_ip: $( get_value master3_ip2 ), openshift_hostname: 'master3.{{ private_domain }}' }
+                master2: { ansible_host: $( get_value master2_ip1 ), openshift_ip: $( get_value master2_ip2 ), openshift_hostname: 'master2.{{ private_domain }}' }
+                master3: { ansible_host: $( get_value master3_ip1 ), openshift_ip: $( get_value master3_ip2 ), openshift_hostname: 'master3.{{ private_domain }}' }
              vars:
                  containerized: true
                  openshift_schedulable: false
@@ -109,8 +106,8 @@ all:
          infra:
              hosts:
                 infra1: { ansible_host: $( get_value infra1_ip1 ), openshift_public_ip: $( get_value infra1_ip1 ), openshift_ip: $( get_value infra1_ip2 ), openshift_hostname: 'infra1.{{ private_domain }}' }
-                infra2: { ansible_host: $( get_value infra2_ip2 ), openshift_public_ip: $( get_value infra2_ip2 ), openshift_ip: $( get_value infra2_ip2 ), openshift_hostname: 'infra2.{{ private_domain }}' }
-                infra3: { ansible_host: $( get_value infra3_ip3 ), openshift_public_ip: $( get_value infra3_ip3 ), openshift_ip: $( get_value infra3_ip2 ), openshift_hostname: 'infra3.{{ private_domain }}' }
+                infra2: { ansible_host: $( get_value infra2_ip1 ), openshift_public_ip: $( get_value infra2_ip1 ), openshift_ip: $( get_value infra2_ip2 ), openshift_hostname: 'infra2.{{ private_domain }}' }
+                infra3: { ansible_host: $( get_value infra3_ip1 ), openshift_public_ip: $( get_value infra3_ip1 ), openshift_ip: $( get_value infra3_ip2 ), openshift_hostname: 'infra3.{{ private_domain }}' }
              vars:
                  containerized: true
                  openshift_schedulable: true
