@@ -245,23 +245,23 @@ outputs:
 #        value: { get_attr: [ cluster_vip_port, fixed_ips, 0, ip_address ]}
     master1_ip1:
         description: Master1 Public IP address
-        value: { get_attr: [ master1, networks, { get_attr: [ public_network, name ]}, 0 ]}
+        value: { get_attr: [ master1, networks, { get_param: public_network }, 0 ]}
     master1_ip2:
         description: Master1 Private IP address
-        value: { get_attr: [ master1, networks, { get_attr: [ private_network, name ]}, 0 ]}
+        value: { get_attr: [ master1, networks, { get_param: private_network }, 0 ]}
  
     master2_ip1:
         description: Master1 Public IP address
-        value: { get_attr: [ master2, networks, { get_attr: [ public_network, name ]}, 0 ]}
+        value: { get_attr: [ master2, networks, { get_param: public_network }, 0 ]}
     master2_ip2:
         description: Master1 Private IP address
-        value: { get_attr: [ master2, networks, { get_attr: [ private_network, name ]}, 0 ]}
+        value: { get_attr: [ master2, networks, { get_param: private_network }, 0 ]}
  
     master3_ip1:
         description: Master3 Public IP address
-        value: { get_attr: [ master3, networks, { get_attr: [ public_network, name ]}, 0 ]}
+        value: { get_attr: [ master3, networks, { get_param: public_network }, 0 ]}
     master3_ip2:
         description: Master3 Private IP address
-        value: { get_attr: [ master3, networks, { get_attr: [ private_network, name ]}, 0 ]}
+        value: { get_attr: [ master3, networks, { get_param: private_network }, 0 ]}
  
 
