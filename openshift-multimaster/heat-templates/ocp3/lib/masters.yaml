@@ -170,7 +170,7 @@ resources:
             name: master1_port2
             network_id: { get_param: private_network }
             security_groups:
-            - { get_resource: sg_port2_allports }}
+            - { get_resource: sg_port2_allports }
 
 #            allowed_address_pairs:
 #            - ip_address: { get_attr: [ cluster_vip_port, fixed_ips, 0, ip_address ]}
@@ -190,7 +190,7 @@ resources:
             name: master2_port2
             network_id: { get_param: private_network }
             security_groups:
-            - { get_resource: sg_port2_allports }}
+            - { get_resource: sg_port2_allports }
 
     master3_port1:
         type: OS::Neutron::Port
@@ -207,7 +207,7 @@ resources:
             name: master3_port2
             network_id: { get_param: private_network }
             security_groups:
-            - { get_resource: sg_port2_allports }}
+            - { get_resource: sg_port2_allports }
 
 
 
