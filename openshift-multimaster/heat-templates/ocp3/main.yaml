@@ -175,8 +175,8 @@ outputs:
 
     private_key: { value: { get_attr: [ ocp3_sshkey, private_key ]}}
 
-    bastion1_ip1: { value: { get_attr: [ services, bastion1_ip1 ]}}
-    bastion1_ip2: { value: { get_attr: [ services, bastion1_ip2 ]}}
+    bastion_ip1: { value: { get_attr: [ services, bastion_ip1 ]}}
+    bastion_ip2: { value: { get_attr: [ services, bastion_ip2 ]}}
 
 
     local_dns_ip: { value: { get_attr: [ services, bastion1_ip1 ]}}

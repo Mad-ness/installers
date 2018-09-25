@@ -134,11 +134,10 @@ resources:
 
 outputs:
 
-    bastion1_ip1:
+    bastion_ip1:
         description: Bastion1 Public IP address
-        value: { get_attr: [ bastion1_port1, fixed_ips, 0, ip_address ]}
-    bastion1_ip2:
+        value: { get_attr: [ bastion_port1, fixed_ips, 0, ip_address ]}
+    bastion_ip2:
         description: Bastion1 Private IP address
-        value: { get_attr: [ bastion1_port2, fixed_ips, 0, ip_address ]}
-
+        value: { get_attr: [ bastion_port2, fixed_ips, 0, ip_address ]}
 
