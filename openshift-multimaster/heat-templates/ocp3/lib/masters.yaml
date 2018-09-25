@@ -18,10 +18,11 @@ parameters:
         #type: comma_delimited_list
         type: string
         label: Public/API network
-        description: The server is being attached to the specified network
+        description: Public network that is used for external connections
     private_network:
         type: string
         label: Private network
+        description: Private network that is used for OpenShift internal communications
     cluster_vip_allowed_tcp_ports:
         type: comma_delimited_list
         label: Allowed TCP ports
@@ -84,9 +85,10 @@ resources:
 
 
 
-    ocp3_sg_port2_allports: 
+    sg_port2_allports: 
         type: OS::Neutron::SecurityGroup
         properties: 
+            name: ocp3_sg_internal_network
             rules:
               - direction: ingress
                 ethertype: IPv4
@@ -101,10 +103,10 @@ resources:
                 protocol: icmp
                 remote_ip_prefix: 0.0.0.0/0
 
-    ocp3_sg_port1_tcpports:
+    sg_port1_tcpports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: sg_masters_port1_tcpports
+            name: ocp3_sg_masters_port1_tcpports
             description: Rules to access the only allowed traffic on a master port1 by TCP ports
             rules:
                 repeat:
@@ -118,10 +120,10 @@ resources:
                         protocol: tcp
                         remote_ip_prefix: 0.0.0.0/0
 
-    ocp3_sg_port1_udpports:
+    sg_port1_udpports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: sg_masters_port1_udpports
+            name: ocp3_sg_masters_port1_udpports
             description: Rules to access the only allowed traffic on a master port1 by UDP ports
             rules:
                 repeat:
@@ -135,10 +137,10 @@ resources:
                         protocol: udp
                         remote_ip_prefix: 0.0.0.0/0
 
-    ocp3_sg_port1_icmpports:
+    sg_port1_icmpports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: sg_masters_port1_icmpports
+            name: ocp3_sg_masters_port1_icmpports
             description: Rules to access the only allowed traffic on a master port1 by ICMP ports
             rules:
               - direction: ingress
@@ -158,19 +160,17 @@ resources:
     master1_port1:
         type: OS::Neutron::Port
         properties:
-            name: master1_port1
             network_id: { get_param: public_network }
             security_groups:
-            - { get_resource: ocp3_sg_port1_tcpports }
-            - { get_resource: ocp3_sg_port1_udpports }
-            - { get_resource: ocp3_sg_port1_icmpports }
+            - { get_resource: sg_port1_tcpports }
+            - { get_resource: sg_port1_udpports }
+            - { get_resource: sg_port1_icmpports }
     master1_port2:
         type: OS::Neutron::Port
         properties:
-            name: master1_port2
             network_id: { get_param: private_network }
             security_groups:
-            - { get_resource: ocp3_sg_port2_allports }
+            - { get_resource: sg_port2_allports }
 
 #            allowed_address_pairs:
 #            - ip_address: { get_attr: [ cluster_vip_port, fixed_ips, 0, ip_address ]}
@@ -178,36 +178,32 @@ resources:
     master2_port1:
         type: OS::Neutron::Port
         properties:
-            name: master2_port1
             network_id: { get_param: public_network }
             security_groups:
-            - { get_resource: ocp3_sg_port1_tcpports }
-            - { get_resource: ocp3_sg_port1_udpports }
-            - { get_resource: ocp3_sg_port1_icmpports }
+            - { get_resource: sg_port1_tcpports }
+            - { get_resource: sg_port1_udpports }
+            - { get_resource: sg_port1_icmpports }
     master2_port2:
         type: OS::Neutron::Port
         properties:
-            name: master2_port2
             network_id: { get_param: private_network }
             security_groups:
-            - { get_resource: ocp3_sg_port2_allports }
+            - { get_resource: sg_port2_allports }
 
     master3_port1:
         type: OS::Neutron::Port
         properties:
-            name: master3_port1
             network_id: { get_param: public_network }
             security_groups:
-            - { get_resource: ocp3_sg_port1_tcpports }
-            - { get_resource: ocp3_sg_port1_udpports }
-            - { get_resource: ocp3_sg_port1_icmpports }
+            - { get_resource: sg_port1_tcpports }
+            - { get_resource: sg_port1_udpports }
+            - { get_resource: sg_port1_icmpports }
     master3_port2:
         type: OS::Neutron::Port
         properties:
-            name: master3_port2
             network_id: { get_param: private_network }
             security_groups:
-            - { get_resource: ocp3_sg_port2_allports }
+            - { get_resource: sg_port2_allports }
 
 
 
