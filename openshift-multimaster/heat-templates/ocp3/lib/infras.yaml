@@ -73,7 +73,7 @@ resources:
     sg_port2_allports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: ocp3_sg_internal_network
+            name: ocp3_sg_infra_internal_network
             rules:
               - direction: ingress
                 ethertype: IPv4

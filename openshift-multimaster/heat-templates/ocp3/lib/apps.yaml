@@ -1,0 +1,215 @@
+heat_template_version: 2018-03-02
+description: A template for creating application nodes
+
+parameters:
+    image:
+        type: string
+        label: Image name or ID
+        description: Image used to create an instance from
+    flavor:
+        type: string
+        label: Flavor
+        description: Flavor to set a proper set of resources
+    key_name:
+        type: string
+        label: Key name
+        description: Name of key-pair to be installed on a created server
+
+    public_network:
+        type: string
+        label: The public network
+        description: Public network that is used for external connections
+    private_network:
+        type: string
+        label: Private network
+        description: Private network that is used for OpenShift internal communications
+
+    port1_allowed_tcp_ports:
+        type: comma_delimited_list
+        label: Allowed TCP ports
+        description: Allowed TCP ports that is being accessing on a app port1
+        default: "22,2049"
+    port1_allowed_udp_ports:
+        type: comma_delimited_list
+        label: Allowed UDP ports
+        description: Allowed UDP ports that is being accessing on a app port1
+        default: "111"
+
+    user_data: 
+        type: string
+        label: Software configuration
+        description: Put there a script that is being executing upon a server gets up
+        default: ""
+
+resources:
+
+    sg_port1_tcpports:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            name: ocp3_sg_apps_port1_tcpports
+            description: Rules to access the only allowed traffic on a app port1 by TCP ports
+            rules:
+                repeat:
+                    for_each:
+                        <%port%>: { get_param: port1_allowed_tcp_ports }
+                    template:
+                        direction: ingress
+                        ethertype: IPv4
+                        port_range_min: <%port%>
+                        port_range_max: <%port%>
+                        protocol: tcp
+                        remote_ip_prefix: 0.0.0.0/0
+
+    sg_port1_udpports:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            name: ocp3_sg_apps_port1_udpports
+            description: Rules to access the only allowed traffic on a app port1 by UDP ports
+            rules:
+                repeat:
+                    for_each:
+                        <%port%>: { get_param: port1_allowed_udp_ports }
+                    template:
+                        direction: ingress
+                        ethertype: IPv4
+                        port_range_min: <%port%>
+                        port_range_max: <%port%>
+                        protocol: udp
+                        remote_ip_prefix: 0.0.0.0/0
+
+    sg_port1_icmpports:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            name: ocp3_sg_apps_port1_icmpports
+            description: Rules to access the only allowed traffic on a app port1 by ICMP ports
+            rules:
+              - direction: ingress
+                ethertype: IPv4
+                protocol: icmp
+                remote_ip_prefix: 0.0.0.0/0
+
+    sg_port2_allports:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            name: ocp3_sg_apps_internal_network
+            rules:
+              - direction: ingress
+                ethertype: IPv4
+                protocol: tcp
+                remote_ip_prefix: 0.0.0.0/0
+              - direction: ingress
+                ethertype: IPv4
+                protocol: udp
+                remote_ip_prefix: 0.0.0.0/0
+              - direction: ingress
+                ethertype: IPv4
+                protocol: icmp
+                remote_ip_prefix: 0.0.0.0/0
+
+    app1_port1:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: public_network }
+            security_groups:
+            - { get_resource: sg_port1_tcpports }
+            - { get_resource: sg_port1_udpports }
+            - { get_resource: sg_port1_icmpports }
+    app1_port2:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: private_network }
+            security_groups:
+              - { get_resource: sg_port2_allports }
+
+    app2_port1:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: public_network }
+            security_groups:
+            - { get_resource: sg_port1_tcpports }
+            - { get_resource: sg_port1_udpports }
+            - { get_resource: sg_port1_icmpports }
+    app2_port2:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: private_network }
+            security_groups:
+              - { get_resource: sg_port2_allports }
+
+
+    app3_port1:
+        type: OS::Neutron::Port
+        properties:
+            name: app1_port1
+            network_id: { get_param: public_network }
+            security_groups:
+            - { get_resource: sg_port1_tcpports }
+            - { get_resource: sg_port1_udpports }
+            - { get_resource: sg_port1_icmpports }
+    app1_port2:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: private_network }
+            security_groups:
+              - { get_resource: sg_port2_allports }
+
+
+
+
+    app1:
+        type: OS::Nova::Server
+        properties:
+            name: ocp3_app1
+            image: { get_param: image }
+            flavor: { get_param: flavor }
+            key_name: { get_param: key_name }
+            networks: [ port: { get_resource: app1_port1 }, port: { get_resource: app1_port2 }]
+            user_data: { get_param: user_data }
+
+    app2:
+        type: OS::Nova::Server
+        properties:
+            name: ocp3_app2
+            image: { get_param: image }
+            flavor: { get_param: flavor }
+            key_name: { get_param: key_name }
+            networks: [ port: { get_resource: app2_port1 }, port: { get_resource: app2_port2 }]
+            user_data: { get_param: user_data }
+
+    app3:
+        type: OS::Nova::Server
+        properties:
+            name: ocp3_app3
+            image: { get_param: image }
+            flavor: { get_param: flavor }
+            key_name: { get_param: key_name }
+            networks: [ port: { get_resource: app3_port1 }, port: { get_resource: app3_port2 }]
+            user_data: { get_param: user_data }
+
+
+outputs:
+
+
+    app1_ip1:
+        description: App1 Public IP address
+        value: { get_attr: [ app1_port1, fixed_ips, 0, ip_address ]}
+    app1_ip2:
+        description: App1 Private IP address
+        value: { get_attr: [ app1_port2, fixed_ips, 0, ip_address ]}
+
+    app2_ip1:
+        description: App2 Public IP address
+        value: { get_attr: [ app2_port1, fixed_ips, 0, ip_address ]}
+    app2_ip2:
+        description: App2 Private IP address
+        value: { get_attr: [ app2_port2, fixed_ips, 0, ip_address ]}
+
+    app3_ip1:
+        description: App3 Public IP address
+        value: { get_attr: [ app3_port1, fixed_ips, 0, ip_address ]}
+    app3_ip2:
+        description: App3 Private IP address
+        value: { get_attr: [ app3_port2, fixed_ips, 0, ip_address ]}
+
+
+
