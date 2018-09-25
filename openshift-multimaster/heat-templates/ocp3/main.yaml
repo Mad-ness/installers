@@ -83,6 +83,7 @@ resources:
         type: OS::Neutron::Subnet 
         properties:
             name: OCP3 Internal Subnet
+            network: { get_resource: private_network }
             allocation_pools:
               - start: 100.0.0.11
                 end:   100.0.0.250
