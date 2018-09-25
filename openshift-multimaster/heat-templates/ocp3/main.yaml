@@ -77,7 +77,7 @@ resources:
         type: OS::Neutron::Net
         properties:
             name: OCP3 Internal Network
-            dns_domain: ocp.local
+            dns_domain: ocp.local.
             shared: false
     private_subnet:
         type: OS::Neutron::Subnet 
