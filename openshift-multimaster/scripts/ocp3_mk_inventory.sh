@@ -47,7 +47,6 @@ all:
                 # openshift_master_portal_net: '$( get_value portal_net_cidr )'
                 openshift_deployment_type: origin
                 os_sdn_network_plugin_name: 'redhat/openshift-ovs-multitenant'
-                openshift_hosted_registry_storage_kind: glusterfs
                 openshift_hosted_registry_storage_volume_size: 50Gi
                 openshift_storage_glusterfs_registry_storageclass: True
                 local_dns: '$( get_value local_dns_ip )'
