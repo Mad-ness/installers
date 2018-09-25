@@ -158,11 +158,29 @@ resources:
             port1_allowed_udp_ports: "4789,53,8053,443,2049"
             user_data: { get_param: user_data }
 
+    services:
+        type: lib/services.yaml
+        properties:
+            image: { get_param: app_image }
+            flavor: { get_param: app_flavor }
+            key_name: { get_resource: ocp3_sshkey }
+            public_network: { get_param: public_network }
+            private_network: { get_resource: private_network }
+            port1_allowed_tcp_ports: "22,53,8053,443,8443,10250,10010,2049,2379,2380,9000,8444,1936"
+            port1_allowed_udp_ports: "4789,53,8053,443,2049"
+            user_data: { get_param: user_data }
+
 
 outputs:
 
     private_key: { value: { get_attr: [ ocp3_sshkey, private_key ]}}
 
+    bastion1_ip1: { value: { get_attr: [ services, bastion1_ip1 ]}}
+    bastion1_ip2: { value: { get_attr: [ services, bastion1_ip2 ]}}
+
+
+    local_dns_ip: { value: { get_attr: [ services, bastion1_ip1 ]}}
+ 
 ##    cluster_vip_ip1: { value: { get_attr: [ masters, cluster_vip ]}}
 ##    buildhost_ip1: { value: { get_attr: [ services, buildhost_ip1 ]}}
 #    dnsserver_ip1: { value: { get_attr: [ services, buildhost_ip1 ]}}
