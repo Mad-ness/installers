@@ -14,11 +14,15 @@ parameters:
         type: string
         label: Key name
         description: Name of key-pair to be installed on a created server
+
     public_network:
-        #type: comma_delimited_list
         type: string
         label: The public network
-        description: The server is being attached to the specified network
+        description: Public network that is used for external connections
+    private_network:
+        type: string
+        label: Private network
+        description: Private network that is used for OpenShift internal communications
 
     port1_allowed_tcp_ports:
         type: comma_delimited_list
@@ -50,10 +54,10 @@ parameters:
 
 resources:
 
-    sg_storages_port1_tcpports:
+    sg_port1_tcpports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: sg_storages_port1_tcpports
+            name: ocp3_sg_storages_port1_tcpports
             description: Rules to access the only allowed traffic on a storage port1 by TCP ports
             rules:
                 repeat:
@@ -67,10 +71,10 @@ resources:
                         protocol: tcp
                         remote_ip_prefix: 0.0.0.0/0
 
-    sg_storages_port1_udpports:
+    sg_port1_udpports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: sg_storages_port1_udpports
+            name: ocp3_sg_storages_port1_udpports
             description: Rules to access the only allowed traffic on a storage port1 by UDP ports
             rules:
                 repeat:
@@ -84,10 +88,10 @@ resources:
                         protocol: udp
                         remote_ip_prefix: 0.0.0.0/0
 
-    sg_storages_port1_icmpports:
+    sg_port1_icmpports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: sg_storages_port1_icmpports
+            name: ocp3_sg_storages_port1_icmpports
             description: Rules to access the only allowed traffic on a storage port1 by ICMP ports
             rules:
               - direction: ingress
@@ -95,37 +99,69 @@ resources:
                 protocol: icmp
                 remote_ip_prefix: 0.0.0.0/0
 
+    sg_port2_allports:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            name: ocp3_sg_storages_internal_network
+            rules:
+              - direction: ingress
+                ethertype: IPv4
+                protocol: tcp
+                remote_ip_prefix: 0.0.0.0/0
+              - direction: ingress
+                ethertype: IPv4
+                protocol: udp
+                remote_ip_prefix: 0.0.0.0/0
+              - direction: ingress
+                ethertype: IPv4
+                protocol: icmp
+                remote_ip_prefix: 0.0.0.0/0
 
     storage1_port1:
         type: OS::Neutron::Port
         properties:
-            name: storage1_port1
             network_id: { get_param: public_network }
             security_groups:
-            - { get_resource: sg_storages_port1_tcpports }
-            - { get_resource: sg_storages_port1_udpports }
-            - { get_resource: sg_storages_port1_icmpports }
+              - { get_resource: sg_port1_tcpports }
+              - { get_resource: sg_port1_udpports }
+              - { get_resource: sg_port1_icmpports }
+    storage1_port2:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: private_network }
+            security_groups:
+              - { get_resource: sg_port2_allports }
 
     storage2_port1:
         type: OS::Neutron::Port
         properties:
-            name: storage2_port1
             network_id: { get_param: public_network }
             security_groups:
-            - { get_resource: sg_storages_port1_tcpports }
-            - { get_resource: sg_storages_port1_udpports }
-            - { get_resource: sg_storages_port1_icmpports }
+              - { get_resource: sg_port1_tcpports }
+              - { get_resource: sg_port1_udpports }
+              - { get_resource: sg_port1_icmpports }
+    storage2_port2:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: private_network }
+            security_groups:
+              - { get_resource: sg_port2_allports }
 
 
     storage3_port1:
         type: OS::Neutron::Port
         properties:
-            name: storage3_port1
             network_id: { get_param: public_network }
             security_groups:
-            - { get_resource: sg_storages_port1_tcpports }
-            - { get_resource: sg_storages_port1_udpports }
-            - { get_resource: sg_storages_port1_icmpports }
+              - { get_resource: sg_port1_tcpports }
+              - { get_resource: sg_port1_udpports }
+              - { get_resource: sg_port1_icmpports }
+    storage3_port2:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: private_network }
+            security_groups:
+              - { get_resource: sg_port2_allports }
 
 
 
@@ -160,38 +196,52 @@ resources:
     storage1:
         type: OS::Nova::Server
         properties:
-            name: ocp2_storage1
+            name: ocp3_storage1
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
-            networks: [ port: { get_resource: storage1_port1 }]
+            networks: [ port: { get_resource: storage1_port1 }, port: { get_resource: storage1_port2 }]
             user_data: { get_param: user_data }
     storage2:
         type: OS::Nova::Server
         properties:
-            name: ocp2_storage2
+            name: ocp3_storage2
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
-            networks: [ port: { get_resource: storage2_port1 }]
+            networks: [ port: { get_resource: storage2_port1 }, port: { get_resource: storage2_port2 }]
             user_data: { get_param: user_data }
     storage3:
         type: OS::Nova::Server
         properties:
-            name: ocp2_storage3
+            name: ocp3_storage3
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
-            networks: [ port: { get_resource: storage3_port1 }]
+            networks: [ port: { get_resource: storage3_port1 }, port: { get_resource: storage3_port2 }]
             user_data: { get_param: user_data }
+
 outputs:
+
     storage1_ip1:
-        description: Storage1 IP address
-        value: { get_attr: [ storage1, first_address ]}
+        description: Storage1 Public IP address
+        value: { get_attr: [ storage1_port1, fixed_ips, 0, ip_address ]}
+    storage1_ip2:
+        description: Storage1 Private IP address
+        value: { get_attr: [ storage1_port2, fixed_ips, 0, ip_address ]}
+
     storage2_ip1:
-        description: Storage2 IP address
-        value: { get_attr: [ storage2, first_address ]}
+        description: Storage2 Public IP address
+        value: { get_attr: [ storage2_port1, fixed_ips, 0, ip_address ]}
+    storage2_ip2:
+        description: Storage2 Private IP address
+        value: { get_attr: [ storage2_port2, fixed_ips, 0, ip_address ]}
+
     storage3_ip1:
-        description: Storage3 IP address
-        value: { get_attr: [ storage3, first_address ]}
+        description: Storage3 Public IP address
+        value: { get_attr: [ storage3_port1, fixed_ips, 0, ip_address ]}
+    storage3_ip2:
+        description: Storage3 Private IP address
+        value: { get_attr: [ storage3_port2, fixed_ips, 0, ip_address ]}
+
 
