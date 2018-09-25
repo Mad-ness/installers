@@ -1,0 +1,183 @@
+heat_template_version: 2018-03-02
+description: A template for creating a customized server
+
+parameters:
+    master_image:
+        type: string
+        label: Image name or ID
+        description: Image used to create an instance from
+        default: CentOS-7
+    master_flavor:
+        type: string
+        label: Flavor
+        description: Flavor to set a proper set of resources
+        default: d1.os-master
+
+    storage_image:
+        type: string
+        label: Image name or ID
+        description: Image used to create an instance from
+        default: CentOS-7
+    storage_flavor:
+        type: string
+        label: Flavor
+        description: Flavor to set a proper set of resources
+        default: d1.os-node
+
+    appnode_image:
+        type: string
+        label: Image name or ID
+        description: Image used to create an instance from
+        default: CentOS-7
+    appnode_flavor:
+        type: string
+        label: Flavor
+        description: Flavor to set a proper set of resources
+        default: d1.os-node
+
+    public_network:
+        type: string
+        label: API Network
+        description: A network to connect to
+        default: ipsystems-management
+    network_cidr:
+        type: string
+        label: The CIDR of the network
+        default: 10.189.132.0/25
+        description: Make sure this subnet exists
+    key_name:
+        type: string
+        label: Key name
+        description: Name of key-pair to be installed on a created server
+        default: dmitrii-key1
+    external_network:
+        type: string
+        label: External/API network
+        description: All server should be connected to thi network
+        default: "ipsystems-management"
+    user_data:
+        type: string
+        label: Software configuration
+        default: |
+            #!/usr/bin/env bash
+            yum update -y
+            yum install -y epel-release
+            yum update -y || true
+        description: Put there a script that is being executing upon a server gets up
+
+resources:
+
+    ocp3_sshkey:
+        type: OS::Nova::KeyPair
+        properties:
+            save_private_key: true
+            name: ocp3_sshkey
+
+    internal_network:
+        type: OS::Neutron::Net
+        properties:
+            name: OCP3 Internal Network
+            dns_domain: ocp.local
+            shared: false
+    internal_subnet:
+        type: OS:Neutron:Subnet 
+        properties:
+            name: OCP3 Internal Subnet
+            allocation_pools:
+              - start: 100.0.0.11
+                end:   100.0.0.250
+            cidr: 100.0.0.0/24
+            dns_nameservers: [ '100.0.0.01', ]
+            enable_dhcp: true
+            gateway_ip: '100.0.0.1'
+            host_routes:
+              - destination: 0.0.0.0/0
+                nexthop: 100.0.0.1
+    masters:
+        type: lib/masters.yaml
+        properties:
+            image: { get_param: master_image }
+            flavor: { get_param: master_flavor }
+            key_name: { get_resource: ocp3_sshkey }
+            public_network: { get_param: public_network }
+            internal_network: { get_resource: private_network }
+            port1_allowed_tcp_ports: "22,53,8053,443,8443,10250,10010,2049,2379,2380,9000,8444,1936"
+            port1_allowed_udp_ports: "4789,53,8053,443,2049"
+            user_data: { get_param: user_data }
+
+#     storages:
+#         type: lib/storages.yaml
+#         properties:
+#             image: { get_param: storage_image }
+#             flavor: { get_param: storage_flavor }
+#             key_name: { get_resource: ocp3_sshkey }
+#             public_network: { get_param: public_network }
+#             port1_allowed_tcp_ports: "22,53,8053,443,8443,10250,10010,2049,2379,2380,9000,8444,1936"
+#             port1_allowed_udp_ports: "4789,53,8053,443,2049"
+#             user_data: { get_param: user_data }
+# 
+#     infranodes:
+#         type: lib/appnodes.yaml
+#         properties:
+#             image: { get_param: appnode_image }
+#             flavor: { get_param: appnode_flavor }
+#             key_name: { get_resource: ocp3_sshkey }
+#             public_network: { get_param: public_network }
+#             port1_allowed_tcp_ports: "22,53,8053,443,8443,10250,10010,2049,2379,2380,9000,8444,1936"
+#             port1_allowed_udp_ports: "4789,53,8053,443,2049"
+#             user_data: { get_param: user_data }
+# 
+#     services:
+#         type: lib/services.yaml
+#         properties:
+#             image: { get_param: appnode_image }
+#             flavor: { get_param: appnode_flavor }
+#             key_name: { get_resource: ocp3_sshkey }
+#             public_network: { get_param: public_network }
+#             port1_allowed_tcp_ports: "22,53,8053,443,8443,10250,10010,2049,2379,2380,9000,8444,1936"
+#             port1_allowed_udp_ports: "4789,53,8053,443,2049"
+#             user_data: { get_param: user_data }
+# 
+# 
+# 
+# 
+#     appnodes:
+#         type: lib/appnodes.yaml
+#         properties:
+#             image: { get_param: appnode_image }
+#             flavor: { get_param: appnode_flavor }
+#             key_name: { get_resource: ocp3_sshkey }
+#             public_network: { get_param: public_network }
+#             port1_allowed_tcp_ports: "22,53,8053,443,8443,10250,10010,2049,2379,2380,9000,8444,1936"
+#             port1_allowed_udp_ports: "4789,53,8053,443,2049"
+#             user_data: { get_param: user_data }
+# 
+# 
+
+outputs:
+##    private_key: { value: { get_attr: [ ocp3_sshkey, private_key ]}}
+##    cluster_vip_ip1: { value: { get_attr: [ masters, cluster_vip ]}}
+##    buildhost_ip1: { value: { get_attr: [ services, buildhost_ip1 ]}}
+#    dnsserver_ip1: { value: { get_attr: [ services, buildhost_ip1 ]}}
+
+    master1_ip1: { value: { get_attr: [ masters, master1_ip1 ]}}
+    master2_ip1: { value: { get_attr: [ masters, master2_ip1 ]}}
+    master3_ip1: { value: { get_attr: [ masters, master3_ip1 ]}}
+    master1_ip2: { value: { get_attr: [ masters, master1_ip2 ]}}
+    master2_ip2: { value: { get_attr: [ masters, master2_ip2 ]}}
+    master3_ip2: { value: { get_attr: [ masters, master3_ip2 ]}}
+
+
+#     storagenode1_ip1: { value: { get_attr: [ storages, storage1_ip1 ]}}
+#     storagenode2_ip1: { value: { get_attr: [ storages, storage2_ip1 ]}}
+#     storagenode3_ip1: { value: { get_attr: [ storages, storage3_ip1 ]}}
+# 
+#     infra1_ip1: { value: { get_attr: [ infranodes, node1_ip1 ]}}
+#     infra2_ip1: { value: { get_attr: [ infranodes, node2_ip1 ]}}
+#     infra3_ip1: { value: { get_attr: [ infranodes, node3_ip1 ]}}
+# 
+#     appnode1_ip1: { value: { get_attr: [ appnodes, node1_ip1 ]}}
+#     appnode2_ip1: { value: { get_attr: [ appnodes, node2_ip1 ]}}
+#     appnode3_ip1: { value: { get_attr: [ appnodes, node3_ip1 ]}}
+
+
