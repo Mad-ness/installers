@@ -4,7 +4,7 @@
   tasks:
 
   - name: Set hostname
-    hostname: name='{{ inventory_hostname }}.{{ domain_name }}'
+    hostname: name='{{ openshift_hostname }}'
 
   - name: Reboot hosts
     shell: "sleep 5 && reboot"

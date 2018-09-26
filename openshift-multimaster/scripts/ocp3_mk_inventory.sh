@@ -139,7 +139,10 @@ all:
                  glusterfs:
          bastion:
             hosts:
-                bastion: { ansible_host: $( get_value bastion_ip1 ), openshift_ip: $( get_value bastion_ip2 )}
+                bastion: 
+                    ansible_host: $( get_value bastion_ip1 )
+                    openshift_ip: $( get_value bastion_ip2 )
+                    openshift_hostname: 'bastion.{{ private_domain }}'
 
 INVENTORY
 
