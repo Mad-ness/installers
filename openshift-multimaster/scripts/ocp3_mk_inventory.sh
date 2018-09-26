@@ -124,9 +124,9 @@ all:
          glusterfs:
              children: { app: }
              hosts:
-                storage1: { ansible_host: $( get_value storage1_ip1 ), openshift_ip: $( get_value storage1_ip2 ), openshift_hostname: 'storage1.{{ private_domain }}' }
-                storage2: { ansible_host: $( get_value storage2_ip1 ), openshift_ip: $( get_value storage2_ip2 ), openshift_hostname: 'storage2.{{ private_domain }}' }
-                storage3: { ansible_host: $( get_value storage3_ip1 ), openshift_ip: $( get_value storage3_ip2 ), openshift_hostname: 'storage3.{{ private_domain }}' }
+                storage1: { ansible_host: $( get_value storage1_ip1 ), glusterfs_ip: $(get_value storage1_ip2), openshift_ip: $( get_value storage1_ip2 ), openshift_hostname: 'storage1.{{ private_domain }}' }
+                storage2: { ansible_host: $( get_value storage2_ip1 ), glusterfs_ip: $(get_value storage2_ip2), openshift_ip: $( get_value storage2_ip2 ), openshift_hostname: 'storage2.{{ private_domain }}' }
+                storage3: { ansible_host: $( get_value storage3_ip1 ), glusterfs_ip: $(get_value storage3_ip2), openshift_ip: $( get_value storage3_ip2 ), openshift_hostname: 'storage3.{{ private_domain }}' }
              vars:
                  containerized: true
                  openshift_schedulable: true
@@ -137,7 +137,6 @@ all:
                  masters:
                  infra:
                  app:
-                 glusterfs:
          management:
             hosts:
                 bastion: 
