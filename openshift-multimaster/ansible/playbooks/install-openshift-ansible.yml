@@ -50,6 +50,6 @@
   - name: Copy FreeIPA CA cert file
     copy: 
         src: '../{{ freeipa_cacert_file }}'
-        dest: '{{ openshift_ansible_localdir }}/{{ freeipa_cacert_file }}'
+        dest: '/tmp/{{ freeipa_cacert_file }}'
         mode: '0644'
 

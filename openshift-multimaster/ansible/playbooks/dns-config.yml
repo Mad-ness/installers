@@ -116,8 +116,10 @@
               	IN	A	{{ priv_ip }}
               ns	IN	A	{{ priv_ip }}
 
-              {% for host in groups['masters'] %}
               *.{{ openshift_master_default_subdomain }}. 300  IN A  {{ openshift_master_cluster_public_ip }}
+
+              {% for h in groups['masters'] %}
+              {{ hostvars[h].openshift_hostname }}. 300  IN A  {{ hostvars[h].openshift_ip }}
               {% endfor %}
 
               {% for h in groups['infra'] %}
@@ -162,8 +164,10 @@
               	IN	NS	ns.{{ private_domain }}.
               	IN	A	{{ priv_ip }}
 
-              {% for host in groups['masters'] %}
               {{ openshift_master_cluster_public_ip.split('.')[-1] }}  PTR  *.{{ openshift_master_default_subdomain }}.
+
+              {% for h in groups['masters'] %}
+              {{ hostvars[h].openshift_ip.split('.')[-1] }}  PTR  {{ hostvars[h].openshift_hostname }}.
               {% endfor %}
 
               {% for h in groups['infra'] %}

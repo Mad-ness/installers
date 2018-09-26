@@ -40,17 +40,17 @@ all:
                 glusterfs_registry:
             vars:
                 openshift_master_cluster_method: native
-                openshift_master_cluster_hostname: '{{ private_domain }}'
-                openshift_master_cluster_public_hostname: '{{ public_domain }}'
+                openshift_master_cluster_hostname: 'cluster.{{ private_domain }}'
+                openshift_master_cluster_public_hostname: 'cluster.{{ public_domain }}'
                 openshift_master_default_subdomain: 'apps.{{ public_domain }}'
-                openshift_master_cluter_ip: '$( get_value cluster_private_ip )'
-                openshift_master_cluster_public_ip: '$( get_value cluster_public_ip )'
-                # openshift_master_portal_net: '$( get_value portal_net_cidr )'
+                openshift_master_cluter_ip: $( get_value cluster_private_ip )
+                openshift_master_cluster_public_ip: $( get_value cluster_public_ip )
+                # openshift_master_portal_net: $( get_value portal_net_cidr )
                 openshift_deployment_type: origin
                 os_sdn_network_plugin_name: 'redhat/openshift-ovs-multitenant'
                 openshift_hosted_registry_storage_volume_size: 50Gi
                 openshift_storage_glusterfs_registry_storageclass: True
-                local_dns: '$( get_value local_dns_ip )'
+                local_dns: $( get_value local_dns_ip )
                 external_interface: bond0
 
                 openshift_disable_check:
@@ -101,7 +101,7 @@ all:
                 master3: { ansible_host: $( get_value master3_ip1 ), openshift_ip: $( get_value master3_ip2 ), openshift_hostname: 'master3.{{ private_domain }}' }
              vars:
                  containerized: true
-                 openshift_schedulable: false
+                 openshift_schedulable: true
                  openshift_node_group_name: 'node-config-master'
          infra:
              hosts:
