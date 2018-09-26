@@ -1,7 +1,12 @@
 - hosts: 
-    - master_nodes
-    - infra_nodes
-    - app_nodes
+    - masters
+    - nodes
+    - infra
+    - glusterfs
+    - glusterfs_registry
+    - etcd
+    - app
+    - bastion
   become: true
   tags:
     - master_nodes

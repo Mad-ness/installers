@@ -137,6 +137,9 @@ all:
                  infra:
                  app:
                  glusterfs:
+         bastion:
+            hosts:
+                bastion: { ansible_host: $( get_value bastion_ip1 ), openshift_ip: $( get_value bastion_ip2 )}
 
 INVENTORY
 
