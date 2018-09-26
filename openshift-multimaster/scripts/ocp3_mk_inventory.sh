@@ -122,7 +122,6 @@ all:
                  openshift_schedulable: true
                  openshift_node_group_name: 'node-config-compute'
          glusterfs:
-             children: { app: }
              hosts:
                 storage1: { ansible_host: $( get_value storage1_ip1 ), glusterfs_ip: $(get_value storage1_ip2), openshift_ip: $( get_value storage1_ip2 ), openshift_hostname: 'storage1.{{ private_domain }}' }
                 storage2: { ansible_host: $( get_value storage2_ip1 ), glusterfs_ip: $(get_value storage2_ip2), openshift_ip: $( get_value storage2_ip2 ), openshift_hostname: 'storage2.{{ private_domain }}' }
