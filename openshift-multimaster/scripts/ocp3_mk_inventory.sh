@@ -21,7 +21,7 @@ all:
         ansible_ssh_user: centos
         ansible_become: true
         private_domain: 'ocp.local'
-        public_domain: 'ocp.litf4'
+        public_domain: 'labcloud.litf4'
         ansible_private_key_file: 'key'
     children:
          local: { hosts: { 127.0.0.1: }}
@@ -41,7 +41,7 @@ all:
             vars:
                 openshift_master_cluster_method: native
                 openshift_master_cluster_hostname: 'cluster.{{ private_domain }}'
-                openshift_master_cluster_public_hostname: 'cluster.{{ public_domain }}'
+                openshift_master_cluster_public_hostname: 'ocp.{{ public_domain }}'
                 openshift_master_default_subdomain: 'apps.{{ public_domain }}'
                 openshift_master_cluter_ip: $( get_value cluster_private_ip )
                 openshift_master_cluster_public_ip: $( get_value cluster_public_ip )

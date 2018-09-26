@@ -37,11 +37,11 @@
                   check-names slave ignore;
                   check-names response ignore;
               	recursion yes;
-                forward first;
+                forward only;
                 # forwarders { 10.189.136.37; 10.189.136.165; };
                 forwarders { 10.189.132.52; };
-              	dnssec-enable yes;
-              	dnssec-validation yes;
+              	dnssec-enable no;
+              	dnssec-validation no;
               	bindkeys-file "/etc/named.iscdlv.key";
               	managed-keys-directory "/var/named/dynamic";
               	pid-file "/run/named/named.pid";
@@ -57,6 +57,7 @@
               	type hint;
               	file "named.ca";
               };
+
               include "/etc/named.rfc1912.zones";
               include "/etc/named.root.key";
               include "myzones.conf";
@@ -254,7 +255,7 @@
   - name: Updating /etc/resolv.conf
     copy:
         content: |
-            search novalocal {{ private_domain }}
+            search {{ private_domain }}
             {% for d in dns_ips %}
             nameserver {{ d }}
             {% endfor %}
