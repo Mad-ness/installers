@@ -1,6 +1,6 @@
 - hosts: dns_servers
   become: true
-  gather_facts: true
+  gather_facts: false
   tasks:
 
   - name: Add hosts to OSEv3 group
@@ -11,7 +11,8 @@
 
 
   - set_fact:
-        net1_ip: "{{ ansible_default_ipv4.address }}"
+        pub_ip: "{{ ansible_host }}"
+        priv_ip: "{{ openshift_ip }}"
 
   - name: Configuring DNS server(s) on management host(s)
     block:
@@ -25,7 +26,7 @@
           dest: /etc/named.conf
           content: |
               options {
-              	listen-on port 53 { 127.0.0.1; 0.0.0.0/0; };
+              	listen-on port 53 { 127.0.0.1; {{ priv_ip }}; };
               	//listen-on-v6 port 53 { ::1; };
               	directory 	"/var/named";
               	dump-file 	"/var/named/data/cache_dump.db";
@@ -69,7 +70,7 @@
   
     - name: Setting some temporary facts
       set_fact:
-        rev_zone_net: "{{ ansible_default_ipv4.address.split('.')[::-1][1:] | join('.') }}"
+        rev_zone_net: "{{ priv_ip.split('.')[::-1][1:] | join('.') }}"
       tags:
       - bind-config
   
@@ -83,9 +84,9 @@
                   allow-update { none; };
               };
               
-              zone "{{ domain_name }}" IN {
+              zone "{{ private_domain }}" IN {
                   type master;
-                  file "{{ domain_name }}.zone";
+                  file "{{ private_domain }}.zone";
                   allow-update { none; };
               };
           owner: root
@@ -96,14 +97,14 @@
       tags:
       - bind-config
   
-  
-    - name: Create a direct zone ({{ domain_name }})
+ 
+    - name: Create a direct zone ({{ private_domain }})
       copy:
-          dest: /var/named/{{ domain_name }}.zone
+          dest: /var/named/{{ private_domain }}.zone
           content: |
               $TTL 86400
-              $ORIGIN {{ domain_name }}.
-              @       IN      SOA     ns.{{ domain_name }}. root.{{ domain_name }}. (
+              $ORIGIN {{ private_domain }}.
+              @       IN      SOA     ns.{{ private_domain }}. root.{{ private_domain }}. (
                           01        ; Serial
                           3h        ; Refresh
                           1h        ; Retry
@@ -111,20 +112,29 @@
                           3h        ; TTL
                           )
               
-              	IN	NS	ns.{{ domain_name }}.
-              	IN	A	{{ ansible_default_ipv4.address }}
-              ns	IN	A	{{ ansible_default_ipv4.address }}
+              	IN	NS	ns.{{ private_domain }}.
+              	IN	A	{{ priv_ip }}
+              ns	IN	A	{{ priv_ip }}
+
               {% for host in groups['masters'] %}
-              *.cloudapps 300  IN A  {{ hostvars[host].ansible_host }}
+              *.{{ openshift_master_default_subdomain }}. 300  IN A  {{ openshift_master_cluster_public_ip }}
               {% endfor %}
-              {% if openshift_master_cluster_public_hostname is defined %}
-              {% for h in groups['master_nodes'] %}
-              {{ openshift_master_cluster_hostname }}.  IN A  {{ hostvars[h].ansible_host }}
+
+              {% for h in groups['infra'] %}
+              {{ hostvars[h].openshift_hostname }}.  IN A  {{ hostvars[h].openshift_ip }}
               {% endfor %} 
-              {% endif %}
-              {% for host in groups['all'] %}
-              {{ host.split('.')[0] }}  IN A  {{ hostvars[host].ansible_host }}
-              {% endfor %}
+
+              {% for h in groups['app'] %}
+              {{ hostvars[h].openshift_hostname }}.  IN A  {{ hostvars[h].openshift_ip }}
+              {% endfor %} 
+
+              {% for h in groups['glusterfs'] %}
+              {{ hostvars[h].openshift_hostname }}.  IN A  {{ hostvars[h].openshift_ip }}
+              {% endfor %} 
+
+              {{ openshift_master_cluster_hostname }}.  IN A  {{ openshift_master_cluter_ip }}
+
+
           owner: root
           group: named
           mode: '0644'
@@ -141,7 +151,7 @@
           content: |
               $TTL 86400
               $ORIGIN {{ rev_zone_net }}.in-addr.arpa.
-              @       IN      SOA     ns.{{ domain_name }}. root.{{ domain_name }}. (
+              @       IN      SOA     ns.{{ private_domain }}. root.{{ private_domain }}. (
                           01        ; Serial
                           3h        ; Refresh
                           1h        ; Retry
@@ -149,18 +159,28 @@
                           3h        ; TTL
                           )
               
-              	IN	NS	ns.{{ domain_name }}.
-              	IN	A	{{ ansible_default_ipv4.address }}
-              {% if openshift_master_cluster_public_hostname is defined %}
-              {% for h in groups['master_nodes'] %}
-              {{ hostvars[h].ansible_host.split('.')[-1] }}  PTR  {{ openshift_master_cluster_hostname }}.
+              	IN	NS	ns.{{ private_domain }}.
+              	IN	A	{{ priv_ip }}
+
+              {% for host in groups['masters'] %}
+              {{ openshift_master_cluster_public_ip.split('.')[-1] }}  PTR  *.{{ openshift_master_default_subdomain }}.
               {% endfor %}
-              {% endif %}
-              ;{{ lbfqdn_ip.split('.')[-1] }}  PTR  {{ loadbalancer_fqdn }}.
-              {{ ansible_default_ipv4.address.split('.')[-1] }}	PTR		ns.{{ domain_name }}.
-              {% for host in groups['all'] %}
-              {{ hostvars[host].ansible_host.split('.')[-1] }} PTR  {{ hostvars[host].inventory_hostname }}.{{ domain_name }}.
-              {% endfor %}
+
+              {% for h in groups['infra'] %}
+              {{ hostvars[h].openshift_ip.split('.')[-1] }}  PTR  {{ hostvars[h].openshift_hostname }}.
+              {% endfor %} 
+
+              {% for h in groups['app'] %}
+              {{ hostvars[h].openshift_ip.split('.')[-1] }}  PTR  {{ hostvars[h].openshift_hostname }}.
+              {% endfor %} 
+
+              {% for h in groups['glusterfs'] %}
+              {{ hostvars[h].openshift_ip.split('.')[-1] }}  PTR  {{ hostvars[h].openshift_hostname }}. 
+              {% endfor %} 
+
+              {{ openshift_master_cluter_ip.split('.')[-1] }}  PTR  {{ openshift_master_cluster_hostname }}. 
+
+
           owner: root
           group: named
           mode: '0644'
@@ -178,24 +198,28 @@
       service: name=named state=restarted enabled=on
 
 
-- hosts: all
-#    - master_nodes
-#    - infra_nodes
-#    - app_nodes
-#    - all
+- hosts:
+    - masters
+    - nodes
+    - infra
+    - glusterfs
+    - glusterfs_registry
+    - etcd
+    - app
+    - bastion
   become: yes
   gather_facts: yes
   tasks:
 
-  - name: Remove unneeded DNS entries in /etc/*/ifcfg-eth0
-    lineinfile:
-        path: /etc/sysconfig/network-scripts/ifcfg-eth0
-        regexp: '^DNS.*$'
-        state: absent
+#  - name: Remove unneeded DNS entries in /etc/*/ifcfg-eth0
+#    lineinfile:
+#        path: /etc/sysconfig/network-scripts/ifcfg-eth0
+#        regexp: '^DNS.*$'
+#        state: absent
 
   - name: Get ip addresses of DNS (management server(s))
     set_fact:
-        dns_ips: '{{ groups["dns_servers"] | map("extract", hostvars, "ansible_default_ipv4") | list }}'
+        dns_ips: '{{ groups["dns_servers"] | map("extract", hostvars, "openshift_ip") | list }}'
     tags:
     - dns
 
@@ -216,7 +240,7 @@
     lineinfile:
         path: /etc/sysconfig/network-scripts/ifcfg-eth0
         regexp: '^DNS{{ id+1 }}=.*$'
-        line: 'DNS{{ id+1 }}={{ item.address }}'
+        line: 'DNS{{ id+1 }}={{ item }}'
     loop: '{{ dns_ips }}'
     loop_control: 
         index_var: id
@@ -226,9 +250,9 @@
   - name: Updating /etc/resolv.conf
     copy:
         content: |
-            search novalocal {{ domain_name }}
+            search novalocal {{ private_domain }}
             {% for d in dns_ips %}
-            nameserver {{ d.address }}
+            nameserver {{ d }}
             {% endfor %}
         dest: /etc/resolv.conf
   handlers:

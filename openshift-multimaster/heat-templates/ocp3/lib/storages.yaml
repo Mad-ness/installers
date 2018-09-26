@@ -46,6 +46,11 @@ parameters:
         label: Ceph Storage volume type
         description: Volume Type CephStorage
         default: CephStorage
+    scheduler_hints:
+        type: string
+        label: Scheduler Hints
+        description: Schedule hints that is being applied
+
     user_data:
         type: string
         label: Software configuration
@@ -202,6 +207,8 @@ resources:
             key_name: { get_param: key_name }
             networks: [ port: { get_resource: storage1_port1 }, port: { get_resource: storage1_port2 }]
             user_data: { get_param: user_data }
+            scheduler_hints: { group: { get_param: scheduler_hints }}
+
     storage2:
         type: OS::Nova::Server
         properties:
@@ -211,6 +218,8 @@ resources:
             key_name: { get_param: key_name }
             networks: [ port: { get_resource: storage2_port1 }, port: { get_resource: storage2_port2 }]
             user_data: { get_param: user_data }
+            scheduler_hints: { group: { get_param: scheduler_hints }}
+
     storage3:
         type: OS::Nova::Server
         properties:
@@ -220,6 +229,7 @@ resources:
             key_name: { get_param: key_name }
             networks: [ port: { get_resource: storage3_port1 }, port: { get_resource: storage3_port2 }]
             user_data: { get_param: user_data }
+            scheduler_hints: { group: { get_param: scheduler_hints }}
 
 outputs:
 

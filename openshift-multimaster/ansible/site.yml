@@ -1,4 +1,5 @@
 - import_playbook: playbooks/common-packages.yml
+- import_playbook: playbooks/common-privnet.yml
 - import_playbook: playbooks/common-hostname.yml
 - import_playbook: playbooks/manage-packages.yml
 - import_playbook: playbooks/install-openshift-ansible.yml

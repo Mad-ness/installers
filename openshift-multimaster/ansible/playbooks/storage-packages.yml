@@ -1,4 +1,4 @@
-- hosts: storage_nodes
+- hosts: glusterfs
   become: true
   gather_facts: false
   tasks:

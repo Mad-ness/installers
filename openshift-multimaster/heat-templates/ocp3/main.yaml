@@ -87,6 +87,11 @@ resources:
             save_private_key: true
             name: ocp3_sshkey
 
+    server_group:
+        type: OS::Nova::ServerGroup
+        properties:
+            policies: [ "affinity", ]
+
     private_network:
         type: OS::Neutron::Net
         properties:
@@ -118,6 +123,7 @@ resources:
             port1_allowed_tcp_ports: "22,53,8053,443,8443,10250,10010,2049,2379,2380,9000,8444,1936"
             port1_allowed_udp_ports: "4789,53,8053,443,2049"
             user_data: { get_param: user_data }
+            scheduler_hints: { get_resource: server_group }
 
     infras:
         type: lib/infras.yaml
@@ -132,6 +138,7 @@ resources:
             cluster_vip_allowed_tcp_ports: "22,53,8053,443,8443,10250,10010,2049,2379,2380,9000,8444,1936"
             cluster_vip_allowed_udp_ports: "4789,53,8053,443,2049"
             user_data: { get_param: user_data }
+            scheduler_hints: { get_resource: server_group }
 
 
     apps:
@@ -145,6 +152,7 @@ resources:
             port1_allowed_tcp_ports: "22,53,8053,443,8443,10250,10010,2049,2379,2380,9000,8444,1936"
             port1_allowed_udp_ports: "4789,53,8053,443,2049"
             user_data: { get_param: user_data }
+            scheduler_hints: { get_resource: server_group }
 
     storages:
         type: lib/storages.yaml
@@ -157,6 +165,7 @@ resources:
             port1_allowed_tcp_ports: "22,53,8053,443,8443,10250,10010,2049,2379,2380,9000,8444,1936"
             port1_allowed_udp_ports: "4789,53,8053,443,2049"
             user_data: { get_param: user_data }
+            scheduler_hints: { get_resource: server_group }
 
     services:
         type: lib/services.yaml
@@ -169,6 +178,7 @@ resources:
             port1_allowed_tcp_ports: "22,53,8053,443,8443,10250,10010,2049,2379,2380,9000,8444,1936"
             port1_allowed_udp_ports: "4789,53,8053,443,2049"
             user_data: { get_param: user_data }
+            scheduler_hints: { get_resource: server_group }
 
 
 outputs:
