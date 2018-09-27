@@ -197,7 +197,8 @@ outputs:
 ##    buildhost_ip1: { value: { get_attr: [ services, buildhost_ip1 ]}}
 #    dnsserver_ip1: { value: { get_attr: [ services, buildhost_ip1 ]}}
 
-    master_cluster_vip: { value: { get_attr: [ masters, cluster_vip ]}}
+    master_cluster_public_vip: { value: { get_attr: [ masters, cluster_public_vip ]}}
+    master_cluster_private_vip: { value: { get_attr: [ masters, cluster_private_vip ]}}
 
     master1_ip1: { value: { get_attr: [ masters, master1_ip1 ]}}
     master1_ip2: { value: { get_attr: [ masters, master1_ip2 ]}}

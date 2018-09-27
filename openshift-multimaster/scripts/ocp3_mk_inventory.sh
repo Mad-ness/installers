@@ -44,11 +44,11 @@ all:
                 openshift_master_cluster_hostname: 'cluster.{{ private_domain }}'
                 openshift_master_cluster_public_hostname: 'ocp.{{ public_domain }}'
                 openshift_master_default_subdomain: 'apps.{{ public_domain }}'
-                openshift_master_cluter_ip: $( get_value cluster_private_ip )
-                openshift_master_cluster_public_ip: $( get_value cluster_public_ip )
+                openshift_master_cluter_ip: $( get_value master_cluster_private_vip )
+                openshift_master_cluster_public_ip: $( get_value master_cluster_public_vip )
                 openshift_deployment_type: origin
                 os_sdn_network_plugin_name: 'redhat/openshift-ovs-multitenant'
-                openshift_hosted_registry_storage_volume_size: 50Gi
+                openshift_hosted_registry_storage_volume_size: 30Gi
                 openshift_storage_glusterfs_registry_storageclass: True
                 local_dns: $( get_value local_dns_ip )
                 external_interface: bond0
