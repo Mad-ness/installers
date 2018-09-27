@@ -183,7 +183,7 @@ resources:
     storage1_port3:
         type: OS::Neutron::Port
         properties:
-            network_id: { get_param: storage_network }
+            network_id: { get_resource: storage_network }
             security_groups:
               - { get_resource: sg_port3_allports }
 
@@ -205,7 +205,7 @@ resources:
     storage2_port3:
         type: OS::Neutron::Port
         properties:
-            network_id: { get_param: storage_network }
+            network_id: { get_resource: storage_network }
             security_groups:
               - { get_resource: sg_port3_allports }
 
@@ -228,7 +228,7 @@ resources:
     storage3_port3:
         type: OS::Neutron::Port
         properties:
-            network_id: { get_param: storage_network }
+            network_id: { get_resource: storage_network }
             security_groups:
               - { get_resource: sg_port3_allports }
 
