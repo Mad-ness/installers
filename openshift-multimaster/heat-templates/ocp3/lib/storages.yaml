@@ -59,6 +59,29 @@ parameters:
 
 resources:
 
+
+    storage_network:
+        type: OS::Neutron::Net
+        properties:
+            name: OCP3 Storage Backend Network
+            shared: false
+    storage_subnet:
+        type: OS::Neutron::Subnet
+        properties:
+            name: OCP3 Storage Backend Subnet
+            network: { get_resource: storage_network }
+            allocation_pools:
+              - start: 200.0.0.11
+                end:   200.0.0.250
+            cidr: 200.0.0.0/24
+            dns_nameservers: [ '200.0.0.1', ]
+            enable_dhcp: true
+            gateway_ip: '200.0.0.1'
+            host_routes:
+              - destination: 0.0.0.0/0
+                nexthop: 200.0.0.1
+
+
     sg_port1_tcpports:
         type: OS::Neutron::SecurityGroup
         properties:
@@ -122,6 +145,27 @@ resources:
                 protocol: icmp
                 remote_ip_prefix: 0.0.0.0/0
 
+    sg_port3_allports:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            name: ocp3_sg_storages_storage_network
+            rules:
+              - direction: ingress
+                ethertype: IPv4
+                protocol: tcp
+                remote_ip_prefix: 0.0.0.0/0
+              - direction: ingress
+                ethertype: IPv4
+                protocol: udp
+                remote_ip_prefix: 0.0.0.0/0
+              - direction: ingress
+                ethertype: IPv4
+                protocol: icmp
+                remote_ip_prefix: 0.0.0.0/0
+
+### Port-1 - Management Network
+### Port-2 - API Network
+### Port-3 - Storage Network
     storage1_port1:
         type: OS::Neutron::Port
         properties:
@@ -136,6 +180,13 @@ resources:
             network_id: { get_param: private_network }
             security_groups:
               - { get_resource: sg_port2_allports }
+    storage1_port3:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: storage_network }
+            security_groups:
+              - { get_resource: sg_port3_allports }
+
 
     storage2_port1:
         type: OS::Neutron::Port
@@ -151,6 +202,13 @@ resources:
             network_id: { get_param: private_network }
             security_groups:
               - { get_resource: sg_port2_allports }
+    storage2_port3:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: storage_network }
+            security_groups:
+              - { get_resource: sg_port3_allports }
+
 
 
     storage3_port1:
@@ -167,6 +225,13 @@ resources:
             network_id: { get_param: private_network }
             security_groups:
               - { get_resource: sg_port2_allports }
+    storage3_port3:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: storage_network }
+            security_groups:
+              - { get_resource: sg_port3_allports }
+
 
 
 
@@ -205,7 +270,7 @@ resources:
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
-            networks: [ port: { get_resource: storage1_port1 }, port: { get_resource: storage1_port2 }]
+            networks: [ port: { get_resource: storage1_port1 }, port: { get_resource: storage1_port2 }, port: { get_resource: storage1_port3 }]
             user_data: { get_param: user_data }
             scheduler_hints: { group: { get_param: scheduler_hints }}
 
@@ -216,7 +281,7 @@ resources:
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
-            networks: [ port: { get_resource: storage2_port1 }, port: { get_resource: storage2_port2 }]
+            networks: [ port: { get_resource: storage2_port1 }, port: { get_resource: storage2_port2 }, port: { get_resource: storage2_port3 }]
             user_data: { get_param: user_data }
             scheduler_hints: { group: { get_param: scheduler_hints }}
 
@@ -227,7 +292,7 @@ resources:
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
-            networks: [ port: { get_resource: storage3_port1 }, port: { get_resource: storage3_port2 }]
+            networks: [ port: { get_resource: storage3_port1 }, port: { get_resource: storage3_port2 }, port: { get_resource: storage3_port3 }]
             user_data: { get_param: user_data }
             scheduler_hints: { group: { get_param: scheduler_hints }}
 
@@ -239,6 +304,9 @@ outputs:
     storage1_ip2:
         description: Storage1 Private IP address
         value: { get_attr: [ storage1_port2, fixed_ips, 0, ip_address ]}
+    storage1_ip3:
+        description: Storage1 Private IP address
+        value: { get_attr: [ storage1_port3, fixed_ips, 0, ip_address ]}
 
     storage2_ip1:
         description: Storage2 Public IP address
@@ -246,6 +314,9 @@ outputs:
     storage2_ip2:
         description: Storage2 Private IP address
         value: { get_attr: [ storage2_port2, fixed_ips, 0, ip_address ]}
+    storage2_ip3:
+        description: Storage1 Private IP address
+        value: { get_attr: [ storage2_port3, fixed_ips, 0, ip_address ]}
 
     storage3_ip1:
         description: Storage3 Public IP address
@@ -253,5 +324,6 @@ outputs:
     storage3_ip2:
         description: Storage3 Private IP address
         value: { get_attr: [ storage3_port2, fixed_ips, 0, ip_address ]}
-
-
+    storage3_ip3:
+        description: Storage1 Private IP address
+        value: { get_attr: [ storage3_port3, fixed_ips, 0, ip_address ]}

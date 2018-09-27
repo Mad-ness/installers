@@ -46,8 +46,8 @@ parameters:
         type: string
         label: Scheduler Hints
         description: Schedule hints that is being applied
- 
-    user_data: 
+
+    user_data:
         type: string
         label: Software configuration
         description: Put there a script that is being executing upon a server gets up
@@ -59,7 +59,7 @@ resources:
         type: OS::Neutron::SecurityGroup
         properties:
             name: ocp3_sg_cluster_int_vip
-            rules: 
+            rules:
               - direction: ingress
                 ethertype: IPv4
                 protocol: tcp
@@ -113,7 +113,7 @@ resources:
     sg_cluster_pub_vip_udpports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: ocp3_sg_infras_cluster_pub_vip_udpports 
+            name: ocp3_sg_infras_cluster_pub_vip_udpports
             description: Rules to access the only allowed traffic on a infra port1 by UDP ports
             rules:
                 repeat:
@@ -212,7 +212,7 @@ resources:
               - { get_resource: sg_port2_allports }
             allowed_address_pairs:
               - ip_address: { get_attr: [ cluster_vip_port2, fixed_ips, 0, ip_address ]}
- 
+
     infra2_port1:
         type: OS::Neutron::Port
         properties:
@@ -231,27 +231,27 @@ resources:
               - { get_resource: sg_port2_allports }
             allowed_address_pairs:
               - ip_address: { get_attr: [ cluster_vip_port2, fixed_ips, 0, ip_address ]}
- 
 
-    infra3_port1:
-        type: OS::Neutron::Port
-        properties:
-            network_id: { get_param: public_network }
-            security_groups:
-              - { get_resource: sg_port1_tcpports }
-              - { get_resource: sg_port1_udpports }
-              - { get_resource: sg_port1_icmpports }
-            allowed_address_pairs:
-              - ip_address: { get_attr: [ cluster_vip_port1, fixed_ips, 0, ip_address ]}
-    infra3_port2:
-        type: OS::Neutron::Port
-        properties:
-            network_id: { get_param: private_network }
-            security_groups:
-              - { get_resource: sg_port2_allports }
-            allowed_address_pairs:
-              - ip_address: { get_attr: [ cluster_vip_port2, fixed_ips, 0, ip_address ]}
- 
+
+    # infra3_port1:
+    #     type: OS::Neutron::Port
+    #     properties:
+    #         network_id: { get_param: public_network }
+    #         security_groups:
+    #           - { get_resource: sg_port1_tcpports }
+    #           - { get_resource: sg_port1_udpports }
+    #           - { get_resource: sg_port1_icmpports }
+    #         allowed_address_pairs:
+    #           - ip_address: { get_attr: [ cluster_vip_port1, fixed_ips, 0, ip_address ]}
+    # infra3_port2:
+    #     type: OS::Neutron::Port
+    #     properties:
+    #         network_id: { get_param: private_network }
+    #         security_groups:
+    #           - { get_resource: sg_port2_allports }
+    #         allowed_address_pairs:
+    #           - ip_address: { get_attr: [ cluster_vip_port2, fixed_ips, 0, ip_address ]}
+    #
 
 
     infra1:
@@ -276,16 +276,16 @@ resources:
             user_data: { get_param: user_data }
             scheduler_hints: { group: { get_param: scheduler_hints }}
 
-    infra3:
-        type: OS::Nova::Server
-        properties:
-            name: ocp3_infra3
-            image: { get_param: image }
-            flavor: { get_param: flavor }
-            key_name: { get_param: key_name }
-            networks: [ port: { get_resource: infra3_port1 }, port: { get_resource: infra3_port2 }]
-            user_data: { get_param: user_data }
-            scheduler_hints: { group: { get_param: scheduler_hints }}
+    # infra3:
+    #     type: OS::Nova::Server
+    #     properties:
+    #         name: ocp3_infra3
+    #         image: { get_param: image }
+    #         flavor: { get_param: flavor }
+    #         key_name: { get_param: key_name }
+    #         networks: [ port: { get_resource: infra3_port1 }, port: { get_resource: infra3_port2 }]
+    #         user_data: { get_param: user_data }
+    #         scheduler_hints: { group: { get_param: scheduler_hints }}
 
 outputs:
 
@@ -311,10 +311,9 @@ outputs:
         description: Infra2 Private IP address
         value: { get_attr: [ infra2_port2, fixed_ips, 0, ip_address ]}
 
-    infra3_ip1:
-        description: Infra3 Public IP address
-        value: { get_attr: [ infra3_port1, fixed_ips, 0, ip_address ]}
-    infra3_ip2:
-        description: Infra3 Private IP address
-        value: { get_attr: [ infra3_port2, fixed_ips, 0, ip_address ]}
-
+    # infra3_ip1:
+    #     description: Infra3 Public IP address
+    #     value: { get_attr: [ infra3_port1, fixed_ips, 0, ip_address ]}
+    # infra3_ip2:
+    #     description: Infra3 Private IP address
+    #     value: { get_attr: [ infra3_port2, fixed_ips, 0, ip_address ]}

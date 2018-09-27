@@ -98,7 +98,7 @@ resources:
             name: OCP3 Internal Network
             shared: false
     private_subnet:
-        type: OS::Neutron::Subnet 
+        type: OS::Neutron::Subnet
         properties:
             name: OCP3 Internal Subnet
             network: { get_resource: private_network }
@@ -122,6 +122,7 @@ resources:
             private_network: { get_resource: private_network }
             port1_allowed_tcp_ports: "22,53,8053,443,8443,10250,10010,2049,2379,2380,9000,8444,1936"
             port1_allowed_udp_ports: "4789,53,8053,443,2049"
+            cluster_vip_allowed_tcp_ports: "22,8443"
             user_data: { get_param: user_data }
             scheduler_hints: { get_resource: server_group }
 
@@ -190,10 +191,12 @@ outputs:
 
 
     local_dns_ip: { value: { get_attr: [ services, bastion_ip2 ]}}
- 
+
 ##    cluster_vip_ip1: { value: { get_attr: [ masters, cluster_vip ]}}
 ##    buildhost_ip1: { value: { get_attr: [ services, buildhost_ip1 ]}}
 #    dnsserver_ip1: { value: { get_attr: [ services, buildhost_ip1 ]}}
+
+    master_cluster_vip: { value: { get_attr: [ masters, cluster_vip ]}}
 
     master1_ip1: { value: { get_attr: [ masters, master1_ip1 ]}}
     master1_ip2: { value: { get_attr: [ masters, master1_ip2 ]}}
@@ -213,8 +216,8 @@ outputs:
     infra1_ip2: { value: { get_attr: [ infras, infra1_ip2 ]}}
     infra2_ip1: { value: { get_attr: [ infras, infra2_ip1 ]}}
     infra2_ip2: { value: { get_attr: [ infras, infra2_ip2 ]}}
-    infra3_ip1: { value: { get_attr: [ infras, infra3_ip1 ]}}
-    infra3_ip2: { value: { get_attr: [ infras, infra3_ip2 ]}}
+    # infra3_ip1: { value: { get_attr: [ infras, infra3_ip1 ]}}
+    # infra3_ip2: { value: { get_attr: [ infras, infra3_ip2 ]}}
 
 
     app1_ip1: { value: { get_attr: [ apps, app1_ip1 ]}}
@@ -226,24 +229,10 @@ outputs:
 
     storage1_ip1: { value: { get_attr: [ storages, storage1_ip1 ]}}
     storage1_ip2: { value: { get_attr: [ storages, storage1_ip2 ]}}
+    storage1_ip3: { value: { get_attr: [ storages, storage1_ip3 ]}}
     storage2_ip1: { value: { get_attr: [ storages, storage2_ip1 ]}}
     storage2_ip2: { value: { get_attr: [ storages, storage2_ip2 ]}}
+    storage2_ip3: { value: { get_attr: [ storages, storage2_ip3 ]}}
     storage3_ip1: { value: { get_attr: [ storages, storage3_ip1 ]}}
     storage3_ip2: { value: { get_attr: [ storages, storage3_ip2 ]}}
-
-
-
-
-#     storagenode1_ip1: { value: { get_attr: [ storages, storage1_ip1 ]}}
-#     storagenode2_ip1: { value: { get_attr: [ storages, storage2_ip1 ]}}
-#     storagenode3_ip1: { value: { get_attr: [ storages, storage3_ip1 ]}}
-# 
-#     infra1_ip1: { value: { get_attr: [ infranodes, node1_ip1 ]}}
-#     infra2_ip1: { value: { get_attr: [ infranodes, node2_ip1 ]}}
-#     infra3_ip1: { value: { get_attr: [ infranodes, node3_ip1 ]}}
-# 
-#     appnode1_ip1: { value: { get_attr: [ appnodes, node1_ip1 ]}}
-#     appnode2_ip1: { value: { get_attr: [ appnodes, node2_ip1 ]}}
-#     appnode3_ip1: { value: { get_attr: [ appnodes, node3_ip1 ]}}
-
-
+    storage3_ip3: { value: { get_attr: [ storages, storage3_ip3 ]}}
