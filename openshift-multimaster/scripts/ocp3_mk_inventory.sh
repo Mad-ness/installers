@@ -23,6 +23,7 @@ all:
         private_domain: 'ocp.local'
         public_domain: 'labcloud.litf4'
         ansible_private_key_file: 'key'
+        api_subnet_cidr: $( get_value api_subnet_cidr )
     children:
          local: { hosts: { 127.0.0.1: }}
          etcd: { children: { masters: }}
@@ -45,7 +46,6 @@ all:
                 openshift_master_default_subdomain: 'apps.{{ public_domain }}'
                 openshift_master_cluter_ip: $( get_value cluster_private_ip )
                 openshift_master_cluster_public_ip: $( get_value cluster_public_ip )
-                # openshift_master_portal_net: $( get_value portal_net_cidr )
                 openshift_deployment_type: origin
                 os_sdn_network_plugin_name: 'redhat/openshift-ovs-multitenant'
                 openshift_hosted_registry_storage_volume_size: 50Gi
@@ -107,7 +107,6 @@ all:
              hosts:
                 infra1: { ansible_host: $( get_value infra1_ip1 ), openshift_public_ip: $( get_value infra1_ip1 ), openshift_ip: $( get_value infra1_ip2 ), openshift_hostname: 'infra1.{{ private_domain }}' }
                 infra2: { ansible_host: $( get_value infra2_ip1 ), openshift_public_ip: $( get_value infra2_ip1 ), openshift_ip: $( get_value infra2_ip2 ), openshift_hostname: 'infra2.{{ private_domain }}' }
-                infra3: { ansible_host: $( get_value infra3_ip1 ), openshift_public_ip: $( get_value infra3_ip1 ), openshift_ip: $( get_value infra3_ip2 ), openshift_hostname: 'infra3.{{ private_domain }}' }
              vars:
                  containerized: true
                  openshift_schedulable: true
@@ -123,14 +122,15 @@ all:
                  openshift_node_group_name: 'node-config-compute'
          glusterfs:
              hosts:
-                storage1: { ansible_host: $( get_value storage1_ip1 ), glusterfs_ip: $(get_value storage1_ip2), openshift_ip: $( get_value storage1_ip2 ), openshift_hostname: 'storage1.{{ private_domain }}' }
-                storage2: { ansible_host: $( get_value storage2_ip1 ), glusterfs_ip: $(get_value storage2_ip2), openshift_ip: $( get_value storage2_ip2 ), openshift_hostname: 'storage2.{{ private_domain }}' }
-                storage3: { ansible_host: $( get_value storage3_ip1 ), glusterfs_ip: $(get_value storage3_ip2), openshift_ip: $( get_value storage3_ip2 ), openshift_hostname: 'storage3.{{ private_domain }}' }
+                storage1: { ansible_host: $( get_value storage1_ip1 ), glusterfs_ip: $( get_value storage1_ip3 ), openshift_ip: $( get_value storage1_ip2 ), openshift_hostname: 'storage1.{{ private_domain }}' }
+                storage2: { ansible_host: $( get_value storage2_ip1 ), glusterfs_ip: $( get_value storage2_ip3 ), openshift_ip: $( get_value storage2_ip2 ), openshift_hostname: 'storage2.{{ private_domain }}' }
+                storage3: { ansible_host: $( get_value storage3_ip1 ), glusterfs_ip: $( get_value storage3_ip3 ), openshift_ip: $( get_value storage3_ip2 ), openshift_hostname: 'storage3.{{ private_domain }}' }
              vars:
                  containerized: true
                  openshift_schedulable: true
                  openshift_node_group_name: 'node-config-infra'
                  glusterfs_devices: [ "/dev/vdc", "/dev/vde", "/dev/vdd" ]
+                 storage_subnet_cidr: $( get_value storage_subnet_cidr )
          nodes:
              children:
                  masters:
@@ -138,7 +138,7 @@ all:
                  app:
          management:
             hosts:
-                bastion: 
+                bastion:
                     ansible_host: $( get_value bastion_ip1 )
                     openshift_ip: $( get_value bastion_ip2 )
                     openshift_hostname: 'bastion.{{ private_domain }}'
@@ -146,4 +146,3 @@ all:
 INVENTORY
 
 echo "# Find the private key in ${stackname}.key"
-
