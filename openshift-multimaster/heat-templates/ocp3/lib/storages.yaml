@@ -75,11 +75,7 @@ resources:
                 end:   200.0.0.250
             cidr: 200.0.0.0/24
             dns_nameservers: [ '200.0.0.1', ]
-            enable_dhcp: true
-            gateway_ip: '200.0.0.1'
-            host_routes:
-              - destination: 0.0.0.0/0
-                nexthop: 200.0.0.1
+            enable_dhcp: false
 
 
     sg_port1_tcpports:
