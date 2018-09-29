@@ -208,8 +208,10 @@ outputs:
     master3_ip2: { value: { get_attr: [ masters, master3_ip2 ]}}
 
 
-    cluster_ip1: { value: { get_attr: [ infras, clusger_ip1 ]}}
-    cluster_ip2: { value: { get_attr: [ infras, cluster_ip2 ]}}
+    infra_public_vip1: { value: { get_attr: [ infras, cluster_public_vip1 ]}}
+    infra_private_vip1: { value: { get_attr: [ infras, cluster_private_vip1 ]}}
+    infra_public_vip2: { value: { get_attr: [ infras, cluster_public_vip2 ]}}
+    infra_private_vip2: { value: { get_attr: [ infras, cluster_private_vip2 ]}}
     cluster_public_ip: { value: { get_attr: [ infras, cluster_ip1 ]}}
     cluster_private_ip: { value: { get_attr: [ infras, cluster_ip2 ]}}
 

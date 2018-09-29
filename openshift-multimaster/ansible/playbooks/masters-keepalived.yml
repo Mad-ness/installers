@@ -1,0 +1,22 @@
+- hosts: masters
+  become: true
+  gather_facts: false
+  tasks:
+
+  - name: Install Keepalived
+    yum: name=keepalived state=present
+
+  - set_fact:
+        servers: "{{ groups['masters'] }}"
+
+  - name: Deploy config
+    template:
+        src: keepalived.conf.j2
+        dest: /etc/keepalived/keepalived.conf
+    notify: restart_keepalived
+
+  handlers:
+  - name: restart_keepalived
+    service: name=keepalived state=restarted
+
+

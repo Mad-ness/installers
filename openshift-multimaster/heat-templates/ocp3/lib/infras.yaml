@@ -175,7 +175,7 @@ resources:
                 remote_ip_prefix: 0.0.0.0/0
 
 
-    cluster_vip_port1:
+    cluster_vip1_port1:
         type: OS::Neutron::Port
         properties:
             network_id: { get_param: public_network }
@@ -183,7 +183,22 @@ resources:
               - { get_resource: sg_port1_tcpports }
               - { get_resource: sg_port1_udpports }
               - { get_resource: sg_port1_icmpports }
-    cluster_vip_port2:
+    cluster_vip1_port2:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: private_network }
+            security_groups:
+              - { get_resource: sg_cluster_int_vip_allports }
+
+    cluster_vip2_port1:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: public_network }
+            security_groups:
+              - { get_resource: sg_port1_tcpports }
+              - { get_resource: sg_port1_udpports }
+              - { get_resource: sg_port1_icmpports }
+    cluster_vip2_port2:
         type: OS::Neutron::Port
         properties:
             network_id: { get_param: private_network }
@@ -203,7 +218,8 @@ resources:
               - { get_resource: sg_port1_udpports }
               - { get_resource: sg_port1_icmpports }
             allowed_address_pairs:
-              - ip_address: { get_attr: [ cluster_vip_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip1_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip2_port1, fixed_ips, 0, ip_address ]}
     infra1_port2:
         type: OS::Neutron::Port
         properties:
@@ -211,7 +227,8 @@ resources:
             security_groups:
               - { get_resource: sg_port2_allports }
             allowed_address_pairs:
-              - ip_address: { get_attr: [ cluster_vip_port2, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip1_port2, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip2_port2, fixed_ips, 0, ip_address ]}
 
     infra2_port1:
         type: OS::Neutron::Port
@@ -222,7 +239,8 @@ resources:
               - { get_resource: sg_port1_udpports }
               - { get_resource: sg_port1_icmpports }
             allowed_address_pairs:
-              - ip_address: { get_attr: [ cluster_vip_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip1_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip2_port1, fixed_ips, 0, ip_address ]}
     infra2_port2:
         type: OS::Neutron::Port
         properties:
@@ -230,7 +248,8 @@ resources:
             security_groups:
               - { get_resource: sg_port2_allports }
             allowed_address_pairs:
-              - ip_address: { get_attr: [ cluster_vip_port2, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip1_port2, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip2_port2, fixed_ips, 0, ip_address ]}
 
 
     # infra3_port1:
@@ -289,12 +308,19 @@ resources:
 
 outputs:
 
-    cluster_ip1:
+    cluster_public_vip1:
         description: AppNode1 IP address
-        value: { get_attr: [ cluster_vip_port1, fixed_ips, 0, ip_address ]}
-    cluster_ip2:
+        value: { get_attr: [ cluster_vip1_port1, fixed_ips, 0, ip_address ]}
+    cluster_private_vip1:
         description: AppNode1 IP address
-        value: { get_attr: [ cluster_vip_port2, fixed_ips, 0, ip_address ]}
+        value: { get_attr: [ cluster_vip1_port2, fixed_ips, 0, ip_address ]}
+
+    cluster_public_vip2:
+        description: AppNode1 IP address
+        value: { get_attr: [ cluster_vip2_port1, fixed_ips, 0, ip_address ]}
+    cluster_private_vip2:
+        description: AppNode1 IP address
+        value: { get_attr: [ cluster_vip2_port2, fixed_ips, 0, ip_address ]}
 
 
     infra1_ip1:
