@@ -214,7 +214,8 @@ outputs:
     bastion_ip1: { value: { get_attr: [ services, bastion_ip1 ]}}
     bastion_ip2: { value: { get_attr: [ services, bastion_ip2 ]}}
 
-    storage_subnet_cidr: { value: { get_attr: [ storages, storage_subnet_cidr ]}}
+#     storage_subnet_cidr: { value: { get_attr: [ storages, storage_subnet_cidr ]}}
+    storage_subnet_cidr: { value: { get_attr: [ storage_subnet, cidr ]}}
     api_subnet_cidr: { value: { get_attr: [ private_subnet, cidr ]}}
     local_dns_ip: { value: { get_attr: [ services, bastion_ip2 ]}}
 

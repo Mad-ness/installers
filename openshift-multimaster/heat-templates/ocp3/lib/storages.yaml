@@ -280,9 +280,9 @@ resources:
             scheduler_hints: { group: { get_param: scheduler_hints }}
 
 outputs:
-    storage_subnet_cidr:
-        description: CIDR of Storage Backend Network
-        value: { get_attr: [ storage_subnet, cidr ]}
+#    storage_subnet_cidr:
+#        description: CIDR of Storage Backend Network
+#        value: { get_attr: [ storage_subnet, cidr ]}
 
     storage1_ip1:
         description: Storage1 Public IP address
