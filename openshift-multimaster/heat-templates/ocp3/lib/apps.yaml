@@ -212,7 +212,7 @@ resources:
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
-            networks: [ port: { get_resource: app3_port1 }, port: { get_resource: app3_port2 }, port: { get_resource: app2_storage_port }]
+            networks: [ port: { get_resource: app3_port1 }, port: { get_resource: app3_port2 }, port: { get_resource: app3_storage_port }]
             user_data: { get_param: user_data }
             scheduler_hints: { group: { get_param: scheduler_hints }}
 
