@@ -1,5 +1,5 @@
 heat_template_version: 2018-03-02
-description: A template for creating application nodes
+description: A template for creating infra nodes
 
 parameters:
     image:
@@ -230,9 +230,9 @@ resources:
             network_id: { get_param: private_network }
             security_groups:
               - { get_resource: sg_port2_allports }
-            allowed_address_pairs:
-              - ip_address: { get_attr: [ cluster_vip1_port2, fixed_ips, 0, ip_address ]}
-              - ip_address: { get_attr: [ cluster_vip2_port2, fixed_ips, 0, ip_address ]}
+           # allowed_address_pairs:
+           #   - ip_address: { get_attr: [ cluster_vip1_port2, fixed_ips, 0, ip_address ]}
+           #   - ip_address: { get_attr: [ cluster_vip2_port2, fixed_ips, 0, ip_address ]}
     infra1_storage_port:
         type: OS::Neutron::Port
         properties:
@@ -257,9 +257,9 @@ resources:
             network_id: { get_param: private_network }
             security_groups:
               - { get_resource: sg_port2_allports }
-            allowed_address_pairs:
-              - ip_address: { get_attr: [ cluster_vip1_port2, fixed_ips, 0, ip_address ]}
-              - ip_address: { get_attr: [ cluster_vip2_port2, fixed_ips, 0, ip_address ]}
+           # allowed_address_pairs:
+           #   - ip_address: { get_attr: [ cluster_vip1_port2, fixed_ips, 0, ip_address ]}
+           #   - ip_address: { get_attr: [ cluster_vip2_port2, fixed_ips, 0, ip_address ]}
     infra2_storage_port:
         type: OS::Neutron::Port
         properties:

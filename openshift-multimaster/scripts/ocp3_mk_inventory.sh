@@ -24,6 +24,7 @@ all:
         public_domain: 'labcloud.litf4'
         ansible_private_key_file: 'key'
         api_subnet_cidr: $( get_value api_subnet_cidr )
+        storage_subnet_cidr: $( get_value storage_subnet_cidr )
     children:
          local: { hosts: { 127.0.0.1: }}
          etcd: { children: { masters: }}
@@ -97,19 +98,19 @@ all:
          masters:
              hosts:
                 master1:
+                    openshift_hostname: 'master1.{{ private_domain }}'
                     ansible_host: $( get_value master1_ip1 )
                     openshift_ip: $( get_value master1_ip2 )
-                    openshift_hostname: 'master1.{{ private_domain }}'
                     glusterfs_ip: $( get_value master1_storage_ip )
                 master2:
+                    openshift_hostname: 'master2.{{ private_domain }}'
                     ansible_host: $( get_value master2_ip1 )
                     openshift_ip: $( get_value master2_ip2 )
-                    openshift_hostname: 'master2.{{ private_domain }}'
                     glusterfs_ip: $( get_value master2_storage_ip )
                 master3:
+                    openshift_hostname: 'master3.{{ private_domain }}'
                     ansible_host: $( get_value master3_ip1 )
                     openshift_ip: $( get_value master3_ip2 )
-                    openshift_hostname: 'master3.{{ private_domain }}'
                     glusterfs_ip: $( get_value master3_storage_ip )
              vars:
                  containerized: true
@@ -118,16 +119,16 @@ all:
          infra:
              hosts:
                 infra1:
+                    openshift_hostname: 'infra1.{{ private_domain }}'
                     ansible_host: $( get_value infra1_ip1 )
                     openshift_public_ip: $( get_value infra1_ip1 )
                     openshift_ip: $( get_value infra1_ip2 )
-                    openshift_hostname: 'infra1.{{ private_domain }}'
                     glusterfs_ip: $( get_value infra1_storage_ip )
                 infra2:
+                    openshift_hostname: 'infra2.{{ private_domain }}'
                     ansible_host: $( get_value infra2_ip1 )
                     openshift_public_ip: $( get_value infra2_ip1 )
                     openshift_ip: $( get_value infra2_ip2 )
-                    openshift_hostname: 'infra2.{{ private_domain }}'
                     glusterfs_ip: $( get_value infra2_storage_ip )
 
              vars:
@@ -155,7 +156,6 @@ all:
                  openshift_schedulable: true
                  openshift_node_group_name: 'node-config-infra'
                  glusterfs_devices: [ "/dev/vdc", "/dev/vde", "/dev/vdd" ]
-                 storage_subnet_cidr: $( get_value storage_subnet_cidr )
          nodes:
              children:
                  masters:
