@@ -23,6 +23,10 @@ parameters:
         type: string
         label: Private network
         description: Private network that is used for OpenShift internal communications
+    storage_network:
+        type: string
+        label: Storage network
+        description: The Storage Network to access Storage
     cluster_vip_allowed_tcp_ports:
         type: comma_delimited_list
         label: Allowed TCP ports
@@ -109,6 +113,18 @@ resources:
                 protocol: udp
                 remote_ip_prefix: 0.0.0.0/0
               - direction: ingress
+                ethertype: IPv4
+                protocol: icmp
+                remote_ip_prefix: 0.0.0.0/0
+              - direction: egress
+                ethertype: IPv4
+                protocol: tcp
+                remote_ip_prefix: 0.0.0.0/0
+              - direction: egress
+                ethertype: IPv4
+                protocol: udp
+                remote_ip_prefix: 0.0.0.0/0
+              - direction: egress
                 ethertype: IPv4
                 protocol: icmp
                 remote_ip_prefix: 0.0.0.0/0
@@ -220,6 +236,13 @@ resources:
             allowed_address_pairs:
             - ip_address: { get_attr: [ cluster_private_vip_port, fixed_ips, 0, ip_address ]}
 
+    master1_storage_port:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: storage_network }
+            security_groups:
+            - { get_resource: sg_port2_allports }
+
     master2_port1:
         type: OS::Neutron::Port
         properties:
@@ -240,6 +263,13 @@ resources:
             - { get_resource: sg_port2_allports }
             allowed_address_pairs:
             - ip_address: { get_attr: [ cluster_private_vip_port, fixed_ips, 0, ip_address ]}
+    master2_storage_port:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: storage_network }
+            security_groups:
+            - { get_resource: sg_port2_allports }
+
 
     master3_port1:
         type: OS::Neutron::Port
@@ -261,6 +291,13 @@ resources:
             - { get_resource: sg_port2_allports }
             allowed_address_pairs:
             - ip_address: { get_attr: [ cluster_private_vip_port, fixed_ips, 0, ip_address ]}
+    master3_storage_port:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: storage_network }
+            security_groups:
+            - { get_resource: sg_port2_allports }
+
 
 
 
@@ -271,7 +308,7 @@ resources:
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
-            networks: [ port: { get_resource: master1_port1 }, port: { get_resource: master1_port2 }]
+            networks: [ port: { get_resource: master1_port1 }, port: { get_resource: master1_port2 }, port: { get_resource: master1_storage_port }]
             user_data: { get_param: user_data }
             scheduler_hints: { group: { get_param: scheduler_hints }}
 
@@ -282,7 +319,7 @@ resources:
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
-            networks: [ port: { get_resource: master2_port1 }, port: { get_resource: master2_port2 }]
+            networks: [ port: { get_resource: master2_port1 }, port: { get_resource: master2_port2 }, port: { get_resource: master2_storage_port }]
             user_data: { get_param: user_data }
             scheduler_hints: { group: { get_param: scheduler_hints }}
 
@@ -293,7 +330,7 @@ resources:
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
-            networks: [ port: { get_resource: master3_port1 }, port: { get_resource: master3_port2 }]
+            networks: [ port: { get_resource: master3_port1 }, port: { get_resource: master3_port2 }, port: { get_resource: master3_storage_port }]
             user_data: { get_param: user_data }
             scheduler_hints: { group: { get_param: scheduler_hints }}
 
@@ -313,12 +350,20 @@ outputs:
         description: Master1 Private IP address
         value: { get_attr: [ master1, networks, { get_param: private_network }, 0 ]}
 
+    master1_storage_ip:
+        description: Master1 Storage IP address
+        value: { get_attr: [ master1, networks, { get_param: storage_network }, 0 ]}
+
     master2_ip1:
         description: Master1 Public IP address
         value: { get_attr: [ master2, networks, { get_param: public_network }, 0 ]}
     master2_ip2:
         description: Master1 Private IP address
         value: { get_attr: [ master2, networks, { get_param: private_network }, 0 ]}
+    master2_storage_ip:
+        description: Master1 Storage IP address
+        value: { get_attr: [ master2, networks, { get_param: storage_network }, 0 ]}
+
 
     master3_ip1:
         description: Master3 Public IP address
@@ -326,3 +371,6 @@ outputs:
     master3_ip2:
         description: Master3 Private IP address
         value: { get_attr: [ master3, networks, { get_param: private_network }, 0 ]}
+    master3_storage_ip:
+        description: Master1 Storage IP address
+        value: { get_attr: [ master3, networks, { get_param: storage_network }, 0 ]}

@@ -112,6 +112,27 @@ resources:
             host_routes:
               - destination: 0.0.0.0/0
                 nexthop: 100.0.0.1
+
+    storage_network:
+        type: OS::Neutron::Net
+        properties:
+            name: OCP3 Storage Backend Network
+            shared: false
+    storage_subnet:
+        type: OS::Neutron::Subnet
+        properties:
+            name: OCP3 Storage Backend Subnet
+            network: { get_resource: storage_network }
+            allocation_pools:
+              - start: 200.0.0.11
+                end:   200.0.0.250
+            cidr: 200.0.0.0/24
+            dns_nameservers: [ '200.0.0.1', ]
+            enable_dhcp: false
+
+
+
+
     masters:
         type: lib/masters.yaml
         properties:
@@ -120,6 +141,7 @@ resources:
             key_name: { get_resource: ocp3_sshkey }
             public_network: { get_param: public_network }
             private_network: { get_resource: private_network }
+            storage_network: { get_resource: storage_network }
             port1_allowed_tcp_ports: "22,53,8053,443,8443,10250,10010,2049,2379,2380,9000,8444,1936"
             port1_allowed_udp_ports: "4789,53,8053,443,2049"
             cluster_vip_allowed_tcp_ports: "22,8443"
@@ -134,6 +156,7 @@ resources:
             key_name: { get_resource: ocp3_sshkey }
             public_network: { get_param: public_network }
             private_network: { get_resource: private_network }
+            storage_network: { get_resource: storage_network }
             port1_allowed_tcp_ports: "22,53,8053,443,8443,10250,10010,2049,2379,2380,9000,8444,1936"
             port1_allowed_udp_ports: "4789,53,8053,443,2049"
             cluster_vip_allowed_tcp_ports: "22,53,8053,443,8443,10250,10010,2049,2379,2380,9000,8444,1936"
@@ -150,6 +173,7 @@ resources:
             key_name: { get_resource: ocp3_sshkey }
             public_network: { get_param: public_network }
             private_network: { get_resource: private_network }
+            storage_network: { get_resource: storage_network }
             port1_allowed_tcp_ports: "22,53,8053,443,8443,10250,10010,2049,2379,2380,9000,8444,1936"
             port1_allowed_udp_ports: "4789,53,8053,443,2049"
             user_data: { get_param: user_data }
@@ -163,6 +187,7 @@ resources:
             key_name: { get_resource: ocp3_sshkey }
             public_network: { get_param: public_network }
             private_network: { get_resource: private_network }
+            storage_network: { get_resource: storage_network }
             port1_allowed_tcp_ports: "22,53,8053,443,8443,10250,10010,2049,2379,2380,9000,8444,1936"
             port1_allowed_udp_ports: "4789,53,8053,443,2049"
             user_data: { get_param: user_data }
@@ -202,10 +227,13 @@ outputs:
 
     master1_ip1: { value: { get_attr: [ masters, master1_ip1 ]}}
     master1_ip2: { value: { get_attr: [ masters, master1_ip2 ]}}
+    master1_storage_ip: { value: { get_attr: [ masters, master1_storage_ip ]}}
     master2_ip1: { value: { get_attr: [ masters, master2_ip1 ]}}
     master2_ip2: { value: { get_attr: [ masters, master2_ip2 ]}}
+    master2_storage_ip: { value: { get_attr: [ masters, master2_storage_ip ]}}
     master3_ip1: { value: { get_attr: [ masters, master3_ip1 ]}}
     master3_ip2: { value: { get_attr: [ masters, master3_ip2 ]}}
+    master3_storage_ip: { value: { get_attr: [ masters, master3_storage_ip ]}}
 
 
     infra_public_vip1: { value: { get_attr: [ infras, cluster_public_vip1 ]}}
@@ -218,18 +246,24 @@ outputs:
 
     infra1_ip1: { value: { get_attr: [ infras, infra1_ip1 ]}}
     infra1_ip2: { value: { get_attr: [ infras, infra1_ip2 ]}}
+    infra1_storage_ip: { value: { get_attr: [ infras, infra1_storage_ip ]}}
     infra2_ip1: { value: { get_attr: [ infras, infra2_ip1 ]}}
     infra2_ip2: { value: { get_attr: [ infras, infra2_ip2 ]}}
+    infra2_storage_ip: { value: { get_attr: [ infras, infra2_storage_ip ]}}
+
     # infra3_ip1: { value: { get_attr: [ infras, infra3_ip1 ]}}
     # infra3_ip2: { value: { get_attr: [ infras, infra3_ip2 ]}}
 
 
     app1_ip1: { value: { get_attr: [ apps, app1_ip1 ]}}
     app1_ip2: { value: { get_attr: [ apps, app1_ip2 ]}}
+    app1_storage_ip: { value: { get_attr: [ apps, app1_storage_ip ]}}
     app2_ip1: { value: { get_attr: [ apps, app2_ip1 ]}}
     app2_ip2: { value: { get_attr: [ apps, app2_ip2 ]}}
+    app2_storage_ip: { value: { get_attr: [ apps, app2_storage_ip ]}}
     app3_ip1: { value: { get_attr: [ apps, app3_ip1 ]}}
     app3_ip2: { value: { get_attr: [ apps, app3_ip2 ]}}
+    app3_storage_ip: { value: { get_attr: [ apps, app3_storage_ip ]}}
 
     storage1_ip1: { value: { get_attr: [ storages, storage1_ip1 ]}}
     storage1_ip2: { value: { get_attr: [ storages, storage1_ip2 ]}}

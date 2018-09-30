@@ -23,6 +23,10 @@ parameters:
         type: string
         label: Private network
         description: Private network that is used for OpenShift internal communications
+    storage_network:
+        type: string
+        label: Storage network
+        description: The Storage Network to access Storage
 
     port1_allowed_tcp_ports:
         type: comma_delimited_list
@@ -39,7 +43,7 @@ parameters:
         label: Scheduler Hints
         description: Schedule hints that is being applied
 
-    user_data: 
+    user_data:
         type: string
         label: Software configuration
         description: Put there a script that is being executing upon a server gets up
@@ -124,6 +128,13 @@ resources:
             network_id: { get_param: private_network }
             security_groups:
               - { get_resource: sg_port2_allports }
+    app1_storage_port:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: storage_network }
+            security_groups:
+              - { get_resource: sg_port2_allports }
+
 
     app2_port1:
         type: OS::Neutron::Port
@@ -137,6 +148,12 @@ resources:
         type: OS::Neutron::Port
         properties:
             network_id: { get_param: private_network }
+            security_groups:
+              - { get_resource: sg_port2_allports }
+    app2_storage_port:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: storage_network }
             security_groups:
               - { get_resource: sg_port2_allports }
 
@@ -156,6 +173,12 @@ resources:
             network_id: { get_param: private_network }
             security_groups:
               - { get_resource: sg_port2_allports }
+    app3_storage_port:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: storage_network }
+            security_groups:
+              - { get_resource: sg_port2_allports }
 
 
 
@@ -167,7 +190,7 @@ resources:
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
-            networks: [ port: { get_resource: app1_port1 }, port: { get_resource: app1_port2 }]
+            networks: [ port: { get_resource: app1_port1 }, port: { get_resource: app1_port2 }, port: { get_resource: app1_storage_port }]
             user_data: { get_param: user_data }
             scheduler_hints: { group: { get_param: scheduler_hints }}
 
@@ -178,7 +201,7 @@ resources:
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
-            networks: [ port: { get_resource: app2_port1 }, port: { get_resource: app2_port2 }]
+            networks: [ port: { get_resource: app2_port1 }, port: { get_resource: app2_port2 }, port: { get_resource: app1_storage_port }]
             user_data: { get_param: user_data }
             scheduler_hints: { group: { get_param: scheduler_hints }}
 
@@ -189,7 +212,7 @@ resources:
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
-            networks: [ port: { get_resource: app3_port1 }, port: { get_resource: app3_port2 }]
+            networks: [ port: { get_resource: app3_port1 }, port: { get_resource: app3_port2 }, port: { get_resource: app1_storage_port }]
             user_data: { get_param: user_data }
             scheduler_hints: { group: { get_param: scheduler_hints }}
 
@@ -202,6 +225,10 @@ outputs:
     app1_ip2:
         description: App1 Private IP address
         value: { get_attr: [ app1_port2, fixed_ips, 0, ip_address ]}
+    app1_storage_ip:
+        description: App1 Private IP address
+        value: { get_attr: [ app1_storage_port, fixed_ips, 0, ip_address ]}
+
 
     app2_ip1:
         description: App2 Public IP address
@@ -209,6 +236,9 @@ outputs:
     app2_ip2:
         description: App2 Private IP address
         value: { get_attr: [ app2_port2, fixed_ips, 0, ip_address ]}
+    app2_storage_ip:
+        description: App1 Private IP address
+        value: { get_attr: [ app2_storage_port, fixed_ips, 0, ip_address ]}
 
     app3_ip1:
         description: App3 Public IP address
@@ -216,6 +246,6 @@ outputs:
     app3_ip2:
         description: App3 Private IP address
         value: { get_attr: [ app3_port2, fixed_ips, 0, ip_address ]}
-
-
-
+    app3_storage_ip:
+        description: App1 Private IP address
+        value: { get_attr: [ app3_storage_port, fixed_ips, 0, ip_address ]}

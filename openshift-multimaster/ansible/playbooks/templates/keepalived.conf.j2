@@ -11,7 +11,7 @@ vrrp_script haproxy_check {
 vrrp_instance OCP_Ext {
     interface           eth1
     virtual_router_id   51
-    priority            xxx
+    priority            50
     virtual_ipaddress   {
         {{ openshift_master_cluster_public_ip }} dev eth0
     }
@@ -27,42 +27,17 @@ vrrp_instance OCP_Ext {
 vrrp_instance OCP_Int {
     interface           eth1
     virtual_router_id   52
-    priority            xxx
+    priority            50
     virtual_ipaddress   {
-        {{ openshift_master_cluter_ip }} dev eth1 
+        {{ openshift_master_cluster_ip }} dev eth1 
     }
     track_script {
         haproxy_check
     }
     authentication {
         auth_type       PASS
-        auth_pass       lc0VfENu//5hdUvHEQ=
+        auth_pass       YA5RGE1kfwbvVZ3VOA=
     }
 }
 
 
-
-# vrrp_instance VI_1 {
-# {% if servers[0] == inventory_hostname %}
-#     state MASTER
-# {% else %}
-#     state BACKUP
-# {% endif %}
-# 
-#     virtual_router_id 51
-#     interface eth1
-#     advert_int 1
-#     unicast_peer {
-# {% for server in servers %}
-#         {{ hostvars[server].openshift_ip }}
-# {% endfor %}
-#     }
-#     authentication {
-#         auth_type PASS
-#         auth_pass VeryVerySecuryPassword
-#     }
-#     virtual_ipaddress {
-#         {{ openshift_master_cluter_ip }}
-#     }
-# }
-# 

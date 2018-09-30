@@ -24,6 +24,11 @@ parameters:
         label: Private network
         description: Private network that is used for OpenShift internal communications
 
+    storage_network:
+        type: string
+        label: Storage Network
+        description: Storage Network to access Storage
+
     port1_allowed_tcp_ports:
         type: comma_delimited_list
         label: Allowed TCP ports
@@ -58,24 +63,6 @@ parameters:
         default: ""
 
 resources:
-
-
-    storage_network:
-        type: OS::Neutron::Net
-        properties:
-            name: OCP3 Storage Backend Network
-            shared: false
-    storage_subnet:
-        type: OS::Neutron::Subnet
-        properties:
-            name: OCP3 Storage Backend Subnet
-            network: { get_resource: storage_network }
-            allocation_pools:
-              - start: 200.0.0.11
-                end:   200.0.0.250
-            cidr: 200.0.0.0/24
-            dns_nameservers: [ '200.0.0.1', ]
-            enable_dhcp: false
 
 
     sg_port1_tcpports:
@@ -179,7 +166,7 @@ resources:
     storage1_port3:
         type: OS::Neutron::Port
         properties:
-            network_id: { get_resource: storage_network }
+            network_id: { get_param: storage_network }
             security_groups:
               - { get_resource: sg_port3_allports }
 
@@ -201,7 +188,7 @@ resources:
     storage2_port3:
         type: OS::Neutron::Port
         properties:
-            network_id: { get_resource: storage_network }
+            network_id: { get_param: storage_network }
             security_groups:
               - { get_resource: sg_port3_allports }
 
@@ -224,7 +211,7 @@ resources:
     storage3_port3:
         type: OS::Neutron::Port
         properties:
-            network_id: { get_resource: storage_network }
+            network_id: { get_param: storage_network }
             security_groups:
               - { get_resource: sg_port3_allports }
 

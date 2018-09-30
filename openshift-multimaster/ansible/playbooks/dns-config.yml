@@ -135,7 +135,7 @@
               {{ hostvars[h].openshift_hostname }}.  IN A  {{ hostvars[h].openshift_ip }}
               {% endfor %} 
 
-              {{ openshift_master_cluster_hostname }}.  IN A  {{ openshift_master_cluter_ip }}
+              {{ openshift_master_cluster_hostname }}.  IN A  {{ openshift_master_cluster_ip }}
 
 
           owner: root
@@ -183,7 +183,7 @@
               {{ hostvars[h].openshift_ip.split('.')[-1] }}  PTR  {{ hostvars[h].openshift_hostname }}. 
               {% endfor %} 
 
-              {{ openshift_master_cluter_ip.split('.')[-1] }}  PTR  {{ openshift_master_cluster_hostname }}. 
+              {{ openshift_master_cluster_ip.split('.')[-1] }}  PTR  {{ openshift_master_cluster_hostname }}. 
 
 
           owner: root

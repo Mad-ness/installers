@@ -22,6 +22,10 @@ parameters:
         type: string
         label: Private network
         description: Private network that is used for OpenShift internal communications
+    storage_network:
+        type: string
+        label: Storage network
+        description: The Storage Network to access Storage
     port1_allowed_tcp_ports:
         type: comma_delimited_list
         label: Allowed TCP ports
@@ -229,6 +233,12 @@ resources:
             allowed_address_pairs:
               - ip_address: { get_attr: [ cluster_vip1_port2, fixed_ips, 0, ip_address ]}
               - ip_address: { get_attr: [ cluster_vip2_port2, fixed_ips, 0, ip_address ]}
+    infra1_storage_port:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: storage_network }
+            security_groups:
+              - { get_resource: sg_port2_allports }
 
     infra2_port1:
         type: OS::Neutron::Port
@@ -250,6 +260,12 @@ resources:
             allowed_address_pairs:
               - ip_address: { get_attr: [ cluster_vip1_port2, fixed_ips, 0, ip_address ]}
               - ip_address: { get_attr: [ cluster_vip2_port2, fixed_ips, 0, ip_address ]}
+    infra2_storage_port:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: storage_network }
+            security_groups:
+              - { get_resource: sg_port2_allports }
 
 
     # infra3_port1:
@@ -280,7 +296,7 @@ resources:
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
-            networks: [ port: { get_resource: infra1_port1 }, port: { get_resource: infra1_port2 }]
+            networks: [ port: { get_resource: infra1_port1 }, port: { get_resource: infra1_port2 }, port: { get_resource: infra1_storage_port }]
             user_data: { get_param: user_data }
             scheduler_hints: { group: { get_param: scheduler_hints }}
 
@@ -291,7 +307,7 @@ resources:
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
-            networks: [ port: { get_resource: infra2_port1 }, port: { get_resource: infra2_port2 }]
+            networks: [ port: { get_resource: infra2_port1 }, port: { get_resource: infra2_port2 }, port: { get_resource: infra2_storage_port }]
             user_data: { get_param: user_data }
             scheduler_hints: { group: { get_param: scheduler_hints }}
 
@@ -329,6 +345,9 @@ outputs:
     infra1_ip2:
         description: Infra1 Private IP address
         value: { get_attr: [ infra1_port2, fixed_ips, 0, ip_address ]}
+    infra1_storage_ip:
+        description: Infra1 Storage IP address
+        value: { get_attr: [ infra1_storage_port, fixed_ips, 0, ip_address ]}
 
     infra2_ip1:
         description: Infra2 Public IP address
@@ -336,6 +355,10 @@ outputs:
     infra2_ip2:
         description: Infra2 Private IP address
         value: { get_attr: [ infra2_port2, fixed_ips, 0, ip_address ]}
+    infra2_storage_ip:
+        description: Infra1 Storage IP address
+        value: { get_attr: [ infra2_storage_port, fixed_ips, 0, ip_address ]}
+
 
     # infra3_ip1:
     #     description: Infra3 Public IP address
