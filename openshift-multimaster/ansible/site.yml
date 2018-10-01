@@ -1,6 +1,7 @@
 - import_playbook: playbooks/common-packages.yml
 - import_playbook: playbooks/common-privnet.yml
 - import_playbook: playbooks/masters-keepalived.yml
+- import_playbook: playbooks/infra-keepalived.yml
 - import_playbook: playbooks/storage-storagenet.yml
 - import_playbook: playbooks/storage-net.yml
 - import_playbook: playbooks/common-hostname.yml

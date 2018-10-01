@@ -13,6 +13,10 @@ vrrp_instance lb_{{ loop.index0 }} {
     interface           eth0
     virtual_router_id   {{ 58 + loop.index0 }}
     advert_int          1
+    unicast_src_ip      {{ hostvars[server].ansible_host }}
+    unicast_peer        {
+        {{ hostvars[servers[loop.revindex0]].ansible_host }}
+    }
     virtual_ipaddress   {
         {{ public_vips[loop.index0] }}   dev eth0
     }
