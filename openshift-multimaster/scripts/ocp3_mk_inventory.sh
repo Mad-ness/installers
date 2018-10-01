@@ -136,7 +136,6 @@ all:
                  openshift_schedulable: true
                  openshift_node_group_name: 'node-config-infra'
                  public_vips: [ $( get_value infra_public_vip1 ), $( get_value infra_public_vip2 )]
-                 private_vips: [ $( get_value infra_private_vip1 ), $( get_value infra_private_vip2 )]
          app:
              hosts:
                 app1: { ansible_host: $( get_value app1_ip1 ), openshift_ip: $( get_value app1_ip2 ), openshift_hostname: 'app1.{{ private_domain }}', glusterfs_ip: $( get_value app1_storage_ip ) }

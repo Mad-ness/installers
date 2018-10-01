@@ -238,11 +238,11 @@ outputs:
 
 
     infra_public_vip1: { value: { get_attr: [ infras, cluster_public_vip1 ]}}
-    infra_private_vip1: { value: { get_attr: [ infras, cluster_private_vip1 ]}}
+    # infra_private_vip1: { value: { get_attr: [ infras, cluster_private_vip1 ]}}
     infra_public_vip2: { value: { get_attr: [ infras, cluster_public_vip2 ]}}
-    infra_private_vip2: { value: { get_attr: [ infras, cluster_private_vip2 ]}}
-    cluster_public_ip: { value: { get_attr: [ infras, cluster_ip1 ]}}
-    cluster_private_ip: { value: { get_attr: [ infras, cluster_ip2 ]}}
+    # infra_private_vip2: { value: { get_attr: [ infras, cluster_private_vip2 ]}}
+    # cluster_public_ip: { value: { get_attr: [ infras, cluster_ip1 ]}}
+    # cluster_private_ip: { value: { get_attr: [ infras, cluster_ip2 ]}}
 
 
     infra1_ip1: { value: { get_attr: [ infras, infra1_ip1 ]}}

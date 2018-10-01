@@ -297,18 +297,18 @@ resources:
 outputs:
 
     cluster_public_vip1:
-        description: AppNode1 IP address
+        description: Infra vIP address 1
         value: { get_attr: [ cluster_vip1_port1, fixed_ips, 0, ip_address ]}
-    cluster_private_vip1:
-        description: AppNode1 IP address
-        value: { get_attr: [ cluster_vip1_port2, fixed_ips, 0, ip_address ]}
+    # cluster_private_vip1:
+    #     description: AppNode1 IP address
+    #     value: { get_attr: [ cluster_vip1_port2, fixed_ips, 0, ip_address ]}
 
     cluster_public_vip2:
-        description: AppNode1 IP address
+        description: Infra vIP address 2
         value: { get_attr: [ cluster_vip2_port1, fixed_ips, 0, ip_address ]}
-    cluster_private_vip2:
-        description: AppNode1 IP address
-        value: { get_attr: [ cluster_vip2_port2, fixed_ips, 0, ip_address ]}
+#     cluster_private_vip2:
+#         description: AppNode1 IP address
+#         value: { get_attr: [ cluster_vip2_port2, fixed_ips, 0, ip_address ]}
 
 
     infra1_ip1:
