@@ -1,4 +1,4 @@
-- hosts: masters
+- hosts: infra
   become: true
   gather_facts: false
   tasks:
@@ -7,11 +7,11 @@
     yum: name=keepalived state=present
 
   - set_fact:
-        servers: "{{ groups['masters'] }}"
+        servers: "{{ groups['infra'] }}"
 
   - name: Deploy config
     template:
-        src: masters-keepalived.conf.j2
+        src: infra-keepalived.conf.j2
         dest: /etc/keepalived/keepalived.conf
     notify: restart_keepalived
 
@@ -22,3 +22,5 @@
   handlers:
   - name: restart_keepalived
     service: name=keepalived state=restarted
+
+
