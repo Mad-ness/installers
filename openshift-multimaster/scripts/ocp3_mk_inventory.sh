@@ -45,7 +45,6 @@ all:
                 openshift_metrics_cassandra_pvc_storage_class_name: glusterfs-storage-block
                 openshift_logging_install_logging: true
                 openshift_logging_es_pvc_dynamic: true
-                openshift_logging_es_pvc_storage_class_name: 
                 openshift_metrics_install_metrics: true
                 openshift_master_cluster_method: native
                 openshift_metrics_cassandra_storage_type: dynamic
