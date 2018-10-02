@@ -41,18 +41,24 @@ all:
                 glusterfs:
                 glusterfs_registry:
             vars:
+                openshift_logging_es_pvc_storage_class_name: glusterfs-storage-block 
+                openshift_metrics_cassandra_pvc_storage_class_name: glusterfs-storage-block
+                openshift_logging_install_logging: true
+                openshift_logging_es_pvc_dynamic: true
+                openshift_logging_es_pvc_storage_class_name: 
+                openshift_metrics_install_metrics: true
                 openshift_master_cluster_method: native
-                openshift_master_cluster_hostname: 'cluster.{{ private_domain }}'
+                openshift_metrics_cassandra_storage_type: dynamic
+                openshift_master_cluster_hostname: 'console.{{ private_domain }}'
                 openshift_master_cluster_public_hostname: 'ocp.{{ public_domain }}'
                 openshift_master_default_subdomain: 'apps.{{ public_domain }}'
                 openshift_master_cluster_ip: $( get_value master_cluster_private_vip )
                 openshift_master_cluster_public_ip: $( get_value master_cluster_public_vip )
                 openshift_deployment_type: origin
                 os_sdn_network_plugin_name: 'redhat/openshift-ovs-multitenant'
-                openshift_hosted_registry_storage_volume_size: 30Gi
+                openshift_hosted_registry_storage_volume_size: 15Gi
                 openshift_storage_glusterfs_registry_storageclass: True
                 local_dns: $( get_value local_dns_ip )
-                external_interface: bond0
 
                 openshift_disable_check:
                   - docker_image_availability
