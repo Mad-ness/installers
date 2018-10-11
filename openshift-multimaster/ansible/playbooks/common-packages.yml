@@ -37,6 +37,10 @@
       - docker
       - glusterfs-fuse
 
+  - name: Install httpd-tools
+    yum: name=httpd-tools state=present
+    when: inventory_hostname in groups['masters']
+
   - name: Ensure NetworkManager
     service: name=NetworkManager state=started enabled=on
 

@@ -114,6 +114,159 @@ resources:
                 protocol: icmp
                 remote_ip_prefix: 0.0.0.0/0
 
+
+
+    sg_port1_tcpports:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            name: ocp3_sg_apps_port1_tcpports
+            description: Rules to access the only allowed traffic on a app port1 by TCP ports
+            rules:
+                repeat:
+                    for_each:
+                        <%port%>: { get_param: port1_allowed_tcp_ports }
+                    template:
+                        direction: ingress
+                        ethertype: IPv4
+                        port_range_min: <%port%>
+                        port_range_max: <%port%>
+                        protocol: tcp
+                        remote_ip_prefix: 0.0.0.0/0
+
+    sg_port1_udpports:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            name: ocp3_sg_apps_port1_udpports
+            description: Rules to access the only allowed traffic on a app port1 by UDP ports
+            rules:
+                repeat:
+                    for_each:
+                        <%port%>: { get_param: port1_allowed_udp_ports }
+                    template:
+                        direction: ingress
+                        ethertype: IPv4
+                        port_range_min: <%port%>
+                        port_range_max: <%port%>
+                        protocol: udp
+                        remote_ip_prefix: 0.0.0.0/0
+
+    sg_port1_icmpports:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            name: ocp3_sg_apps_port1_icmpports
+            description: Rules to access the only allowed traffic on a app port1 by ICMP ports
+            rules:
+              - direction: ingress
+                ethertype: IPv4
+                protocol: icmp
+                remote_ip_prefix: 0.0.0.0/0
+
+    sg_port1_vrrp:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            description: Rules to access the only allowe VRRP protocol
+            rules:
+              - direction: ingress
+                ethertype: IPv4
+                protocol: 112
+              - direction: egress
+                ethertype: IPv4
+                protocol: 112
+
+
+    cluster_vip1_port1:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: public_network }
+            security_groups:
+              - { get_resource: sg_port1_tcpports }
+              - { get_resource: sg_port1_udpports }
+              - { get_resource: sg_port1_icmpports }
+              - { get_resource: sg_port1_vrrp }
+    cluster_vip2_port1:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: public_network }
+            security_groups:
+              - { get_resource: sg_port1_tcpports }
+              - { get_resource: sg_port1_udpports }
+              - { get_resource: sg_port1_icmpports }
+              - { get_resource: sg_port1_vrrp }
+    cluster_vip3_port1:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: public_network }
+            security_groups:
+              - { get_resource: sg_port1_tcpports }
+              - { get_resource: sg_port1_udpports }
+              - { get_resource: sg_port1_icmpports }
+              - { get_resource: sg_port1_vrrp }
+    cluster_vip4_port1:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: public_network }
+            security_groups:
+              - { get_resource: sg_port1_tcpports }
+              - { get_resource: sg_port1_udpports }
+              - { get_resource: sg_port1_icmpports }
+              - { get_resource: sg_port1_vrrp }
+    cluster_vip5_port1:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: public_network }
+            security_groups:
+              - { get_resource: sg_port1_tcpports }
+              - { get_resource: sg_port1_udpports }
+              - { get_resource: sg_port1_icmpports }
+              - { get_resource: sg_port1_vrrp }
+    cluster_vip6_port1:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: public_network }
+            security_groups:
+              - { get_resource: sg_port1_tcpports }
+              - { get_resource: sg_port1_udpports }
+              - { get_resource: sg_port1_icmpports }
+              - { get_resource: sg_port1_vrrp }
+    cluster_vip7_port1:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: public_network }
+            security_groups:
+              - { get_resource: sg_port1_tcpports }
+              - { get_resource: sg_port1_udpports }
+              - { get_resource: sg_port1_icmpports }
+              - { get_resource: sg_port1_vrrp }
+    cluster_vip8_port1:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: public_network }
+            security_groups:
+              - { get_resource: sg_port1_tcpports }
+              - { get_resource: sg_port1_udpports }
+              - { get_resource: sg_port1_icmpports }
+              - { get_resource: sg_port1_vrrp }
+    cluster_vip9_port1:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: public_network }
+            security_groups:
+              - { get_resource: sg_port1_tcpports }
+              - { get_resource: sg_port1_udpports }
+              - { get_resource: sg_port1_icmpports }
+              - { get_resource: sg_port1_vrrp }
+    cluster_vip10_port1:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: public_network }
+            security_groups:
+              - { get_resource: sg_port1_tcpports }
+              - { get_resource: sg_port1_udpports }
+              - { get_resource: sg_port1_icmpports }
+              - { get_resource: sg_port1_vrrp }
+
+
+
     app1_port1:
         type: OS::Neutron::Port
         properties:
@@ -122,6 +275,17 @@ resources:
             - { get_resource: sg_port1_tcpports }
             - { get_resource: sg_port1_udpports }
             - { get_resource: sg_port1_icmpports }
+            allowed_address_pairs:
+              - ip_address: { get_attr: [ cluster_vip1_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip2_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip3_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip4_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip5_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip6_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip7_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip8_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip9_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip10_port1, fixed_ips, 0, ip_address ]}
     app1_port2:
         type: OS::Neutron::Port
         properties:
@@ -144,6 +308,17 @@ resources:
             - { get_resource: sg_port1_tcpports }
             - { get_resource: sg_port1_udpports }
             - { get_resource: sg_port1_icmpports }
+            allowed_address_pairs:
+              - ip_address: { get_attr: [ cluster_vip1_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip2_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip3_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip4_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip5_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip6_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip7_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip8_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip9_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip10_port1, fixed_ips, 0, ip_address ]}
     app2_port2:
         type: OS::Neutron::Port
         properties:
@@ -161,12 +336,22 @@ resources:
     app3_port1:
         type: OS::Neutron::Port
         properties:
-            name: app1_port1
             network_id: { get_param: public_network }
             security_groups:
             - { get_resource: sg_port1_tcpports }
             - { get_resource: sg_port1_udpports }
             - { get_resource: sg_port1_icmpports }
+            allowed_address_pairs:
+              - ip_address: { get_attr: [ cluster_vip1_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip2_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip3_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip4_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip5_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip6_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip7_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip8_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip9_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip10_port1, fixed_ips, 0, ip_address ]}
     app3_port2:
         type: OS::Neutron::Port
         properties:
@@ -179,6 +364,73 @@ resources:
             network_id: { get_param: storage_network }
             security_groups:
               - { get_resource: sg_port2_allports }
+
+    app4_port1:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: public_network }
+            security_groups:
+            - { get_resource: sg_port1_tcpports }
+            - { get_resource: sg_port1_udpports }
+            - { get_resource: sg_port1_icmpports }
+            allowed_address_pairs:
+              - ip_address: { get_attr: [ cluster_vip1_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip2_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip3_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip4_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip5_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip6_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip7_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip8_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip9_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip10_port1, fixed_ips, 0, ip_address ]}
+    app4_port2:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: private_network }
+            security_groups:
+              - { get_resource: sg_port2_allports }
+    app4_storage_port:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: storage_network }
+            security_groups:
+              - { get_resource: sg_port2_allports }
+
+    app5_port1:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: public_network }
+            security_groups:
+            - { get_resource: sg_port1_tcpports }
+            - { get_resource: sg_port1_udpports }
+            - { get_resource: sg_port1_icmpports }
+            allowed_address_pairs:
+              - ip_address: { get_attr: [ cluster_vip1_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip2_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip3_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip4_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip5_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip6_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip7_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip8_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip9_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip10_port1, fixed_ips, 0, ip_address ]}
+    app5_port2:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: private_network }
+            security_groups:
+              - { get_resource: sg_port2_allports }
+    app5_storage_port:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: storage_network }
+            security_groups:
+              - { get_resource: sg_port2_allports }
+            allowed_address_pairs:
+              - ip_address: { get_attr: [ cluster_vip1_port1, fixed_ips, 0, ip_address ]}
+              - ip_address: { get_attr: [ cluster_vip2_port1, fixed_ips, 0, ip_address ]}
 
 
 
@@ -216,6 +468,32 @@ resources:
             user_data: { get_param: user_data }
             scheduler_hints: { group: { get_param: scheduler_hints }}
 
+    app4:
+        type: OS::Nova::Server
+        properties:
+            name: ocp3_app4
+            image: { get_param: image }
+            flavor: { get_param: flavor }
+            key_name: { get_param: key_name }
+            networks: [ port: { get_resource: app4_port1 }, port: { get_resource: app4_port2 }, port: { get_resource: app4_storage_port }]
+            user_data: { get_param: user_data }
+            scheduler_hints: { group: { get_param: scheduler_hints }}
+
+
+    app5:
+        type: OS::Nova::Server
+        properties:
+            name: ocp3_app5
+            image: { get_param: image }
+            flavor: { get_param: flavor }
+            key_name: { get_param: key_name }
+            networks: [ port: { get_resource: app5_port1 }, port: { get_resource: app5_port2 }, port: { get_resource: app5_storage_port }]
+            user_data: { get_param: user_data }
+            scheduler_hints: { group: { get_param: scheduler_hints }}
+
+
+
+
 outputs:
 
 
@@ -249,3 +527,56 @@ outputs:
     app3_storage_ip:
         description: App1 Private IP address
         value: { get_attr: [ app3_storage_port, fixed_ips, 0, ip_address ]}
+
+    app4_ip1:
+        description: App4 Public IP address
+        value: { get_attr: [ app4_port1, fixed_ips, 0, ip_address ]}
+    app4_ip2:
+        description: App4 Private IP address
+        value: { get_attr: [ app4_port2, fixed_ips, 0, ip_address ]}
+    app4_storage_ip:
+        description: App4 Private IP address
+        value: { get_attr: [ app4_storage_port, fixed_ips, 0, ip_address ]}
+
+
+    app5_ip1:
+        description: App5 Public IP address
+        value: { get_attr: [ app5_port1, fixed_ips, 0, ip_address ]}
+    app5_ip2:
+        description: App5 Private IP address
+        value: { get_attr: [ app5_port2, fixed_ips, 0, ip_address ]}
+    app5_storage_ip:
+        description: App5 Private IP address
+        value: { get_attr: [ app5_storage_port, fixed_ips, 0, ip_address ]}
+
+
+    app_floating_vip1:
+        description: Infra vIP address 1
+        value: { get_attr: [ cluster_vip1_port1, fixed_ips, 0, ip_address ]}
+    app_floating_vip2:
+        description: Infra vIP address 2
+        value: { get_attr: [ cluster_vip2_port1, fixed_ips, 0, ip_address ]}
+    app_floating_vip3:
+        description: Infra vIP address 3
+        value: { get_attr: [ cluster_vip3_port1, fixed_ips, 0, ip_address ]}
+    app_floating_vip4:
+        description: Infra vIP address 4
+        value: { get_attr: [ cluster_vip4_port1, fixed_ips, 0, ip_address ]}
+    app_floating_vip5:
+        description: Infra vIP address 5
+        value: { get_attr: [ cluster_vip5_port1, fixed_ips, 0, ip_address ]}
+    app_floating_vip6:
+        description: Infra vIP address 6
+        value: { get_attr: [ cluster_vip6_port1, fixed_ips, 0, ip_address ]}
+    app_floating_vip7:
+        description: Infra vIP address 7
+        value: { get_attr: [ cluster_vip7_port1, fixed_ips, 0, ip_address ]}
+    app_floating_vip8:
+        description: Infra vIP address 8
+        value: { get_attr: [ cluster_vip8_port1, fixed_ips, 0, ip_address ]}
+    app_floating_vip9:
+        description: Infra vIP address 9
+        value: { get_attr: [ cluster_vip9_port1, fixed_ips, 0, ip_address ]}
+    app_floating_vip10:
+        description: Infra vIP address 10
+        value: { get_attr: [ cluster_vip10_port1, fixed_ips, 0, ip_address ]}

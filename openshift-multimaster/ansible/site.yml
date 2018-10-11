@@ -10,6 +10,7 @@
 - import_playbook: playbooks/dns-config.yml
 - import_playbook: playbooks/storage-packages.yml
 - import_playbook: playbooks/storage-firewall.yml
+- import_playbook: playbooks/install-rhsm-ca.yml
 
 
 # - import_playbook: playbooks/storage-prereq.yml

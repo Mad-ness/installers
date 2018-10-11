@@ -8,21 +8,21 @@ vrrp_script haproxy_check {
     weight              2
 }
 
-vrrp_instance OCP_Ext {
-    interface           eth0
-    virtual_router_id   51
-    priority            50
-    virtual_ipaddress   {
-        {{ openshift_master_cluster_public_ip }} dev eth0
-    }
-    track_script {
-        haproxy_check
-    }
-    authentication {
-        auth_type       PASS
-        auth_pass       lc0VfENu//5hdUvHEQ=
-    }
-}
+# vrrp_instance OCP_Ext {
+#     interface           eth0
+#     virtual_router_id   51
+#     priority            50
+#     virtual_ipaddress   {
+#         {{ openshift_master_cluster_public_ip }} dev eth0
+#     }
+#     track_script {
+#         haproxy_check
+#     }
+#     authentication {
+#         auth_type       PASS
+#         auth_pass       lc0VfENu//5hdUvHEQ=
+#     }
+# }
 
 vrrp_instance OCP_Int {
     interface           eth1
