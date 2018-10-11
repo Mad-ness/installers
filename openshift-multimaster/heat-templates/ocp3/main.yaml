@@ -74,6 +74,10 @@ parameters:
         label: Software configuration
         default: |
             #!/usr/bin/env bash
+            sed -i -e 's/^PasswordAuthentication.*$/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+            echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config
+            systemctl restart sshd
+            echo 'Admin123' | passwd --stdin root
             yum update -y
             yum install -y epel-release
             yum update -y || true
