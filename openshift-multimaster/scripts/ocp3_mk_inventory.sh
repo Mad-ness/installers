@@ -10,7 +10,14 @@ function get_value2() {
     key="$1"
     openstack stack output show "$stackname" $key -f value | sed 1,2d
 }
-
+function get_app_vips() {
+    tofile="floating_vips.txt"
+    cat /dev/null > $tofile
+    for h in {1..10}; do
+        get_value app_floating_vip_${h} >> $tofile
+    done
+    echo $tofile
+}
 cat << SSH_PRIV_KEY > "${stackname}.key"
 $( get_value2 private_key )
 SSH_PRIV_KEY
@@ -41,7 +48,7 @@ all:
                 glusterfs:
                 glusterfs_registry:
             vars:
-                openshift_logging_es_pvc_storage_class_name: glusterfs-storage-block 
+                openshift_logging_es_pvc_storage_class_name: glusterfs-storage-block
                 openshift_metrics_cassandra_pvc_storage_class_name: glusterfs-storage-block
                 openshift_logging_install_logging: true
                 openshift_logging_es_pvc_dynamic: true
@@ -146,6 +153,8 @@ all:
                 app1: { ansible_host: $( get_value app1_ip1 ), openshift_ip: $( get_value app1_ip2 ), openshift_hostname: 'app1.{{ private_domain }}', glusterfs_ip: $( get_value app1_storage_ip ) }
                 app2: { ansible_host: $( get_value app2_ip1 ), openshift_ip: $( get_value app2_ip2 ), openshift_hostname: 'app2.{{ private_domain }}', glusterfs_ip: $( get_value app2_storage_ip ) }
                 app3: { ansible_host: $( get_value app3_ip1 ), openshift_ip: $( get_value app3_ip2 ), openshift_hostname: 'app3.{{ private_domain }}', glusterfs_ip: $( get_value app3_storage_ip ) }
+                app4: { ansible_host: $( get_value app4_ip1 ), openshift_ip: $( get_value app4_ip2 ), openshift_hostname: 'app4.{{ private_domain }}', glusterfs_ip: $( get_value app4_storage_ip ) }
+                app5: { ansible_host: $( get_value app5_ip1 ), openshift_ip: $( get_value app5_ip2 ), openshift_hostname: 'app5.{{ private_domain }}', glusterfs_ip: $( get_value app5_storage_ip ) }
              vars:
                  containerized: true
                  openshift_schedulable: true
@@ -173,5 +182,5 @@ all:
                     openshift_hostname: 'bastion.{{ private_domain }}'
 
 INVENTORY
-
 echo "# Find the private key in ${stackname}.key"
+echo "# Find the Apps floating IPs in $(get_app_vips)"
