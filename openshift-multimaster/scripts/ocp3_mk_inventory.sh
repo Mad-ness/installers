@@ -15,6 +15,7 @@ function get_app_vips() {
     cat /dev/null > $tofile
     for h in {1..10}; do
         get_value app_floating_vip_${h} >> $tofile
+        echo >> $tofile
     done
     echo $tofile
 }
