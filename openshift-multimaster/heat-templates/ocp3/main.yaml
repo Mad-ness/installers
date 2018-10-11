@@ -11,7 +11,7 @@ parameters:
         type: string
         label: Flavor
         description: Flavor to set a proper set of resources
-        default: d1.os-master
+        default: f1.ocp-master
 
     infra_image:
         type: string
@@ -22,7 +22,7 @@ parameters:
         type: string
         label: Flavor
         description: Flavor to set a proper set of resources
-        default: d1.os-node
+        default: f1.ocp-node
 
 
 
@@ -36,7 +36,7 @@ parameters:
         type: string
         label: Flavor
         description: Flavor to set a proper set of resources
-        default: d1.os-node
+        default: f1.ocp-node
 
     app_image:
         type: string
@@ -47,7 +47,7 @@ parameters:
         type: string
         label: Flavor
         description: Flavor to set a proper set of resources
-        default: d1.os-node
+        default: f1.ocp-node
 
     public_network:
         type: string
