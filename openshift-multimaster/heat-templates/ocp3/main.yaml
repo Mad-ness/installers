@@ -270,13 +270,13 @@ outputs:
     app3_ip2: { value: { get_attr: [ apps, app3_ip2 ]}}
     app3_storage_ip: { value: { get_attr: [ apps, app3_storage_ip ]}}
 
-    app4_ip1: { value: { get_attr: [ apps, app4_ip1 ]}}
-    app4_ip2: { value: { get_attr: [ apps, app4_ip2 ]}}
-    app4_storage_ip: { value: { get_attr: [ apps, app4_storage_ip ]}}
+    # app4_ip1: { value: { get_attr: [ apps, app4_ip1 ]}}
+    # app4_ip2: { value: { get_attr: [ apps, app4_ip2 ]}}
+    # app4_storage_ip: { value: { get_attr: [ apps, app4_storage_ip ]}}
 
-    app5_ip1: { value: { get_attr: [ apps, app5_ip1 ]}}
-    app5_ip2: { value: { get_attr: [ apps, app5_ip2 ]}}
-    app5_storage_ip: { value: { get_attr: [ apps, app5_storage_ip ]}}
+    # app5_ip1: { value: { get_attr: [ apps, app5_ip1 ]}}
+    # app5_ip2: { value: { get_attr: [ apps, app5_ip2 ]}}
+    # app5_storage_ip: { value: { get_attr: [ apps, app5_storage_ip ]}}
 
     app_floating_vip_1: { value: { get_attr: [ apps, app_floating_vip1 ]}}
     app_floating_vip_2: { value: { get_attr: [ apps, app_floating_vip2 ]}}

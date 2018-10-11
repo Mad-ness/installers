@@ -34,7 +34,7 @@ all:
         api_subnet_cidr: $( get_value api_subnet_cidr )
         storage_subnet_cidr: $( get_value storage_subnet_cidr )
     children:
-         local: { hosts: { 127.0.0.1: }}
+         # local: { hosts: { 127.0.0.1: }}
          etcd: { children: { masters: }}
          glusterfs_registry: { children: { glusterfs: }}
          dns_servers: { children: { management: }}
@@ -45,7 +45,7 @@ all:
                 nodes:
                 etcd:
                 lb:
-                local:
+                # local:
                 glusterfs:
                 glusterfs_registry:
             vars:
