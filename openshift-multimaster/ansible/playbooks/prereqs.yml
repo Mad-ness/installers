@@ -5,6 +5,10 @@
     - all
   tasks:
 
+  - name: Install python2-dnf if needed
+    raw: yum install -y python2-dnf
+    when: ansible_ssh_user == "fedora"
+
   - name: Set /etc/hosts
     copy: 
         content: |

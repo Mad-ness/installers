@@ -15,6 +15,6 @@
   - name: Install Ansible
     yum: name='{{ item }}' state=present
     with_items: 
-     - ansible
+#     - ansible
      - git
 

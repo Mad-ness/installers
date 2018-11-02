@@ -16,11 +16,13 @@
   gather_facts: false
   tasks:
 
+
+
   - name: Install updates
-    yum: name='*' state=latest
+    package: name='*' state=latest
 
   - name: Install required packages
-    yum: name='{{ item }}'
+    package: name='{{ item }}'
     with_items:
       - NetworkManager
       - wget
@@ -36,6 +38,13 @@
       - psacct
       - docker
       - glusterfs-fuse
+
+  - name: Installing httpd-tools on bastion
+    package: name='{{ item }}'
+    with_items:
+    - httpd-tools
+    - java-1.8.0-openjdk-headless
+    when: inventory_hostname == 'bastion'
 
   - name: Install httpd-tools
     yum: name=httpd-tools state=present
