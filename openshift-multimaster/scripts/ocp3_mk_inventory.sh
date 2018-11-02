@@ -93,20 +93,27 @@ all:
                 openshift_storage_glusterfs_registry_block_host_vol_size: 20
                 openshift_master_ldap_ca_file: '/tmp/freeipa-cacert.p12'
                 openshift_master_identity_providers:
-                  - name: FreeIPA
-                    challenge: true
-                    login: true
-                    kind: LDAPPasswordIdentityProvider
-                    attributes:
-                        id: ['dn']
-                        email: ['mail']
-                        name: ['cn']
-                        preferredUsername: ['uid']
-                    bindDN: 'uid=freeipabind,cn=users,cn=accounts,dc=labcloud,dc=litf4'
-                    bindPassword: 'oZP3Z8D+PGjECUQWfc/YN4I9+UA='
-                    insecure: false
-                    # ca: freeipa-cacert.p12
-                    url: 'ldap://freeipa.labcloud.litf4:389/cn=users,cn=accounts,dc=labcloud,dc=litf4?uid?sub?(&(!(memberOf=cn=disabledusers,cn=groups,cn=accounts,dc=labcloud,dc=litf4))(|(memberOf=cn=openshiftusers,cn=groups,cn=accounts,dc=labcloud,dc=litf4)(memberOf=cn=openshiftadmins,cn=groups,cn=accounts,dc=labcloud,dc=litf4)))'
+                    - name: htpasswd_auth
+                      login: true
+                      challenge: true
+                      kind: HTPasswdPasswordIdentityProvider
+                      filename: /etc/openshift/openshift-passwd 
+
+##                 openshift_master_identity_providers:
+##                   - name: FreeIPA
+##                     challenge: true
+##                     login: true
+##                     kind: LDAPPasswordIdentityProvider
+##                     attributes:
+##                         id: ['dn']
+##                         email: ['mail']
+##                         name: ['cn']
+##                         preferredUsername: ['uid']
+##                     bindDN: 'uid=freeipabind,cn=users,cn=accounts,dc=labcloud,dc=litf4'
+##                     bindPassword: 'oZP3Z8D+PGjECUQWfc/YN4I9+UA='
+##                     insecure: false
+##                     # ca: freeipa-cacert.p12
+##                     url: 'ldap://freeipa.labcloud.litf4:389/cn=users,cn=accounts,dc=labcloud,dc=litf4?uid?sub?(&(!(memberOf=cn=disabledusers,cn=groups,cn=accounts,dc=labcloud,dc=litf4))(|(memberOf=cn=openshiftusers,cn=groups,cn=accounts,dc=labcloud,dc=litf4)(memberOf=cn=openshiftadmins,cn=groups,cn=accounts,dc=labcloud,dc=litf4)))'
 
          masters:
              hosts:
