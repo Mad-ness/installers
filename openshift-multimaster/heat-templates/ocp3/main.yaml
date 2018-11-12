@@ -13,17 +13,17 @@ parameters:
         description: Flavor to set a proper set of resources
         default: d1.os-master
 
-    infra_image:
-        type: string
-        label: Image name or ID
-        description: Image used to create an instance from
-        default: CentOS-7
-    infra_flavor:
-        type: string
-        label: Flavor
-        description: Flavor to set a proper set of resources
-        default: d1.os-node
-
+##     infra_image:
+##         type: string
+##         label: Image name or ID
+##         description: Image used to create an instance from
+##         default: CentOS-7
+##     infra_flavor:
+##         type: string
+##         label: Flavor
+##         description: Flavor to set a proper set of resources
+##         default: d1.os-node
+## 
 
 
 
@@ -147,23 +147,23 @@ resources:
             cluster_vip_allowed_tcp_ports: "22,8443"
             user_data: { get_param: user_data }
             scheduler_hints: { get_resource: server_group }
-
-    infras:
-        type: lib/infras.yaml
-        properties:
-            image: { get_param: infra_image }
-            flavor: { get_param: infra_flavor }
-            key_name: { get_resource: sshkey }
-            public_network: { get_param: public_network }
-            private_network: { get_resource: private_network }
-            storage_network: { get_resource: storage_network }
-            port1_allowed_tcp_ports: "22,53,8053,443,8443,10250,10010,2049,2379,2380,9000,8444,1936"
-            port1_allowed_udp_ports: "4789,53,8053,443,2049"
-            cluster_vip_allowed_tcp_ports: "22,53,8053,443,8443,10250,10010,2049,2379,2380,9000,8444,1936"
-            cluster_vip_allowed_udp_ports: "4789,53,8053,443,2049"
-            user_data: { get_param: user_data }
-            scheduler_hints: { get_resource: server_group }
-
+## 
+##     infras:
+##         type: lib/infras.yaml
+##         properties:
+##             image: { get_param: infra_image }
+##             flavor: { get_param: infra_flavor }
+##             key_name: { get_resource: sshkey }
+##             public_network: { get_param: public_network }
+##             private_network: { get_resource: private_network }
+##             storage_network: { get_resource: storage_network }
+##             port1_allowed_tcp_ports: "22,53,8053,443,8443,10250,10010,2049,2379,2380,9000,8444,1936"
+##             port1_allowed_udp_ports: "4789,53,8053,443,2049"
+##             cluster_vip_allowed_tcp_ports: "22,53,8053,443,8443,10250,10010,2049,2379,2380,9000,8444,1936"
+##             cluster_vip_allowed_udp_ports: "4789,53,8053,443,2049"
+##             user_data: { get_param: user_data }
+##             scheduler_hints: { get_resource: server_group }
+## 
 
     apps:
         type: lib/apps.yaml
@@ -214,14 +214,9 @@ outputs:
     bastion_ip1: { value: { get_attr: [ services, bastion_ip1 ]}}
     bastion_ip2: { value: { get_attr: [ services, bastion_ip2 ]}}
 
-#     storage_subnet_cidr: { value: { get_attr: [ storages, storage_subnet_cidr ]}}
     storage_subnet_cidr: { value: { get_attr: [ storage_subnet, cidr ]}}
     api_subnet_cidr: { value: { get_attr: [ private_subnet, cidr ]}}
     local_dns_ip: { value: { get_attr: [ services, bastion_ip2 ]}}
-
-##    cluster_vip_ip1: { value: { get_attr: [ masters, cluster_vip ]}}
-##    buildhost_ip1: { value: { get_attr: [ services, buildhost_ip1 ]}}
-#    dnsserver_ip1: { value: { get_attr: [ services, buildhost_ip1 ]}}
 
     master_cluster_public_vip: { value: { get_attr: [ masters, cluster_public_vip ]}}
     master_cluster_private_vip: { value: { get_attr: [ masters, cluster_private_vip ]}}
@@ -237,20 +232,20 @@ outputs:
     master3_storage_ip: { value: { get_attr: [ masters, master3_storage_ip ]}}
 
 
-    infra_public_vip1: { value: { get_attr: [ infras, cluster_public_vip1 ]}}
-    # infra_private_vip1: { value: { get_attr: [ infras, cluster_private_vip1 ]}}
-    infra_public_vip2: { value: { get_attr: [ infras, cluster_public_vip2 ]}}
-    # infra_private_vip2: { value: { get_attr: [ infras, cluster_private_vip2 ]}}
-    # cluster_public_ip: { value: { get_attr: [ infras, cluster_ip1 ]}}
-    # cluster_private_ip: { value: { get_attr: [ infras, cluster_ip2 ]}}
-
-
-    infra1_ip1: { value: { get_attr: [ infras, infra1_ip1 ]}}
-    infra1_ip2: { value: { get_attr: [ infras, infra1_ip2 ]}}
-    infra1_storage_ip: { value: { get_attr: [ infras, infra1_storage_ip ]}}
-    infra2_ip1: { value: { get_attr: [ infras, infra2_ip1 ]}}
-    infra2_ip2: { value: { get_attr: [ infras, infra2_ip2 ]}}
-    infra2_storage_ip: { value: { get_attr: [ infras, infra2_storage_ip ]}}
+##     infra_public_vip1: { value: { get_attr: [ infras, cluster_public_vip1 ]}}
+##     # infra_private_vip1: { value: { get_attr: [ infras, cluster_private_vip1 ]}}
+##     infra_public_vip2: { value: { get_attr: [ infras, cluster_public_vip2 ]}}
+##     # infra_private_vip2: { value: { get_attr: [ infras, cluster_private_vip2 ]}}
+##     # cluster_public_ip: { value: { get_attr: [ infras, cluster_ip1 ]}}
+##     # cluster_private_ip: { value: { get_attr: [ infras, cluster_ip2 ]}}
+## 
+## 
+##     infra1_ip1: { value: { get_attr: [ infras, infra1_ip1 ]}}
+##     infra1_ip2: { value: { get_attr: [ infras, infra1_ip2 ]}}
+##     infra1_storage_ip: { value: { get_attr: [ infras, infra1_storage_ip ]}}
+##     infra2_ip1: { value: { get_attr: [ infras, infra2_ip1 ]}}
+##     infra2_ip2: { value: { get_attr: [ infras, infra2_ip2 ]}}
+##     infra2_storage_ip: { value: { get_attr: [ infras, infra2_storage_ip ]}}
 
     # infra3_ip1: { value: { get_attr: [ infras, infra3_ip1 ]}}
     # infra3_ip2: { value: { get_attr: [ infras, infra3_ip2 ]}}
@@ -265,14 +260,14 @@ outputs:
     app3_ip1: { value: { get_attr: [ apps, app3_ip1 ]}}
     app3_ip2: { value: { get_attr: [ apps, app3_ip2 ]}}
     app3_storage_ip: { value: { get_attr: [ apps, app3_storage_ip ]}}
+    app4_ip1: { value: { get_attr: [ apps, app4_ip1 ]}}
+    app4_ip2: { value: { get_attr: [ apps, app4_ip2 ]}}
+    app4_storage_ip: { value: { get_attr: [ apps, app4_storage_ip ]}}
+    app5_ip1: { value: { get_attr: [ apps, app5_ip1 ]}}
+    app5_ip2: { value: { get_attr: [ apps, app5_ip2 ]}}
+    app5_storage_ip: { value: { get_attr: [ apps, app5_storage_ip ]}}
 
-    # app4_ip1: { value: { get_attr: [ apps, app4_ip1 ]}}
-    # app4_ip2: { value: { get_attr: [ apps, app4_ip2 ]}}
-    # app4_storage_ip: { value: { get_attr: [ apps, app4_storage_ip ]}}
 
-    # app5_ip1: { value: { get_attr: [ apps, app5_ip1 ]}}
-    # app5_ip2: { value: { get_attr: [ apps, app5_ip2 ]}}
-    # app5_storage_ip: { value: { get_attr: [ apps, app5_storage_ip ]}}
 
     app_floating_vip_1: { value: { get_attr: [ apps, app_floating_vip1 ]}}
     app_floating_vip_2: { value: { get_attr: [ apps, app_floating_vip2 ]}}
@@ -295,3 +290,4 @@ outputs:
     storage3_ip1: { value: { get_attr: [ storages, storage3_ip1 ]}}
     storage3_ip2: { value: { get_attr: [ storages, storage3_ip2 ]}}
     storage3_ip3: { value: { get_attr: [ storages, storage3_ip3 ]}}
+

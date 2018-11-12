@@ -137,32 +137,32 @@ all:
                  openshift_schedulable: true
                  openshift_node_group_name: 'node-config-master'
          infra:
-             hosts:
-                infra1:
-                    openshift_hostname: 'infra1.{{ private_domain }}'
-                    ansible_host: $( get_value infra1_ip1 )
-                    openshift_public_ip: $( get_value infra1_ip1 )
-                    openshift_ip: $( get_value infra1_ip2 )
-                    glusterfs_ip: $( get_value infra1_storage_ip )
-                infra2:
-                    openshift_hostname: 'infra2.{{ private_domain }}'
-                    ansible_host: $( get_value infra2_ip1 )
-                    openshift_public_ip: $( get_value infra2_ip1 )
-                    openshift_ip: $( get_value infra2_ip2 )
-                    glusterfs_ip: $( get_value infra2_storage_ip )
+            children:
+                masters:
+##             hosts:
+##                 infra1:
+##                     openshift_hostname: 'app1.{{ private_domain }}'
+##                     ansible_host: $( get_value app1_ip1 )
+##                     openshift_public_ip: $( get_value app1_ip2 )
+##                     openshift_ip: $( get_value app1_ip2 )
+##                     glusterfs_ip: $( get_value app11_storage_ip )
+##                 infra2:
+##                     openshift_hostname: 'app2.{{ private_domain }}'
+##                     ansible_host: $( get_value app2_ip1 )
+##                     openshift_public_ip: $( get_value app2_ip1 )
+##                     openshift_ip: $( get_value app2_ip2 )
+##                     glusterfs_ip: $( get_value app2_storage_ip )
 
              vars:
                  containerized: true
                  openshift_schedulable: true
                  openshift_node_group_name: 'node-config-infra'
-                 public_vips: [ $( get_value infra_public_vip1 ), $( get_value infra_public_vip2 )]
+                 public_vips: [ $( get_value app_floating_vip_1 ), $( get_value app_floating_vip_2 )]
          app:
              hosts:
-                app1: { ansible_host: $( get_value app1_ip1 ), openshift_ip: $( get_value app1_ip2 ), openshift_hostname: 'app1.{{ private_domain }}', glusterfs_ip: $( get_value app1_storage_ip ) }
-                app2: { ansible_host: $( get_value app2_ip1 ), openshift_ip: $( get_value app2_ip2 ), openshift_hostname: 'app2.{{ private_domain }}', glusterfs_ip: $( get_value app2_storage_ip ) }
                 app3: { ansible_host: $( get_value app3_ip1 ), openshift_ip: $( get_value app3_ip2 ), openshift_hostname: 'app3.{{ private_domain }}', glusterfs_ip: $( get_value app3_storage_ip ) }
-                # app4: { ansible_host: $( get_value app4_ip1 ), openshift_ip: $( get_value app4_ip2 ), openshift_hostname: 'app4.{{ private_domain }}', glusterfs_ip: $( get_value app4_storage_ip ) }
-                # app5: { ansible_host: $( get_value app5_ip1 ), openshift_ip: $( get_value app5_ip2 ), openshift_hostname: 'app5.{{ private_domain }}', glusterfs_ip: $( get_value app5_storage_ip ) }
+                app4: { ansible_host: $( get_value app4_ip1 ), openshift_ip: $( get_value app4_ip2 ), openshift_hostname: 'app4.{{ private_domain }}', glusterfs_ip: $( get_value app4_storage_ip ) }
+                app5: { ansible_host: $( get_value app5_ip1 ), openshift_ip: $( get_value app5_ip2 ), openshift_hostname: 'app5.{{ private_domain }}', glusterfs_ip: $( get_value app5_storage_ip ) }
              vars:
                  containerized: true
                  openshift_schedulable: true
