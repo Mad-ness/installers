@@ -145,7 +145,7 @@ all:
 ##                     ansible_host: $( get_value app1_ip1 )
 ##                     openshift_public_ip: $( get_value app1_ip2 )
 ##                     openshift_ip: $( get_value app1_ip2 )
-##                     glusterfs_ip: $( get_value app11_storage_ip )
+##                     glusterfs_ip: $( get_value app1_storage_ip )
 ##                 infra2:
 ##                     openshift_hostname: 'app2.{{ private_domain }}'
 ##                     ansible_host: $( get_value app2_ip1 )
