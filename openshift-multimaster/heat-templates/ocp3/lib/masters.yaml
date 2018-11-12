@@ -102,7 +102,6 @@ resources:
     sg_port2_allports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: sg_internal_network
             rules:
               - direction: ingress
                 ethertype: IPv4
@@ -141,7 +140,6 @@ resources:
     sg_port1_tcpports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: sg_masters_port1_tcpports
             description: Rules to access the only allowed traffic on a master port1 by TCP ports
             rules:
                 repeat:
@@ -158,7 +156,6 @@ resources:
     sg_port1_udpports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: sg_masters_port1_udpports
             description: Rules to access the only allowed traffic on a master port1 by UDP ports
             rules:
                 repeat:
@@ -175,7 +172,6 @@ resources:
     sg_port1_icmpports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: sg_masters_port1_icmpports
             description: Rules to access the only allowed traffic on a master port1 by ICMP ports
             rules:
               - direction: ingress
@@ -304,7 +300,6 @@ resources:
     master1:
         type: OS::Nova::Server
         properties:
-            name: master1
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
@@ -315,7 +310,6 @@ resources:
     master2:
         type: OS::Nova::Server
         properties:
-            name: master2
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
@@ -326,7 +320,6 @@ resources:
     master3:
         type: OS::Nova::Server
         properties:
-            name: master3
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }

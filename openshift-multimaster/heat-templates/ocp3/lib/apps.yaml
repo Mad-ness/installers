@@ -54,7 +54,6 @@ resources:
     sg_port1_tcpports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: sg_apps_port1_tcpports
             description: Rules to access the only allowed traffic on a app port1 by TCP ports
             rules:
                 repeat:
@@ -71,7 +70,6 @@ resources:
     sg_port1_udpports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: sg_apps_port1_udpports
             description: Rules to access the only allowed traffic on a app port1 by UDP ports
             rules:
                 repeat:
@@ -88,7 +86,6 @@ resources:
     sg_port1_icmpports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: sg_apps_port1_icmpports
             description: Rules to access the only allowed traffic on a app port1 by ICMP ports
             rules:
               - direction: ingress
@@ -99,7 +96,6 @@ resources:
     sg_port2_allports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: sg_apps_internal_network
             rules:
               - direction: ingress
                 ethertype: IPv4
@@ -119,7 +115,6 @@ resources:
     sg_port1_tcpports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: sg_apps_port1_tcpports
             description: Rules to access the only allowed traffic on a app port1 by TCP ports
             rules:
                 repeat:
@@ -136,7 +131,6 @@ resources:
     sg_port1_udpports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: sg_apps_port1_udpports
             description: Rules to access the only allowed traffic on a app port1 by UDP ports
             rules:
                 repeat:
@@ -153,7 +147,6 @@ resources:
     sg_port1_icmpports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: sg_apps_port1_icmpports
             description: Rules to access the only allowed traffic on a app port1 by ICMP ports
             rules:
               - direction: ingress
@@ -438,7 +431,6 @@ resources:
     app1:
         type: OS::Nova::Server
         properties:
-            name: app1
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
@@ -449,7 +441,6 @@ resources:
     app2:
         type: OS::Nova::Server
         properties:
-            name: app2
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
@@ -460,7 +451,6 @@ resources:
     app3:
         type: OS::Nova::Server
         properties:
-            name: app3
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
@@ -471,7 +461,6 @@ resources:
     # app4:
     #     type: OS::Nova::Server
     #     properties:
-    #         name: app4
     #         image: { get_param: image }
     #         flavor: { get_param: flavor }
     #         key_name: { get_param: key_name }
@@ -483,7 +472,6 @@ resources:
     # app5:
     #     type: OS::Nova::Server
     #     properties:
-    #         name: app5
     #         image: { get_param: image }
     #         flavor: { get_param: flavor }
     #         key_name: { get_param: key_name }

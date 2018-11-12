@@ -99,12 +99,10 @@ resources:
     private_network:
         type: OS::Neutron::Net
         properties:
-            name: OCP3 Internal Network
             shared: false
     private_subnet:
         type: OS::Neutron::Subnet
         properties:
-            name: OCP3 Internal Subnet
             network: { get_resource: private_network }
             allocation_pools:
               - start: 100.0.0.11
@@ -120,12 +118,10 @@ resources:
     storage_network:
         type: OS::Neutron::Net
         properties:
-            name: OCP3 Storage Backend Network
             shared: false
     storage_subnet:
         type: OS::Neutron::Subnet
         properties:
-            name: OCP3 Storage Backend Subnet
             network: { get_resource: storage_network }
             allocation_pools:
               - start: 200.0.0.11
