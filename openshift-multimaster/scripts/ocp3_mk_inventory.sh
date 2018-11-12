@@ -137,7 +137,7 @@ all:
                  openshift_schedulable: true
                  openshift_node_group_name: 'node-config-master'
          infra:
-            children:
+             children:
                 masters:
 ##             hosts:
 ##                 infra1:
