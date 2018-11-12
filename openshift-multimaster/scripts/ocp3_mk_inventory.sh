@@ -138,7 +138,7 @@ all:
                  openshift_node_group_name: 'node-config-master'
          infra:
              children:
-                masters:
+                app[1-2]:
 ##             hosts:
 ##                 infra1:
 ##                     openshift_hostname: 'app1.{{ private_domain }}'
