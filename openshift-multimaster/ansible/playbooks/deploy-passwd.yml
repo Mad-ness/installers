@@ -1,0 +1,18 @@
+- hosts:
+    - masters
+  become: true
+  gather_facts: false
+  tasks:
+
+  - name: Create a directory
+    file:
+        path: /etc/openshift
+        state: directory
+
+  - name: Copy passwd file
+    copy:
+        src: 'openshift-passwd'
+        dest: '/etc/openshift/openshift-passwd'
+        mode: '0644'
+    when: inventory_hostname in groups['masters']
+

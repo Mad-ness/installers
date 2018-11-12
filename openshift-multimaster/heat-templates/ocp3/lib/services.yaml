@@ -49,7 +49,7 @@ resources:
     sg_port1_tcpports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: ocp3_sg_services_port1_tcpports
+            name: sg_services_port1_tcpports
             description: Rules to access the only allowed traffic on a service port1 by TCP ports
             rules:
                 repeat:
@@ -66,7 +66,7 @@ resources:
     sg_port1_udpports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: ocp3_sg_services_port1_udpports
+            name: sg_services_port1_udpports
             description: Rules to access the only allowed traffic on a service port1 by UDP ports
             rules:
                 repeat:
@@ -83,7 +83,7 @@ resources:
     sg_port1_icmpports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: ocp3_sg_services_port1_icmpports
+            name: sg_services_port1_icmpports
             description: Rules to access the only allowed traffic on a service port1 by ICMP ports
             rules:
               - direction: ingress
@@ -94,7 +94,7 @@ resources:
     sg_port2_allports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: ocp3_sg_apps_internal_network
+            name: sg_apps_internal_network
             rules:
               - direction: ingress
                 ethertype: IPv4
@@ -129,7 +129,7 @@ resources:
     bastion:
         type: OS::Nova::Server
         properties:
-            name: ocp3_bastion
+            name: bastion
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }

@@ -68,7 +68,7 @@ resources:
     sg_port1_tcpports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: ocp3_sg_storages_port1_tcpports
+            name: sg_storages_port1_tcpports
             description: Rules to access the only allowed traffic on a storage port1 by TCP ports
             rules:
                 repeat:
@@ -85,7 +85,7 @@ resources:
     sg_port1_udpports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: ocp3_sg_storages_port1_udpports
+            name: sg_storages_port1_udpports
             description: Rules to access the only allowed traffic on a storage port1 by UDP ports
             rules:
                 repeat:
@@ -102,7 +102,7 @@ resources:
     sg_port1_icmpports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: ocp3_sg_storages_port1_icmpports
+            name: sg_storages_port1_icmpports
             description: Rules to access the only allowed traffic on a storage port1 by ICMP ports
             rules:
               - direction: ingress
@@ -113,7 +113,7 @@ resources:
     sg_port2_allports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: ocp3_sg_storages_internal_network
+            name: sg_storages_internal_network
             rules:
               - direction: ingress
                 ethertype: IPv4
@@ -131,7 +131,7 @@ resources:
     sg_port3_allports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: ocp3_sg_storages_storage_network
+            name: sg_storages_storage_network
             rules:
               - direction: ingress
                 ethertype: IPv4
@@ -249,7 +249,7 @@ resources:
     storage1:
         type: OS::Nova::Server
         properties:
-            name: ocp3_storage1
+            name: storage1
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
@@ -260,7 +260,7 @@ resources:
     storage2:
         type: OS::Nova::Server
         properties:
-            name: ocp3_storage2
+            name: storage2
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
@@ -271,7 +271,7 @@ resources:
     storage3:
         type: OS::Nova::Server
         properties:
-            name: ocp3_storage3
+            name: storage3
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }

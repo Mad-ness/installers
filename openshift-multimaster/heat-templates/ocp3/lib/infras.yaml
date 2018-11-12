@@ -62,7 +62,7 @@ resources:
     sg_cluster_int_vip_allports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: ocp3_sg_cluster_int_vip
+            name: sg_cluster_int_vip
             rules:
               - direction: ingress
                 ethertype: IPv4
@@ -81,7 +81,7 @@ resources:
     sg_port2_allports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: ocp3_sg_infra_internal_network
+            name: sg_infra_internal_network
             rules:
               - direction: ingress
                 ethertype: IPv4
@@ -101,7 +101,7 @@ resources:
     sg_cluster_pub_vip_tcpports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: ocp3_sg_infras_cluster_pub_vip_tcpports
+            name: sg_infras_cluster_pub_vip_tcpports
             rules:
                 repeat:
                     for_each:
@@ -117,7 +117,7 @@ resources:
     sg_cluster_pub_vip_udpports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: ocp3_sg_infras_cluster_pub_vip_udpports
+            name: sg_infras_cluster_pub_vip_udpports
             description: Rules to access the only allowed traffic on a infra port1 by UDP ports
             rules:
                 repeat:
@@ -136,7 +136,7 @@ resources:
     sg_port1_tcpports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: ocp3_sg_infras_port1_tcpports
+            name: sg_infras_port1_tcpports
             description: Rules to access the only allowed traffic on a infra port1 by TCP ports
             rules:
                 repeat:
@@ -153,7 +153,7 @@ resources:
     sg_port1_udpports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: ocp3_sg_infras_port1_udpports
+            name: sg_infras_port1_udpports
             description: Rules to access the only allowed traffic on a infra port1 by UDP ports
             rules:
                 repeat:
@@ -170,7 +170,7 @@ resources:
     sg_port1_icmpports:
         type: OS::Neutron::SecurityGroup
         properties:
-            name: ocp3_sg_infras_port1_icmpports
+            name: sg_infras_port1_icmpports
             description: Rules to access the only allowed traffic on a infra port1 by ICMP ports
             rules:
               - direction: ingress
@@ -274,7 +274,7 @@ resources:
     infra1:
         type: OS::Nova::Server
         properties:
-            name: ocp3_infra1
+            name: infra1
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }
@@ -285,7 +285,7 @@ resources:
     infra2:
         type: OS::Nova::Server
         properties:
-            name: ocp3_infra2
+            name: infra2
             image: { get_param: image }
             flavor: { get_param: flavor }
             key_name: { get_param: key_name }

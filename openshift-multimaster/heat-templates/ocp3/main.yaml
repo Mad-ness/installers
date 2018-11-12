@@ -85,11 +85,11 @@ parameters:
 
 resources:
 
-    ocp3_sshkey:
+    sshkey:
         type: OS::Nova::KeyPair
         properties:
             save_private_key: true
-            name: ocp3_sshkey
+            name: sshkey
 
     server_group:
         type: OS::Nova::ServerGroup
@@ -142,7 +142,7 @@ resources:
         properties:
             image: { get_param: master_image }
             flavor: { get_param: master_flavor }
-            key_name: { get_resource: ocp3_sshkey }
+            key_name: { get_resource: sshkey }
             public_network: { get_param: public_network }
             private_network: { get_resource: private_network }
             storage_network: { get_resource: storage_network }
@@ -157,7 +157,7 @@ resources:
         properties:
             image: { get_param: infra_image }
             flavor: { get_param: infra_flavor }
-            key_name: { get_resource: ocp3_sshkey }
+            key_name: { get_resource: sshkey }
             public_network: { get_param: public_network }
             private_network: { get_resource: private_network }
             storage_network: { get_resource: storage_network }
@@ -174,7 +174,7 @@ resources:
         properties:
             image: { get_param: app_image }
             flavor: { get_param: app_flavor }
-            key_name: { get_resource: ocp3_sshkey }
+            key_name: { get_resource: sshkey }
             public_network: { get_param: public_network }
             private_network: { get_resource: private_network }
             storage_network: { get_resource: storage_network }
@@ -188,7 +188,7 @@ resources:
         properties:
             image: { get_param: storage_image }
             flavor: { get_param: storage_flavor }
-            key_name: { get_resource: ocp3_sshkey }
+            key_name: { get_resource: sshkey }
             public_network: { get_param: public_network }
             private_network: { get_resource: private_network }
             storage_network: { get_resource: storage_network }
@@ -202,7 +202,7 @@ resources:
         properties:
             image: { get_param: app_image }
             flavor: { get_param: app_flavor }
-            key_name: { get_resource: ocp3_sshkey }
+            key_name: { get_resource: sshkey }
             public_network: { get_param: public_network }
             private_network: { get_resource: private_network }
             port1_allowed_tcp_ports: "22,53,8053,443,8443,10250,10010,2049,2379,2380,9000,8444,1936"
@@ -213,7 +213,7 @@ resources:
 
 outputs:
 
-    private_key: { value: { get_attr: [ ocp3_sshkey, private_key ]}}
+    private_key: { value: { get_attr: [ sshkey, private_key ]}}
 
     bastion_ip1: { value: { get_attr: [ services, bastion_ip1 ]}}
     bastion_ip2: { value: { get_attr: [ services, bastion_ip2 ]}}
