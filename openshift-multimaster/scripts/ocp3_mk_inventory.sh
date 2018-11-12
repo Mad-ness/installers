@@ -97,7 +97,7 @@ all:
                       login: true
                       challenge: true
                       kind: HTPasswdPasswordIdentityProvider
-                      filename: /etc/openshift/openshift-passwd 
+                      file: /etc/openshift/openshift-passwd 
 
 ##                 openshift_master_identity_providers:
 ##                   - name: FreeIPA
