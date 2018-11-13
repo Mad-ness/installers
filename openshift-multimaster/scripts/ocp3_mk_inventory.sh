@@ -145,7 +145,7 @@ all:
                  containerized: true
                  openshift_schedulable: true
                  openshift_node_group_name: 'node-config-master-infra'
-##         infra:
+         infra:
 ##             hosts:
 ##                app1: { ansible_host: $( get_value app1_ip1 ), openshift_ip: $( get_value app1_ip2 ), openshift_hostname: 'app1.{{ private_domain }}', glusterfs_ip: $( get_value app1_storage_ip ) }
 ##                app2: { ansible_host: $( get_value app2_ip1 ), openshift_ip: $( get_value app2_ip2 ), openshift_hostname: 'app2.{{ private_domain }}', glusterfs_ip: $( get_value app2_storage_ip ) }
