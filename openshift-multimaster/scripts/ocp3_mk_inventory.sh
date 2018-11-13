@@ -65,6 +65,9 @@ all:
                 os_sdn_network_plugin_name: 'redhat/openshift-ovs-multitenant'
                 openshift_hosted_registry_storage_volume_size: 15Gi
                 openshift_storage_glusterfs_registry_storageclass: True
+                ### --- Added monitoring
+                openshift_monitoring_deploy: true
+                ### --- addons end
                 local_dns: $( get_value local_dns_ip )
 
                 openshift_disable_check:
