@@ -38,7 +38,7 @@ all:
          etcd: { children: { masters: }}
          glusterfs_registry: { children: { glusterfs: }}
          dns_servers: { children: { management: }}
-         lb: { children: { infra: }}
+         lb: { children: { masters: }}
          OSEv3:
             children:
                 masters:
@@ -56,8 +56,8 @@ all:
                 ## openshift_metrics_install_metrics: true
                 openshift_master_cluster_method: native
                 ## openshift_metrics_cassandra_storage_type: dynamic
-                openshift_master_cluster_hostname: 'console.{{ private_domain }}'
-                openshift_master_cluster_public_hostname: 'console.{{ public_domain }}'
+                openshift_master_cluster_hostname: 'ocp.{{ private_domain }}'
+                openshift_master_cluster_public_hostname: 'ocp.{{ public_domain }}'
                 openshift_master_default_subdomain: 'apps.{{ public_domain }}'
                 openshift_master_cluster_ip: $( get_value master_cluster_private_vip )
                 openshift_master_cluster_public_ip: $( get_value master_cluster_public_vip )
@@ -65,13 +65,13 @@ all:
                 os_sdn_network_plugin_name: 'redhat/openshift-ovs-multitenant'
                 openshift_hosted_registry_storage_volume_size: 15Gi
                 openshift_storage_glusterfs_registry_storageclass: True
+                ## openshift_master_api_port: 443
                 ### --- Added monitoring
                 openshift_monitoring_deploy: true
                 # Cluster metrics https://docs.openshift.com/container-platform/3.9/install_config/cluster_metrics.html
                 # 10G is a default value
                 openshift_metrics_cassandra_pvc_size: 10G
                 openshift_metrics_cassandra_storage_type: dynamic
-                openshift_metrics_cassandra_storage_type: true
                 openshift_metrics_start_cluster: true
                 ### --- addons end
                 local_dns: $( get_value local_dns_ip )
@@ -144,11 +144,11 @@ all:
              vars:
                  containerized: true
                  openshift_schedulable: true
-                 openshift_node_group_name: 'node-config-master'
+                 openshift_node_group_name: 'node-config-master-infra'
          infra:
              hosts:
-                app1: { ansible_host: $( get_value app1_ip1 ), openshift_ip: $( get_value app1_ip2 ), openshift_hostname: 'app1.{{ private_domain }}', glusterfs_ip: $( get_value app1_storage_ip ) }
-                app2: { ansible_host: $( get_value app2_ip1 ), openshift_ip: $( get_value app2_ip2 ), openshift_hostname: 'app2.{{ private_domain }}', glusterfs_ip: $( get_value app2_storage_ip ) }
+##                app1: { ansible_host: $( get_value app1_ip1 ), openshift_ip: $( get_value app1_ip2 ), openshift_hostname: 'app1.{{ private_domain }}', glusterfs_ip: $( get_value app1_storage_ip ) }
+##                app2: { ansible_host: $( get_value app2_ip1 ), openshift_ip: $( get_value app2_ip2 ), openshift_hostname: 'app2.{{ private_domain }}', glusterfs_ip: $( get_value app2_storage_ip ) }
 ##             children:
 ##                app[1-2]:
 ##             hosts:
@@ -189,7 +189,7 @@ all:
              vars:
                  containerized: true
                  openshift_schedulable: true
-                 openshift_node_group_name: 'node-config-infra'
+                 openshift_node_group_name: 'node-config-master-infra'
                  glusterfs_devices: [ "/dev/vdc", "/dev/vde", "/dev/vdd" ]
          nodes:
              children:
