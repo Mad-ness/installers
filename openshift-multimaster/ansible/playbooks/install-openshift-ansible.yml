@@ -62,3 +62,8 @@
         dest: '/tmp/{{ freeipa_cacert_file }}'
         mode: '0644'
 
+  - name: Install openshift-ansible requirements
+    command: pip2 install -r requirements.txt
+    args:
+        chdir: '{{ openshift_ansible_localdir }}'
+
