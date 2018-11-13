@@ -23,7 +23,7 @@ cat << SSH_PRIV_KEY > "${stackname}.key"
 $( get_value2 private_key )
 SSH_PRIV_KEY
 
-cat << INVENTORY
+cat << INVENTORY | tee inventory.${stackname}
 all:
     vars:
         ansible_ssh_user: centos
@@ -204,5 +204,7 @@ all:
                     openshift_hostname: 'bastion.{{ private_domain }}'
 
 INVENTORY
+echo "# Inventory saved as inventory.${stackname}"
 echo "# Find the private key in ${stackname}.key"
 echo "# Find the Apps floating IPs in $(get_app_vips)"
+
