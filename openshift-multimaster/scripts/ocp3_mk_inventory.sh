@@ -57,7 +57,7 @@ all:
                 openshift_master_cluster_method: native
                 ## openshift_metrics_cassandra_storage_type: dynamic
                 openshift_master_cluster_hostname: 'console.{{ private_domain }}'
-                openshift_master_cluster_public_hostname: 'ocp.{{ public_domain }}'
+                openshift_master_cluster_public_hostname: 'console.{{ public_domain }}'
                 openshift_master_default_subdomain: 'apps.{{ public_domain }}'
                 openshift_master_cluster_ip: $( get_value master_cluster_private_vip )
                 openshift_master_cluster_public_ip: $( get_value master_cluster_public_vip )
@@ -67,6 +67,12 @@ all:
                 openshift_storage_glusterfs_registry_storageclass: True
                 ### --- Added monitoring
                 openshift_monitoring_deploy: true
+                # Cluster metrics https://docs.openshift.com/container-platform/3.9/install_config/cluster_metrics.html
+                # 10G is a default value
+                openshift_metrics_cassandra_pvc_size: 10G
+                openshift_metrics_cassandra_storage_type: dynamic
+                openshift_metrics_cassandra_storage_type: true
+                openshift_metrics_start_cluster: true
                 ### --- addons end
                 local_dns: $( get_value local_dns_ip )
 

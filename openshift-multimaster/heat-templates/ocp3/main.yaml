@@ -59,9 +59,7 @@ parameters:
         label: The CIDR of the network
         default: 10.189.132.0/25
         description: Make sure this subnet exists
-    key_name:
-        type: string
-        label: Key name
+    key_name: type: string label: Key name
         description: Name of key-pair to be installed on a created server
         default: dmitrii-key1
     external_network:
@@ -69,11 +67,11 @@ parameters:
         label: External/API network
         description: All server should be connected to thi network
         default: "ipsystems-management"
-    master_console_ip:
-        type: string
-        label: Master Console IP
-        default: 10.189.132.44
-        description: Cluster IP to access to console.domain
+#    master_console_ip:
+#        type: string
+#        label: Master Console IP
+#        default: 10.189.132.44
+#        description: Cluster IP to access to console.domain
     
     user_data:
         type: string
@@ -145,7 +143,7 @@ resources:
             image: { get_param: master_image }
             flavor: { get_param: master_flavor }
             key_name: { get_resource: sshkey }
-            cluster_fixed_vip: { get_param: master_console_ip }
+            # cluster_fixed_vip: { get_param: master_console_ip }
             public_network: { get_param: public_network }
             private_network: { get_resource: private_network }
             storage_network: { get_resource: storage_network }
