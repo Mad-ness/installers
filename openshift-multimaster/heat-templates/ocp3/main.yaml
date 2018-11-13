@@ -59,7 +59,9 @@ parameters:
         label: The CIDR of the network
         default: 10.189.132.0/25
         description: Make sure this subnet exists
-    key_name: type: string label: Key name
+    key_name: 
+        type: string 
+        label: Key name
         description: Name of key-pair to be installed on a created server
         default: dmitrii-key1
     external_network:
