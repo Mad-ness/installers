@@ -79,8 +79,8 @@ all:
                 openshift_disable_check:
                   - docker_image_availability
                   - memory_availability
-                openshift_storage_glusterfs_namespace: app-storage
-                openshift_storage_glusterfs_storageclass_default: false
+                openshift_storage_glusterfs_namespace: gluster-storage
+                openshift_storage_glusterfs_storageclass_default: true
                 openshift_storage_glusterfs_block_deploy: true
                 openshift_storage_glusterfs_block_host_vol_size: 100
                 openshift_storage_glusterfs_block_storageclass: true
@@ -95,7 +95,7 @@ all:
                 openshift_hosted_registry_storage_kind: glusterfs
                 openshift_hosted_registry_selector: 'node-role.kubernetes.io/infra=true'
 
-                openshift_storage_glusterfs_registry_namespace: infra-storage
+                openshift_storage_glusterfs_registry_namespace: registry-infra
                 openshift_storage_glusterfs_registry_block_deploy: true
                 openshift_storage_glusterfs_registry_block_storageclass: true
                 openshift_storage_glusterfs_registry_block_storageclass_default: false
@@ -145,7 +145,7 @@ all:
                  containerized: true
                  openshift_schedulable: true
                  openshift_node_group_name: 'node-config-master-infra'
-         infra:
+##         infra:
 ##             hosts:
 ##                app1: { ansible_host: $( get_value app1_ip1 ), openshift_ip: $( get_value app1_ip2 ), openshift_hostname: 'app1.{{ private_domain }}', glusterfs_ip: $( get_value app1_storage_ip ) }
 ##                app2: { ansible_host: $( get_value app2_ip1 ), openshift_ip: $( get_value app2_ip2 ), openshift_hostname: 'app2.{{ private_domain }}', glusterfs_ip: $( get_value app2_storage_ip ) }
@@ -164,12 +164,12 @@ all:
 ##                     openshift_public_ip: $( get_value app2_ip1 )
 ##                     openshift_ip: $( get_value app2_ip2 )
 ##                     glusterfs_ip: $( get_value app2_storage_ip )
-
-             vars:
-                 containerized: true
-                 openshift_schedulable: true
-                 openshift_node_group_name: 'node-config-infra'
-                 public_vips: [ $( get_value app_floating_vip_1 ), $( get_value app_floating_vip_2 )]
+##
+##             vars:
+##                 containerized: true
+##                 openshift_schedulable: true
+##                 openshift_node_group_name: 'node-config-infra'
+##                 public_vips: [ $( get_value app_floating_vip_1 ), $( get_value app_floating_vip_2 )]
          app:
              hosts:
                 app1: { ansible_host: $( get_value app1_ip1 ), openshift_ip: $( get_value app1_ip2 ), openshift_hostname: 'app1.{{ private_domain }}', glusterfs_ip: $( get_value app1_storage_ip ) }
@@ -194,7 +194,7 @@ all:
          nodes:
              children:
                  masters:
-                 infra:
+                 # infra:
                  app:
          management:
             hosts:
