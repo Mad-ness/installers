@@ -112,9 +112,9 @@ all:
                 openshift_master_ldap_ca_file: '/tmp/freeipa-cacert.p12'    
                 openshift_master_htpasswd_file: /etc/openshift/openshift-passwd
                 openshift_master_htpasswd_users:
-                    dmitrii: "$apr1$Md/Up5SK$v9NUx3RoFZnwLSPb9ghEa0"
-                    user: "$apr1$67ev4A5t$ATnReEPlCCpko6FrZW8881"
-                    testuser: "$apr1$Eg5yj/Nv$fQyh2FC4gAA8FOSdXER9I/"
+                    dmitrii: '$apr1$Md/Up5SK$v9NUx3RoFZnwLSPb9ghEa0'
+                    user: '$apr1$67ev4A5t$ATnReEPlCCpko6FrZW8881'
+                    testuser: '$apr1$Eg5yj/Nv$fQyh2FC4gAA8FOSdXER9I/'
                 openshift_master_identity_providers:
                     - name: htpasswd_auth
                       login: true
