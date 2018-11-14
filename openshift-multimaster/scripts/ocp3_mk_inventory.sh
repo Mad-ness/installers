@@ -53,9 +53,7 @@ all:
                 openshift_metrics_cassandra_pvc_storage_class_name: glusterfs-storage-block
                 ## openshift_logging_install_logging: true
                 ## openshift_logging_es_pvc_dynamic: true
-                ## openshift_metrics_install_metrics: true
                 openshift_master_cluster_method: native
-                ## openshift_metrics_cassandra_storage_type: dynamic
                 openshift_master_cluster_hostname: 'ocp.{{ private_domain }}'
                 openshift_master_cluster_public_hostname: 'ocp.{{ public_domain }}'
                 openshift_master_default_subdomain: 'apps.{{ public_domain }}'
@@ -65,13 +63,23 @@ all:
                 os_sdn_network_plugin_name: 'redhat/openshift-ovs-multitenant'
                 openshift_hosted_registry_storage_volume_size: 15Gi
                 openshift_storage_glusterfs_registry_storageclass: True
+                etcd_ca_default_days: 3650
+                openshift_node_cert_expire_days: 3650
+                openshift_master_cert_expire_days: 3650
+                openshift_hosted_registry_cert_expire_days: 3650
+                
                 ## openshift_master_api_port: 443
+                ## https://docs.openshift.com/container-platform/3.10/install/configuring_inventory_file.html#advanced-install-cluster-metrics
+                openshift_metrics_install_metrics: true
                 ### --- Added monitoring
                 openshift_monitoring_deploy: true
+                openshift_logging_install_logging: true
+                openshift_logging_es_pvc_dynamic: true
                 # Cluster metrics https://docs.openshift.com/container-platform/3.9/install_config/cluster_metrics.html
                 # 10G is a default value
                 openshift_metrics_cassandra_pvc_size: 10G
                 openshift_metrics_cassandra_storage_type: dynamic
+                openshift_metrics_cassandra_pvc_storage_class_name: gluster-storage
                 openshift_metrics_start_cluster: true
                 ### --- addons end
                 local_dns: $( get_value local_dns_ip )
