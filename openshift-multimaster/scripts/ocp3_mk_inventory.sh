@@ -81,6 +81,7 @@ all:
                 ## openshift_metrics_cassandra_storage_type: dynamic
                 ## openshift_metrics_cassandra_pvc_storage_class_name: gluster-storage
                 ## openshift_metrics_start_cluster: true
+                ## Configs roles/openshift_metrics/defaults/main.yaml
                 openshift_metrics_hawkular_hostname: 'hawkular-metrics.{{ public_domain }}'
                 ### --- addons end
                 local_dns: $( get_value local_dns_ip )
