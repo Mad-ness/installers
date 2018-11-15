@@ -77,10 +77,10 @@ all:
                 ## openshift_logging_es_pvc_dynamic: true
                 # Cluster metrics https://docs.openshift.com/container-platform/3.9/install_config/cluster_metrics.html
                 # 10G is a default value
-                ## openshift_metrics_cassandra_pvc_size: 10G
-                ## openshift_metrics_cassandra_storage_type: dynamic
-                ## openshift_metrics_cassandra_pvc_storage_class_name: gluster-storage
-                ## openshift_metrics_start_cluster: true
+                openshift_metrics_cassandra_pvc_size: 10G
+                openshift_metrics_cassandra_storage_type: dynamic
+                openshift_metrics_cassandra_pvc_storage_class_name: glusterfs-storage
+                openshift_metrics_start_cluster: true
                 ## Configs roles/openshift_metrics/defaults/main.yaml
                 openshift_metrics_hawkular_hostname: 'hawkular-metrics.{{ public_domain }}'
                 ### --- addons end
@@ -90,6 +90,7 @@ all:
                   - docker_image_availability
                   - memory_availability
                 openshift_storage_glusterfs_namespace: gluster-storage
+                openshift_storage_glusterfs_storageclass: true
                 openshift_storage_glusterfs_storageclass_default: true
                 openshift_storage_glusterfs_block_deploy: true
                 openshift_storage_glusterfs_block_host_vol_size: 100
