@@ -21,7 +21,7 @@ parameters:
         description: From this subnet fixed ips will be taken
 
     public_network_fixed_ips:
-        type: commad_delimited_list
+        type: comma_delimited_list
         description: IPs that is being assigned to public interfaces
         label: List of IPs
         constraints:
