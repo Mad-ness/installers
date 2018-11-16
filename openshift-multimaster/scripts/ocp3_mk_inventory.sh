@@ -29,7 +29,7 @@ users: &openshift_users
     user: '$apr1$67ev4A5t$ATnReEPlCCpko6FrZW8881'
     testuser: '$apr1$Eg5yj/Nv$fQyh2FC4gAA8FOSdXER9I/'
 
-INVENTORY_USERS 
+INVENTORY_USERS
 
 cat << INVENTORY | tee -a inventory.${stackname}
 all:
