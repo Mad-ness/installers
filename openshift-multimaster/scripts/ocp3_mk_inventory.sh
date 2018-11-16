@@ -23,7 +23,15 @@ cat << SSH_PRIV_KEY > "${stackname}.key"
 $( get_value2 private_key )
 SSH_PRIV_KEY
 
-cat << INVENTORY | tee inventory.${stackname}
+cat << "INVENTORY_USERS" | tee inventory.${stackname}
+users: &openshift_users
+    dmitrii: '$apr1$Md/Up5SK$v9NUx3RoFZnwLSPb9ghEa0'
+    user: '$apr1$67ev4A5t$ATnReEPlCCpko6FrZW8881'
+    testuser: '$apr1$Eg5yj/Nv$fQyh2FC4gAA8FOSdXER9I/'
+
+INVENTORY_USERS 
+
+cat << INVENTORY | tee -a inventory.${stackname}
 all:
     vars:
         ansible_ssh_user: centos
@@ -112,10 +120,7 @@ all:
                 openshift_storage_glusterfs_registry_block_host_vol_size: 20
                 openshift_master_ldap_ca_file: '/tmp/freeipa-cacert.p12'    
                 openshift_master_htpasswd_file: /etc/openshift/openshift-passwd
-                openshift_master_htpasswd_users:
-                    dmitrii: '$apr1$Md/Up5SK$v9NUx3RoFZnwLSPb9ghEa0'
-                    user: '$apr1$67ev4A5t$ATnReEPlCCpko6FrZW8881'
-                    testuser: '$apr1$Eg5yj/Nv$fQyh2FC4gAA8FOSdXER9I/'
+                openshift_master_htpasswd_users: *openshift_users
                 openshift_master_identity_providers:
                     - name: htpasswd_auth
                       login: true
