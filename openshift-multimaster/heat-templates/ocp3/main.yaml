@@ -56,7 +56,7 @@ parameters:
     public_subnet:
         type: string
         label: Subnet Name
-        default: OSQ-External_subnet
+        default: ipsystems-subnet-management
     key_name: 
         type: string 
         label: Key name
