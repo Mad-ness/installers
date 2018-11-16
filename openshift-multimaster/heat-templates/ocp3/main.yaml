@@ -17,7 +17,7 @@ parameters:
         type: comma_delimited_list 
         label: List of IPs
         description: List of IPs from public network, to these ones requests will come from LB
-        default: [ "10.189.133.50", "10.189.133.51", "10.189.133.52" ]
+        default: [ "10.189.132.100", "10.189.132.101", "10.189.132.102" ]
 
 
 
