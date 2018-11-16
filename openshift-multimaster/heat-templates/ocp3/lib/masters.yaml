@@ -215,9 +215,6 @@ resources:
         type: OS::Neutron::Port
         properties:
             network_id: { get_param: public_network }
-            fixed_ips:
-#            - ip_address: { get_param: cluster_fixed_vip }
-#              subnet: { get_param: [ public_network, subnets, 0 ]}
             security_groups:
             - { get_resource: sg_cluster_public_port }
 
@@ -249,8 +246,6 @@ resources:
         type: OS::Neutron::Port
         properties:
             network_id: { get_param: private_network }
-            - subnet: { get_param: public_subnet }
-              ip_address: { get_param: [ public_network_fixed_ips, 1 ]}
             security_groups:
             - { get_resource: sg_port2_allports }
             allowed_address_pairs:
@@ -260,8 +255,6 @@ resources:
         type: OS::Neutron::Port
         properties:
             network_id: { get_param: storage_network }
-            - subnet: { get_param: public_subnet }
-              ip_address: { get_param: [ public_network_fixed_ips, 2 ]}
             security_groups:
             - { get_resource: sg_port2_allports }
 
@@ -269,6 +262,9 @@ resources:
         type: OS::Neutron::Port
         properties:
             network_id: { get_param: public_network }
+            fixed_ips:
+            - subnet: { get_param: public_subnet }
+              ip_address: { get_param: [ public_network_fixed_ips, 1 ]}
             security_groups:
             - { get_resource: sg_port1_tcpports }
             - { get_resource: sg_port1_udpports }
@@ -297,6 +293,9 @@ resources:
         type: OS::Neutron::Port
         properties:
             network_id: { get_param: public_network }
+            ip_address:
+            - subnet: { get_param: public_subnet }
+              ip_address: { get_param: [ public_network_fixed_ips, 2 ]}
             security_groups:
             - { get_resource: sg_port1_tcpports }
             - { get_resource: sg_port1_udpports }
