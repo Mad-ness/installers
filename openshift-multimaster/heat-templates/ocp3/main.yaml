@@ -13,17 +13,11 @@ parameters:
         description: Flavor to set a proper set of resources
         default: d2.os-master
 
-##     infra_image:
-##         type: string
-##         label: Image name or ID
-##         description: Image used to create an instance from
-##         default: CentOS-7
-##     infra_flavor:
-##         type: string
-##         label: Flavor
-##         description: Flavor to set a proper set of resources
-##         default: d1.os-node
-## 
+    master_public_fixed_ips:
+        type: comma_delimited_list 
+        label: List of IPs
+        description: List of IPs from public network, to these ones requests will come from LB
+        default: [ "10.189.133.50", "10.189.133.51", "10.189.133.52" ]
 
 
 
@@ -147,8 +141,10 @@ resources:
             key_name: { get_resource: sshkey }
             # cluster_fixed_vip: { get_param: master_console_ip }
             public_network: { get_param: public_network }
+            public_subnet: { get_param: [ public_network, subnets, 0 ]}
             private_network: { get_resource: private_network }
             storage_network: { get_resource: storage_network }
+            public_network_fixed_ips: { get_param: public_network_fixed_ips }
             port1_allowed_tcp_ports: "22,53,8053,443,8443,10250,10010,2049,2379,2380,9000,8444,1936"
             port1_allowed_udp_ports: "4789,53,8053,443,2049"
             cluster_vip_allowed_tcp_ports: "22,8443"
