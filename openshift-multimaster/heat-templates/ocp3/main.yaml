@@ -53,6 +53,10 @@ parameters:
         label: The CIDR of the network
         default: 10.189.132.0/25
         description: Make sure this subnet exists
+    public_subnet:
+        type: string
+        label: Subnet Name
+        default: OSQ-External_subnet
     key_name: 
         type: string 
         label: Key name
@@ -141,7 +145,7 @@ resources:
             key_name: { get_resource: sshkey }
             # cluster_fixed_vip: { get_param: master_console_ip }
             public_network: { get_param: public_network }
-            public_subnet: { get_param: [ public_network, subnets, 0 ]}
+            public_subnet: { get_param: public_subnet }
             private_network: { get_resource: private_network }
             storage_network: { get_resource: storage_network }
             public_network_fixed_ips: { get_param: master_public_fixed_ips }
