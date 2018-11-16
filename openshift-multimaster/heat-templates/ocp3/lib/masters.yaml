@@ -293,7 +293,7 @@ resources:
         type: OS::Neutron::Port
         properties:
             network_id: { get_param: public_network }
-            ip_address:
+            fixed_ips:
             - subnet: { get_param: public_subnet }
               ip_address: { get_param: [ public_network_fixed_ips, 2 ]}
             security_groups:
