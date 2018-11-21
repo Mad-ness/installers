@@ -31,7 +31,7 @@ parameters:
         type: string
         label: SSHPair ID or Name
         description: SSH keypair, those public key will be injected into the cluster nodes
-        default: dmitrii-test
+        default: dmitrii-key1
 
     allowed_tcp_ports:
         type: comma_delimited_list
