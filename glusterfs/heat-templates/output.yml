@@ -30,7 +30,7 @@ parameters:
         type: string
         label: SSHPair ID or Name
         description: SSH keypair, those public key will be injected into the cluster nodes
-        default: dmitrii-key1
+        default: 
 
     allowed_tcp_ports:
         type: comma_delimited_list
@@ -151,6 +151,18 @@ resources:
             volume_id: { get_resource: s1vol3 }
             instance_uuid: { get_resource: server1 }
 
+    s1vol4:
+        type: OS::Cinder::Volume
+        properties:
+            size: { get_param: volume_size }
+            volume_type: { get_param: volume_type }
+
+    s1vol4attach:
+        type: OS::Cinder::VolumeAttachment
+        properties:
+            volume_id: { get_resource: s1vol4 }
+            instance_uuid: { get_resource: server1 }
+
 
     s1port01:
         type: OS::Neutron::Port
@@ -217,7 +229,17 @@ resources:
                         NETMASK=`python /tmp/helper.py $port2_netmask`
                         EOF
                         rm -f /tmp/helper.py || true 
-                        sudo yum install -y epel-release
+                        # sudo yum install -y lvm2
+                        # cat << CMDS | sudo bash
+                        # pvcreate $dev1 $dev2 $dev3 $dev4 
+                        # CMDS
+                        cat << DEVS | sudo tee /.devices
+                        $dev1
+                        $dev2
+                        $dev3
+                        $dev4 
+                        DEVS
+                        sudo yum install -y epel-release lvm2
                         sudo yum update -y 
                         touch /.installed
                         sudo reboot
@@ -229,6 +251,10 @@ resources:
                         $port1_dns2:    { get_attr: [ s1port01, subnets, 0, dns_nameservers, 1 ]}
                         $port2_ipaddr:  { get_attr: [ s1port02, fixed_ips, 0, ip_address ]}
                         $port2_netmask: { get_attr: [ s1port02, subnets, 0, cidr ]}
+                        $dev1: { get_attr: [ s1vol1, attachments_list, 0, device ]}
+                        $dev2: { get_attr: [ s1vol2, attachments_list, 0, device ]}
+                        $dev3: { get_attr: [ s1vol3, attachments_list, 0, device ]}
+                        $dev4: { get_attr: [ s1vol4, attachments_list, 0, device ]}
             networks: [ port: { get_resource: s1port01 }, port: { get_resource: s1port02 }]
 
  
@@ -269,6 +295,18 @@ resources:
         type: OS::Cinder::VolumeAttachment
         properties:
             volume_id: { get_resource: s2vol3 }
+            instance_uuid: { get_resource: server2 }
+
+    s2vol4:
+        type: OS::Cinder::Volume
+        properties:
+            size: { get_param: volume_size }
+            volume_type: { get_param: volume_type }
+
+    s2vol4attach:
+        type: OS::Cinder::VolumeAttachment
+        properties:
+            volume_id: { get_resource: s2vol4 }
             instance_uuid: { get_resource: server2 }
 
 
@@ -337,7 +375,17 @@ resources:
                         NETMASK=`python /tmp/helper.py $port2_netmask`
                         EOF
                         rm -f /tmp/helper.py || true 
-                        sudo yum install -y epel-release
+                        # sudo yum install -y lvm2
+                        # cat << CMDS | sudo bash
+                        # pvcreate $dev1 $dev2 $dev3 $dev4 
+                        # CMDS
+                        cat << DEVS | sudo tee /.devices
+                        $dev1
+                        $dev2
+                        $dev3
+                        $dev4 
+                        DEVS
+                        sudo yum install -y epel-release lvm2
                         sudo yum update -y 
                         touch /.installed
                         sudo reboot
@@ -349,6 +397,10 @@ resources:
                         $port1_dns2:    { get_attr: [ s2port01, subnets, 0, dns_nameservers, 1 ]}
                         $port2_ipaddr:  { get_attr: [ s2port02, fixed_ips, 0, ip_address ]}
                         $port2_netmask: { get_attr: [ s2port02, subnets, 0, cidr ]}
+                        $dev1: { get_attr: [ s2vol1, attachments_list, 0, device ]}
+                        $dev2: { get_attr: [ s2vol2, attachments_list, 0, device ]}
+                        $dev3: { get_attr: [ s2vol3, attachments_list, 0, device ]}
+                        $dev4: { get_attr: [ s2vol4, attachments_list, 0, device ]}
             networks: [ port: { get_resource: s2port01 }, port: { get_resource: s2port02 }]
 
  
@@ -389,6 +441,18 @@ resources:
         type: OS::Cinder::VolumeAttachment
         properties:
             volume_id: { get_resource: s3vol3 }
+            instance_uuid: { get_resource: server3 }
+
+    s3vol4:
+        type: OS::Cinder::Volume
+        properties:
+            size: { get_param: volume_size }
+            volume_type: { get_param: volume_type }
+
+    s3vol4attach:
+        type: OS::Cinder::VolumeAttachment
+        properties:
+            volume_id: { get_resource: s3vol4 }
             instance_uuid: { get_resource: server3 }
 
 
@@ -457,7 +521,17 @@ resources:
                         NETMASK=`python /tmp/helper.py $port2_netmask`
                         EOF
                         rm -f /tmp/helper.py || true 
-                        sudo yum install -y epel-release
+                        # sudo yum install -y lvm2
+                        # cat << CMDS | sudo bash
+                        # pvcreate $dev1 $dev2 $dev3 $dev4 
+                        # CMDS
+                        cat << DEVS | sudo tee /.devices
+                        $dev1
+                        $dev2
+                        $dev3
+                        $dev4 
+                        DEVS
+                        sudo yum install -y epel-release lvm2
                         sudo yum update -y 
                         touch /.installed
                         sudo reboot
@@ -469,6 +543,10 @@ resources:
                         $port1_dns2:    { get_attr: [ s3port01, subnets, 0, dns_nameservers, 1 ]}
                         $port2_ipaddr:  { get_attr: [ s3port02, fixed_ips, 0, ip_address ]}
                         $port2_netmask: { get_attr: [ s3port02, subnets, 0, cidr ]}
+                        $dev1: { get_attr: [ s3vol1, attachments_list, 0, device ]}
+                        $dev2: { get_attr: [ s3vol2, attachments_list, 0, device ]}
+                        $dev3: { get_attr: [ s3vol3, attachments_list, 0, device ]}
+                        $dev4: { get_attr: [ s3vol4, attachments_list, 0, device ]}
             networks: [ port: { get_resource: s3port01 }, port: { get_resource: s3port02 }]
 
  
@@ -509,6 +587,18 @@ resources:
         type: OS::Cinder::VolumeAttachment
         properties:
             volume_id: { get_resource: s4vol3 }
+            instance_uuid: { get_resource: server4 }
+
+    s4vol4:
+        type: OS::Cinder::Volume
+        properties:
+            size: { get_param: volume_size }
+            volume_type: { get_param: volume_type }
+
+    s4vol4attach:
+        type: OS::Cinder::VolumeAttachment
+        properties:
+            volume_id: { get_resource: s4vol4 }
             instance_uuid: { get_resource: server4 }
 
 
@@ -577,7 +667,17 @@ resources:
                         NETMASK=`python /tmp/helper.py $port2_netmask`
                         EOF
                         rm -f /tmp/helper.py || true 
-                        sudo yum install -y epel-release
+                        # sudo yum install -y lvm2
+                        # cat << CMDS | sudo bash
+                        # pvcreate $dev1 $dev2 $dev3 $dev4 
+                        # CMDS
+                        cat << DEVS | sudo tee /.devices
+                        $dev1
+                        $dev2
+                        $dev3
+                        $dev4 
+                        DEVS
+                        sudo yum install -y epel-release lvm2
                         sudo yum update -y 
                         touch /.installed
                         sudo reboot
@@ -589,6 +689,10 @@ resources:
                         $port1_dns2:    { get_attr: [ s4port01, subnets, 0, dns_nameservers, 1 ]}
                         $port2_ipaddr:  { get_attr: [ s4port02, fixed_ips, 0, ip_address ]}
                         $port2_netmask: { get_attr: [ s4port02, subnets, 0, cidr ]}
+                        $dev1: { get_attr: [ s4vol1, attachments_list, 0, device ]}
+                        $dev2: { get_attr: [ s4vol2, attachments_list, 0, device ]}
+                        $dev3: { get_attr: [ s4vol3, attachments_list, 0, device ]}
+                        $dev4: { get_attr: [ s4vol4, attachments_list, 0, device ]}
             networks: [ port: { get_resource: s4port01 }, port: { get_resource: s4port02 }]
 
  
@@ -629,6 +733,18 @@ resources:
         type: OS::Cinder::VolumeAttachment
         properties:
             volume_id: { get_resource: s5vol3 }
+            instance_uuid: { get_resource: server5 }
+
+    s5vol4:
+        type: OS::Cinder::Volume
+        properties:
+            size: { get_param: volume_size }
+            volume_type: { get_param: volume_type }
+
+    s5vol4attach:
+        type: OS::Cinder::VolumeAttachment
+        properties:
+            volume_id: { get_resource: s5vol4 }
             instance_uuid: { get_resource: server5 }
 
 
@@ -697,7 +813,17 @@ resources:
                         NETMASK=`python /tmp/helper.py $port2_netmask`
                         EOF
                         rm -f /tmp/helper.py || true 
-                        sudo yum install -y epel-release
+                        # sudo yum install -y lvm2
+                        # cat << CMDS | sudo bash
+                        # pvcreate $dev1 $dev2 $dev3 $dev4 
+                        # CMDS
+                        cat << DEVS | sudo tee /.devices
+                        $dev1
+                        $dev2
+                        $dev3
+                        $dev4 
+                        DEVS
+                        sudo yum install -y epel-release lvm2
                         sudo yum update -y 
                         touch /.installed
                         sudo reboot
@@ -709,6 +835,10 @@ resources:
                         $port1_dns2:    { get_attr: [ s5port01, subnets, 0, dns_nameservers, 1 ]}
                         $port2_ipaddr:  { get_attr: [ s5port02, fixed_ips, 0, ip_address ]}
                         $port2_netmask: { get_attr: [ s5port02, subnets, 0, cidr ]}
+                        $dev1: { get_attr: [ s5vol1, attachments_list, 0, device ]}
+                        $dev2: { get_attr: [ s5vol2, attachments_list, 0, device ]}
+                        $dev3: { get_attr: [ s5vol3, attachments_list, 0, device ]}
+                        $dev4: { get_attr: [ s5vol4, attachments_list, 0, device ]}
             networks: [ port: { get_resource: s5port01 }, port: { get_resource: s5port02 }]
 
  
@@ -718,17 +848,57 @@ outputs:
 
     srv1port1_ip: { value: { get_attr: [ s1port01, fixed_ips, 0, ip_address ]}}
     srv1port2_ip: { value: { get_attr: [ s1port02, fixed_ips, 0, ip_address ]}}
+    srv1devs: 
+        value:
+            list_join:
+                - ' '
+                - { get_attr: [ s1vol1, attachments_list, 0, device ]}
+                - { get_attr: [ s1vol2, attachments_list, 0, device ]}
+                - { get_attr: [ s1vol3, attachments_list, 0, device ]}
+                - { get_attr: [ s1vol4, attachments_list, 0, device ]}
 
     srv2port1_ip: { value: { get_attr: [ s2port01, fixed_ips, 0, ip_address ]}}
     srv2port2_ip: { value: { get_attr: [ s2port02, fixed_ips, 0, ip_address ]}}
+    srv2devs: 
+        value:
+            list_join:
+                - ' '
+                - { get_attr: [ s2vol1, attachments_list, 0, device ]}
+                - { get_attr: [ s2vol2, attachments_list, 0, device ]}
+                - { get_attr: [ s2vol3, attachments_list, 0, device ]}
+                - { get_attr: [ s2vol4, attachments_list, 0, device ]}
 
     srv3port1_ip: { value: { get_attr: [ s3port01, fixed_ips, 0, ip_address ]}}
     srv3port2_ip: { value: { get_attr: [ s3port02, fixed_ips, 0, ip_address ]}}
+    srv3devs: 
+        value:
+            list_join:
+                - ' '
+                - { get_attr: [ s3vol1, attachments_list, 0, device ]}
+                - { get_attr: [ s3vol2, attachments_list, 0, device ]}
+                - { get_attr: [ s3vol3, attachments_list, 0, device ]}
+                - { get_attr: [ s3vol4, attachments_list, 0, device ]}
 
     srv4port1_ip: { value: { get_attr: [ s4port01, fixed_ips, 0, ip_address ]}}
     srv4port2_ip: { value: { get_attr: [ s4port02, fixed_ips, 0, ip_address ]}}
+    srv4devs: 
+        value:
+            list_join:
+                - ' '
+                - { get_attr: [ s4vol1, attachments_list, 0, device ]}
+                - { get_attr: [ s4vol2, attachments_list, 0, device ]}
+                - { get_attr: [ s4vol3, attachments_list, 0, device ]}
+                - { get_attr: [ s4vol4, attachments_list, 0, device ]}
 
     srv5port1_ip: { value: { get_attr: [ s5port01, fixed_ips, 0, ip_address ]}}
     srv5port2_ip: { value: { get_attr: [ s5port02, fixed_ips, 0, ip_address ]}}
+    srv5devs: 
+        value:
+            list_join:
+                - ' '
+                - { get_attr: [ s5vol1, attachments_list, 0, device ]}
+                - { get_attr: [ s5vol2, attachments_list, 0, device ]}
+                - { get_attr: [ s5vol3, attachments_list, 0, device ]}
+                - { get_attr: [ s5vol4, attachments_list, 0, device ]}
 
  
