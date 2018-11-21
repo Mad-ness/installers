@@ -1,0 +1,4 @@
+---
+
+- src: ansible-city.nginx
+  version: v1.0

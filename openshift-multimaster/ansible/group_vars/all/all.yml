@@ -1,0 +1,6 @@
+service_nodes_group_name: 'management'
+master_nodes_group_name: 'master_nodes'
+infra_nodes_group_name: 'infra_nodes'
+app_nodes_group_name: 'app_nodes'
+storage_nodes_group_name: 'storage_nodes'
+

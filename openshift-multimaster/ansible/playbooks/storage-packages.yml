@@ -1,0 +1,14 @@
+- hosts: glusterfs
+  become: true
+  gather_facts: false
+  tasks:
+
+  - name: Install gluster release
+    yum: name='{{ item }}' state=present
+    with_items:
+    - centos-release-gluster41.noarch
+
+  - name: Install glusterfs-server
+    yum: name=glusterfs-server state=present
+    
+  

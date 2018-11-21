@@ -1,0 +1,11 @@
+- hosts: master_nodes
+  become: true
+  gather_facts: false
+  tasks:
+
+  - name: Copy key to master(s)
+    copy:
+        src: "../{{ ansible_private_key_file }}"
+        dest: "{{ openshift_storage_glusterfs_heketi_ssh_keyfile }}"
+        mode: '0400'
+

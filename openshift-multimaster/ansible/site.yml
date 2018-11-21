@@ -1,0 +1,22 @@
+- import_playbook: playbooks/common-packages.yml
+- import_playbook: playbooks/common-privnet.yml
+- import_playbook: playbooks/masters-keepalived.yml
+# - import_playbook: playbooks/infra-keepalived.yml
+- import_playbook: playbooks/storage-storagenet.yml
+- import_playbook: playbooks/storage-net.yml
+- import_playbook: playbooks/common-hostname.yml
+- import_playbook: playbooks/manage-packages.yml
+- import_playbook: playbooks/install-openshift-ansible.yml
+- import_playbook: playbooks/dns-config.yml
+- import_playbook: playbooks/storage-packages.yml
+- import_playbook: playbooks/storage-firewall.yml
+- import_playbook: playbooks/install-rhsm-ca.yml
+- import_playbook: playbooks/deploy-passwd.yml
+
+
+
+# - import_playbook: playbooks/storage-prereq.yml
+# - include: playbooks/custom.yml
+# - include: playbooks/docker.yaml
+# - include: playbooks/kubernetes.yml
+
