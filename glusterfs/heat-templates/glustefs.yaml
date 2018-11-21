@@ -1,7 +1,6 @@
 heat_template_version: 2018-03-02
 description: Deploying a set of server for a GlusterFS Cluster
 
-
 parameters:
     image:
         type: string
