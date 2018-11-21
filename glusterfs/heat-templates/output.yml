@@ -197,6 +197,7 @@ resources:
                         rm -f /tmp/helper.py || true 
                         sudo yum install -y epel-release
                         sudo yum update -y 
+                        touch /.installed
                         sudo reboot
                     params:
                         $port1_ipaddr:  { get_attr: [ s1port01, fixed_ips, 0, ip_address ]}
@@ -277,6 +278,7 @@ resources:
                         rm -f /tmp/helper.py || true 
                         sudo yum install -y epel-release
                         sudo yum update -y 
+                        touch /.installed
                         sudo reboot
                     params:
                         $port1_ipaddr:  { get_attr: [ s2port01, fixed_ips, 0, ip_address ]}
@@ -357,6 +359,7 @@ resources:
                         rm -f /tmp/helper.py || true 
                         sudo yum install -y epel-release
                         sudo yum update -y 
+                        touch /.installed
                         sudo reboot
                     params:
                         $port1_ipaddr:  { get_attr: [ s3port01, fixed_ips, 0, ip_address ]}
@@ -437,6 +440,7 @@ resources:
                         rm -f /tmp/helper.py || true 
                         sudo yum install -y epel-release
                         sudo yum update -y 
+                        touch /.installed
                         sudo reboot
                     params:
                         $port1_ipaddr:  { get_attr: [ s4port01, fixed_ips, 0, ip_address ]}
@@ -517,6 +521,7 @@ resources:
                         rm -f /tmp/helper.py || true 
                         sudo yum install -y epel-release
                         sudo yum update -y 
+                        touch /.installed
                         sudo reboot
                     params:
                         $port1_ipaddr:  { get_attr: [ s5port01, fixed_ips, 0, ip_address ]}

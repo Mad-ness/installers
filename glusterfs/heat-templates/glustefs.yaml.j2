@@ -197,6 +197,7 @@ resources:
                         rm -f /tmp/helper.py || true 
                         sudo yum install -y epel-release
                         sudo yum update -y 
+                        touch /.installed
                         sudo reboot
                     params:
                         $port1_ipaddr:  { get_attr: [ s{{ loop.index }}port01, fixed_ips, 0, ip_address ]}
