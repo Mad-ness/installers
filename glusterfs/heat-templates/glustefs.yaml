@@ -114,7 +114,7 @@ resources:
 {% for num in range(0, n_servers)%} 
 ### -------  Server {{ loop.index }}
 {% set outer_loop = loop %}
-{% for volid in range(0, volume_count|int) %}
+{% for volid in range(0, num_volumes|int) %}
     s{{ outer_loop.index }}vol{{ loop.index }}:
         type: OS::Cinder::Volume
         properties:
@@ -193,7 +193,16 @@ resources:
                         NETMASK=`python /tmp/helper.py $port2_netmask`
                         EOF
                         rm -f /tmp/helper.py || true 
-                        sudo yum install -y epel-release
+                        # sudo yum install -y lvm2
+                        # cat << CMDS | sudo bash
+                        # pvcreate {% for volid in range(0, num_volumes|int) %}$dev{{ loop.index }} {% endfor %}
+                        # CMDS
+                        cat << DEVS | sudo tee /.devices
+                        {%- for volid in range(0, num_volumes|int) %}
+                        $dev{{ loop.index }}
+                        {%- endfor %} 
+                        DEVS
+                        sudo yum install -y epel-release lvm2
                         sudo yum update -y 
                         touch /.installed
                         sudo reboot
@@ -205,6 +214,9 @@ resources:
                         $port1_dns2:    { get_attr: [ s{{ loop.index }}port01, subnets, 0, dns_nameservers, 1 ]}
                         $port2_ipaddr:  { get_attr: [ s{{ loop.index }}port02, fixed_ips, 0, ip_address ]}
                         $port2_netmask: { get_attr: [ s{{ loop.index }}port02, subnets, 0, cidr ]}
+                        {%- for volid in range(0, num_volumes|int) %}
+                        $dev{{ loop.index }}: { get_attr: [ s{{ outer_loop.index }}vol{{ loop.index }}, attachments_list, 0, device ]}
+                        {%- endfor %}
             networks: [ port: { get_resource: s{{ loop.index }}port01 }, port: { get_resource: s{{ loop.index }}port02 }]
 
 {% endfor %} 
@@ -214,5 +226,13 @@ outputs:
 {% for num in range(0, n_servers) %}
     srv{{ loop.index }}port1_ip: { value: { get_attr: [ s{{ loop.index }}port01, fixed_ips, 0, ip_address ]}}
     srv{{ loop.index }}port2_ip: { value: { get_attr: [ s{{ loop.index }}port02, fixed_ips, 0, ip_address ]}}
+    srv{{ loop.index }}devs: 
+        value:
+            list_join:
+                - ' '
+                {%- set outer_loop = loop %}
+                {%- for volid in range(0, num_volumes|int) %}
+                - { get_attr: [ s{{ outer_loop.index }}vol{{ loop.index }}, attachments_list, 0, device ]}
+                {%- endfor %}
 {% endfor %}
  
