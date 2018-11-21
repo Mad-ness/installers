@@ -1,0 +1,144 @@
+heat_template_version: 2018-03-02
+description: Deploying a set of server for a GlusterFS Cluster
+
+
+
+
+parameters:
+    image:
+        type: string
+        label: Image ID or Name
+        description: An image to run a server(s) from
+        default: CentOS-7
+
+    flavor:
+        type: string    
+        label: Flavor ID or Name
+        description: A flavor for a server(s)
+        default: n1.small
+
+    frontend_network:
+        type: string
+        label: Network ID or Name
+        description: A public network for connecting clients to a cluster
+        default: {{ frontend_network }}
+
+    backend_network:
+        type: string
+        label: Network ID or Name
+        descrption: A private network for the cluster's internals
+        default: {{ backend_network }}
+
+    sshkey:
+        type: string
+        label: SSHPair ID or Name
+        description: SSH keypair, those public key will be injected into the cluster nodes
+
+    allowed_tcp_ports:
+        type: comma_delimited_list
+        label: A list of ports
+        description: A list of tcp ports which will be accessed via a security group
+        default: "22,111,2049"
+
+    allowed_udp_ports:
+        type: comma_delimited_list
+        label: A list of ports
+        description: A list of udp ports which will be accessed via a security group    
+        default: "111"
+
+    userdata_script:
+        type: string
+        label: Shell Script
+        default: |
+            #!/bin/bash
+            sudo yum install -y epel-release
+            sudo yum update -y
+        description: A script that is being executed once a system is run first time
+
+resources:
+
+    tcp_ports:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            rules:
+                repeat:
+                    for_each:
+                        <%port%> { get_param: allowed_tcp_ports }
+                    template:
+                        direction: ingress
+                        ethertype: IPv4
+                        port_range_min: <%port%>
+                        port_range_max: <%port%>
+                        protocol: tcp
+                        remote_ip_prefix: 0.0.0.0/0    
+   
+    udp_ports:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            rules:
+                repeat:
+                    for_each:
+                        <%port%> { get_param: allowed_udp_ports }
+                    template:
+                        direction: ingress
+                        ethertype: IPv4
+                        port_range_min: <%port%>
+                        port_range_max: <%port%>
+                        protocol: tcp
+                        remote_ip_prefix: 0.0.0.0/0    
+    icmp_ports:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            rules:
+              - direction: ingress
+                ethertype: IPv4
+                protocol: icmp
+                remote_ip_prefix: 0.0.0.0/0
+     
+
+    all_ports:
+        type: OS::Neutron::SecurityGroup
+        properties: 
+            rules:
+              - directon: ingress
+                ethertype: IPv4
+                remote_ip_prefix: 0.0.0.0/0
+
+
+
+{% for num in range(0, num_servers)%} 
+### -------  Server {{ loop.index }}
+    s{{ loop.index }}port01:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: frontend_network }
+            security_groups:
+              - { get_resource: tcp_ports }
+              - { get_resource: udp_ports }
+              - { get_resource: icmp_ports }
+
+    s{{ loop.index }}port02:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: backend_network }
+            security_groups:
+              - { get_resource: all_ports }
+  
+    server{{ loop.index }}:
+        type: OS::Nova::Server
+        properties:
+            image: { get_param: image } 
+            flavor: { get_param: flavor }
+            key_name: { get_param: sshkey }
+            user_data: { get_param: userdata_script }
+            networks: [ port: { get_resource: s{{ loop.index }}port01 }, port: { get_resource: s{{ loop.index }}port02 }]
+
+{% endfor %} 
+
+
+outputs:
+{% for num in range(0, num_servers) %}
+    srv{{ loop.index }}port1_ip: { get_attr: { s{{ loop.index }}port01, fixed_ips, 0, ip_address }}
+    srv{{ loop.index }}port2_ip: { get_attr: { s{{ loop.index }}port02, fixed_ips, 0, ip_address }}
+{% endfor %}
+    

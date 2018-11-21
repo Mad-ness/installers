@@ -93,6 +93,18 @@ all:
                 ### --- addons end
                 local_dns: $( get_value local_dns_ip )
 
+                # Prometheus
+                openshift_prometheus_state: present
+                openshift_prometheus_namespace: openshift-prometheus
+                openshift_prometheus_storage_kind: glusterfs-storage
+                openshift_prometheus_alertmanager_storage_kind: glusterfs-storage
+                openshift_prometheus_alertbuffer_storage_kind: glusterfs-storage
+                openshift_prometheus_storage_type: pvc
+                openshift_prometheus_alertmanager_storage_type: pvc
+                openshift_prometheus_alertbuffer_storage_type:
+                openshift_prometheus_additional_rules_file: null
+                # Prometheus end
+
                 openshift_disable_check:
                   - docker_image_availability
                   - memory_availability
