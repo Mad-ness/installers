@@ -47,15 +47,6 @@ parameters:
         description: A list of udp ports which will be accessed via a security group    
         default: "111,963"
 
-    userdata_script:
-        type: string
-        label: Shell Script
-        default: |
-            #!/bin/bash
-            sudo yum install -y epel-release
-            sudo yum update -y
-            sudo reboot
-        description: A script that is being executed once a system is run first time
 
 resources:
 
