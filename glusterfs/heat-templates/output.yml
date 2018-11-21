@@ -2,8 +2,6 @@ heat_template_version: 2018-03-02
 description: Deploying a set of server for a GlusterFS Cluster
 
 
-
-
 parameters:
     image:
         type: string
@@ -33,7 +31,7 @@ parameters:
         type: string
         label: SSHPair ID or Name
         description: SSH keypair, those public key will be injected into the cluster nodes
-        default: dmitrii-key1
+        default: dmitrii-test
 
     allowed_tcp_ports:
         type: comma_delimited_list
@@ -48,27 +46,23 @@ parameters:
         default: "111,963"
 
 
+    volume_size:
+        type: number
+        label: Disk size
+        description: Size of a single volume in Gb
+        default: 20
+
+    volume_type:
+        type: string
+        label: Storage volume type
+        description: Type of a volume as defined in OpenStack database
+        default: CephStorage
+
+
+
+
 resources:
 
-
-    boot_script:
-        type: OS::Heat::SoftwareConfig
-        properties:
-            group: ungrouped
-            config: |
-                #!/bin/bash
-                cat << EOF | sudo tee /etc/sysconfig/network-scripts/ifcfg-eth1 
-                DEVICE=eth1
-                BOOTPROTO=static
-                ONBOOT=yes
-                NM_CONTROLLED=no
-                IPADDR=
-                NETMASK=
-                EOF
-                sudo yum install -y epel-release
-                sudo yum update -y 
-                echo "This is all done under "`whoami`
-                sudo reboot
 
     tcp_ports:
         type: OS::Neutron::SecurityGroup
@@ -118,9 +112,47 @@ resources:
                 remote_ip_prefix: 0.0.0.0/0
 
 
-
  
 ### -------  Server 1
+
+
+    s1vol1:
+        type: OS::Cinder::Volume
+        properties:
+            size: { get_param: volume_size }
+            volume_type: { get_param: volume_type }
+
+    s1vol1attach:
+        type: OS::Cinder::VolumeAttachment
+        properties:
+            volume_id: { get_resource: s1vol1 }
+            instance_uuid: { get_resource: server1 }
+
+    s1vol2:
+        type: OS::Cinder::Volume
+        properties:
+            size: { get_param: volume_size }
+            volume_type: { get_param: volume_type }
+
+    s1vol2attach:
+        type: OS::Cinder::VolumeAttachment
+        properties:
+            volume_id: { get_resource: s1vol2 }
+            instance_uuid: { get_resource: server1 }
+
+    s1vol3:
+        type: OS::Cinder::Volume
+        properties:
+            size: { get_param: volume_size }
+            volume_type: { get_param: volume_type }
+
+    s1vol3attach:
+        type: OS::Cinder::VolumeAttachment
+        properties:
+            volume_id: { get_resource: s1vol3 }
+            instance_uuid: { get_resource: server1 }
+
+
     s1port01:
         type: OS::Neutron::Port
         properties:
@@ -202,6 +234,45 @@ resources:
 
  
 ### -------  Server 2
+
+
+    s2vol1:
+        type: OS::Cinder::Volume
+        properties:
+            size: { get_param: volume_size }
+            volume_type: { get_param: volume_type }
+
+    s2vol1attach:
+        type: OS::Cinder::VolumeAttachment
+        properties:
+            volume_id: { get_resource: s2vol1 }
+            instance_uuid: { get_resource: server2 }
+
+    s2vol2:
+        type: OS::Cinder::Volume
+        properties:
+            size: { get_param: volume_size }
+            volume_type: { get_param: volume_type }
+
+    s2vol2attach:
+        type: OS::Cinder::VolumeAttachment
+        properties:
+            volume_id: { get_resource: s2vol2 }
+            instance_uuid: { get_resource: server2 }
+
+    s2vol3:
+        type: OS::Cinder::Volume
+        properties:
+            size: { get_param: volume_size }
+            volume_type: { get_param: volume_type }
+
+    s2vol3attach:
+        type: OS::Cinder::VolumeAttachment
+        properties:
+            volume_id: { get_resource: s2vol3 }
+            instance_uuid: { get_resource: server2 }
+
+
     s2port01:
         type: OS::Neutron::Port
         properties:
@@ -283,6 +354,45 @@ resources:
 
  
 ### -------  Server 3
+
+
+    s3vol1:
+        type: OS::Cinder::Volume
+        properties:
+            size: { get_param: volume_size }
+            volume_type: { get_param: volume_type }
+
+    s3vol1attach:
+        type: OS::Cinder::VolumeAttachment
+        properties:
+            volume_id: { get_resource: s3vol1 }
+            instance_uuid: { get_resource: server3 }
+
+    s3vol2:
+        type: OS::Cinder::Volume
+        properties:
+            size: { get_param: volume_size }
+            volume_type: { get_param: volume_type }
+
+    s3vol2attach:
+        type: OS::Cinder::VolumeAttachment
+        properties:
+            volume_id: { get_resource: s3vol2 }
+            instance_uuid: { get_resource: server3 }
+
+    s3vol3:
+        type: OS::Cinder::Volume
+        properties:
+            size: { get_param: volume_size }
+            volume_type: { get_param: volume_type }
+
+    s3vol3attach:
+        type: OS::Cinder::VolumeAttachment
+        properties:
+            volume_id: { get_resource: s3vol3 }
+            instance_uuid: { get_resource: server3 }
+
+
     s3port01:
         type: OS::Neutron::Port
         properties:
@@ -364,6 +474,45 @@ resources:
 
  
 ### -------  Server 4
+
+
+    s4vol1:
+        type: OS::Cinder::Volume
+        properties:
+            size: { get_param: volume_size }
+            volume_type: { get_param: volume_type }
+
+    s4vol1attach:
+        type: OS::Cinder::VolumeAttachment
+        properties:
+            volume_id: { get_resource: s4vol1 }
+            instance_uuid: { get_resource: server4 }
+
+    s4vol2:
+        type: OS::Cinder::Volume
+        properties:
+            size: { get_param: volume_size }
+            volume_type: { get_param: volume_type }
+
+    s4vol2attach:
+        type: OS::Cinder::VolumeAttachment
+        properties:
+            volume_id: { get_resource: s4vol2 }
+            instance_uuid: { get_resource: server4 }
+
+    s4vol3:
+        type: OS::Cinder::Volume
+        properties:
+            size: { get_param: volume_size }
+            volume_type: { get_param: volume_type }
+
+    s4vol3attach:
+        type: OS::Cinder::VolumeAttachment
+        properties:
+            volume_id: { get_resource: s4vol3 }
+            instance_uuid: { get_resource: server4 }
+
+
     s4port01:
         type: OS::Neutron::Port
         properties:
@@ -445,6 +594,45 @@ resources:
 
  
 ### -------  Server 5
+
+
+    s5vol1:
+        type: OS::Cinder::Volume
+        properties:
+            size: { get_param: volume_size }
+            volume_type: { get_param: volume_type }
+
+    s5vol1attach:
+        type: OS::Cinder::VolumeAttachment
+        properties:
+            volume_id: { get_resource: s5vol1 }
+            instance_uuid: { get_resource: server5 }
+
+    s5vol2:
+        type: OS::Cinder::Volume
+        properties:
+            size: { get_param: volume_size }
+            volume_type: { get_param: volume_type }
+
+    s5vol2attach:
+        type: OS::Cinder::VolumeAttachment
+        properties:
+            volume_id: { get_resource: s5vol2 }
+            instance_uuid: { get_resource: server5 }
+
+    s5vol3:
+        type: OS::Cinder::Volume
+        properties:
+            size: { get_param: volume_size }
+            volume_type: { get_param: volume_type }
+
+    s5vol3attach:
+        type: OS::Cinder::VolumeAttachment
+        properties:
+            volume_id: { get_resource: s5vol3 }
+            instance_uuid: { get_resource: server5 }
+
+
     s5port01:
         type: OS::Neutron::Port
         properties:

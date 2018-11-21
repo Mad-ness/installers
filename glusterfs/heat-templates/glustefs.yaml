@@ -2,8 +2,6 @@ heat_template_version: 2018-03-02
 description: Deploying a set of server for a GlusterFS Cluster
 
 
-
-
 parameters:
     image:
         type: string
@@ -33,7 +31,7 @@ parameters:
         type: string
         label: SSHPair ID or Name
         description: SSH keypair, those public key will be injected into the cluster nodes
-        default: {{ ssh_keypair }}
+        default: {{ sshkey }}
 
     allowed_tcp_ports:
         type: comma_delimited_list
@@ -48,27 +46,23 @@ parameters:
         default: "111,963"
 
 
+    volume_size:
+        type: number
+        label: Disk size
+        description: Size of a single volume in Gb
+        default: {{ volume_size | default(10) }}
+
+    volume_type:
+        type: string
+        label: Storage volume type
+        description: Type of a volume as defined in OpenStack database
+        default: {{ volume_type | default('CephStorage') }}
+
+
+
+
 resources:
 
-
-    boot_script:
-        type: OS::Heat::SoftwareConfig
-        properties:
-            group: ungrouped
-            config: |
-                #!/bin/bash
-                cat << EOF | sudo tee /etc/sysconfig/network-scripts/ifcfg-eth1 
-                DEVICE=eth1
-                BOOTPROTO=static
-                ONBOOT=yes
-                NM_CONTROLLED=no
-                IPADDR=
-                NETMASK=
-                EOF
-                sudo yum install -y epel-release
-                sudo yum update -y 
-                echo "This is all done under "`whoami`
-                sudo reboot
 
     tcp_ports:
         type: OS::Neutron::SecurityGroup
@@ -117,10 +111,24 @@ resources:
                 ethertype: IPv4
                 remote_ip_prefix: 0.0.0.0/0
 
-
-
-{% for num in range(0, num_servers)%} 
+{% set n_servers = num_servers|int %}
+{% for num in range(0, n_servers)%} 
 ### -------  Server {{ loop.index }}
+{% set outer_loop = loop %}
+{% for volid in range(0, volume_count|int) %}
+    s{{ outer_loop.index }}vol{{ loop.index }}:
+        type: OS::Cinder::Volume
+        properties:
+            size: { get_param: volume_size }
+            volume_type: { get_param: volume_type }
+
+    s{{ outer_loop.index }}vol{{ loop.index }}attach:
+        type: OS::Cinder::VolumeAttachment
+        properties:
+            volume_id: { get_resource: s{{ outer_loop.index }}vol{{ loop.index }} }
+            instance_uuid: { get_resource: server{{ outer_loop.index }} }
+{% endfor %}
+
     s{{ loop.index }}port01:
         type: OS::Neutron::Port
         properties:
@@ -204,7 +212,7 @@ resources:
 
 
 outputs:
-{% for num in range(0, num_servers) %}
+{% for num in range(0, n_servers) %}
     srv{{ loop.index }}port1_ip: { value: { get_attr: [ s{{ loop.index }}port01, fixed_ips, 0, ip_address ]}}
     srv{{ loop.index }}port2_ip: { value: { get_attr: [ s{{ loop.index }}port02, fixed_ips, 0, ip_address ]}}
 {% endfor %}

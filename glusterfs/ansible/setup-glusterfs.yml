@@ -1,0 +1,38 @@
+- name: Setting up backend
+  become: true
+  hosts: gluster_nodes
+  gather_facts: false
+  vars:
+    gluster_infra_fw_ports:
+      - 2049/tcp
+      - 54321/tcp
+      - 5900/tcp
+      - 5900-6923/tcp
+      - 5666/tcp
+      - 16514/tcp
+
+    gluster_infra_fw_services:
+      - glusterfs
+    gluster_infra_disktype: JBOD
+    gluster_infra_stripe_unit_size: 128
+    gluster_infra_volume_groups:
+      - { vgname: vg_vdb, pvname: '/dev/vdb' }
+      - { vgname: vg_vdc, pvname: '/dev/vdc' }
+    gluster_infra_thick_lvs:
+      - { vgname: 'vg_vdb', lvname: 'thicklv_1', size: '10G' }
+    gluster_infra_thinpools:
+      - {vgname: 'vg_vdb', thinpoolname: 'foo_thinpool', thinpoolsize: '100G', poolmetadatasize: '16G'}
+      - {vgname: 'vg_vdc', thinpoolname: 'bar_thinpool', thinpoolsize: '500G', poolmetadatasize: '16G'}
+     # Create a thin volume
+    gluster_infra_lv_logicalvols:
+      - { vgname: 'vg_vdb', thinpool: 'foo_thinpool', lvname: 'vg_vdb_thinlv', lvsize: '500G' }
+      - { vgname: 'vg_vdc', thinpool: 'bar_thinpool', lvname: 'vg_vdc_thinlv', lvsize: '500G' }
+     # Mount the devices
+    gluster_infra_mount_devices:
+      - { path: '/mnt/thicklv', vgname: 'vg_vdb', lvname: 'thicklv_1' }
+      - { path: '/mnt/thinlv1', vgname: 'vg_vdb', lvname: 'vg_vdb_thinlv' }
+      - { path: '/mnt/thinlv2', vgname: 'vg_vdc', lvname: 'vg_vdc_thinlv' }
+  roles:
+    - gluster.infra
+
+
