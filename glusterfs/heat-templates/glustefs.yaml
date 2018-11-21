@@ -154,7 +154,7 @@ resources:
                         $stackname: { get_param: "OS::stack_name" }
             image: { get_param: image } 
             flavor: { get_param: flavor }
-            key_name: { get_param: sshkey }
+            key_name: { get_param: sshkey }     
             # user_data: { get_param: userdata_script }
             user_data:
                 str_replace:
@@ -193,15 +193,6 @@ resources:
                         NETMASK=`python /tmp/helper.py $port2_netmask`
                         EOF
                         rm -f /tmp/helper.py || true 
-                        # sudo yum install -y lvm2
-                        # cat << CMDS | sudo bash
-                        # pvcreate {% for volid in range(0, num_volumes|int) %}$dev{{ loop.index }} {% endfor %}
-                        # CMDS
-                        cat << DEVS | sudo tee /.devices
-                        {%- for volid in range(0, num_volumes|int) %}
-                        $dev{{ loop.index }}
-                        {%- endfor %} 
-                        DEVS
                         sudo yum install -y epel-release lvm2
                         sudo yum update -y 
                         touch /.installed
@@ -229,10 +220,11 @@ outputs:
     srv{{ loop.index }}devs: 
         value:
             list_join:
-                - ' '
-                {%- set outer_loop = loop %}
-                {%- for volid in range(0, num_volumes|int) %}
-                - { get_attr: [ s{{ outer_loop.index }}vol{{ loop.index }}, attachments_list, 0, device ]}
-                {%- endfor %}
+                - ','
+                - 
+                  {%- set outer_loop = loop %}
+                  {%- for volid in range(0, num_volumes|int) %}
+                  - { get_attr: [ s{{ outer_loop.index }}vol{{ loop.index }}, attachments_list, 0, device ]}
+                  {%- endfor %}
 {% endfor %}
  
