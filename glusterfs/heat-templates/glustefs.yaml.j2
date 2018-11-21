@@ -39,13 +39,13 @@ parameters:
         type: comma_delimited_list
         label: A list of ports
         description: A list of tcp ports which will be accessed via a security group
-        default: "22,111,2049"
+        default: "22,111,2049,139,445,965,2049,631"
 
     allowed_udp_ports:
         type: comma_delimited_list
         label: A list of ports
         description: A list of udp ports which will be accessed via a security group    
-        default: "111"
+        default: "111,963"
 
     userdata_script:
         type: string
