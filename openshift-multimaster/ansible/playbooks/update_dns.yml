@@ -1,6 +1,0 @@
-- name: Point a host at the internal DNS server ( /etc/*/ifcfg-eth0 )
-  lineinfile:
-      regexp: "^DNS{{ dns_id }}=.*$"
-      line: 'DNS{{ dns_id }}={{ hostvars[groups["all"][dns_id|int-1]].ansible_default_ipv4.address }}'
-      path: /etc/sysconfig/network-scripts/ifcfg-eth0
-
