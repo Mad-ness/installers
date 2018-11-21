@@ -1,0 +1,551 @@
+heat_template_version: 2018-03-02
+description: Deploying a set of server for a GlusterFS Cluster
+
+
+
+
+parameters:
+    image:
+        type: string
+        label: Image ID or Name
+        description: An image to run a server(s) from
+        default: CentOS-7
+
+    flavor:
+        type: string    
+        label: Flavor ID or Name
+        description: A flavor for a server(s)
+        default: v1.small
+
+    frontend_network:
+        type: string
+        label: Subnet ID or Name
+        description: A public network for connecting clients to a cluster
+        default: OSQ-External-Network
+
+    backend_network:
+        type: string
+        label: Subnet ID or Name
+        description: A private network for the cluster's internals
+        default: ipsystems-management
+
+    sshkey:
+        type: string
+        label: SSHPair ID or Name
+        description: SSH keypair, those public key will be injected into the cluster nodes
+        default: dmitrii-key1
+
+    allowed_tcp_ports:
+        type: comma_delimited_list
+        label: A list of ports
+        description: A list of tcp ports which will be accessed via a security group
+        default: "22,111,2049"
+
+    allowed_udp_ports:
+        type: comma_delimited_list
+        label: A list of ports
+        description: A list of udp ports which will be accessed via a security group    
+        default: "111"
+
+    userdata_script:
+        type: string
+        label: Shell Script
+        default: |
+            #!/bin/bash
+            sudo yum install -y epel-release
+            sudo yum update -y
+            sudo reboot
+        description: A script that is being executed once a system is run first time
+
+resources:
+
+
+    boot_script:
+        type: OS::Heat::SoftwareConfig
+        properties:
+            group: ungrouped
+            config: |
+                #!/bin/bash
+                cat << EOF | sudo tee /etc/sysconfig/network-scripts/ifcfg-eth1 
+                DEVICE=eth1
+                BOOTPROTO=static
+                ONBOOT=yes
+                NM_CONTROLLED=no
+                IPADDR=
+                NETMASK=
+                EOF
+                sudo yum install -y epel-release
+                sudo yum update -y 
+                echo "This is all done under "`whoami`
+                sudo reboot
+
+    tcp_ports:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            rules:
+                repeat:
+                    for_each:
+                        <%port%>: { get_param: allowed_tcp_ports }
+                    template:
+                        direction: ingress
+                        ethertype: IPv4
+                        port_range_min: <%port%>
+                        port_range_max: <%port%>
+                        protocol: tcp
+                        remote_ip_prefix: 0.0.0.0/0    
+   
+    udp_ports:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            rules:
+                repeat:
+                    for_each:
+                        <%port%>: { get_param: allowed_udp_ports }
+                    template:
+                        direction: ingress
+                        ethertype: IPv4
+                        port_range_min: <%port%>
+                        port_range_max: <%port%>
+                        protocol: tcp
+                        remote_ip_prefix: 0.0.0.0/0    
+    icmp_ports:
+        type: OS::Neutron::SecurityGroup
+        properties:
+            rules:
+              - direction: ingress
+                ethertype: IPv4
+                protocol: icmp
+                remote_ip_prefix: 0.0.0.0/0
+     
+
+    all_ports:
+        type: OS::Neutron::SecurityGroup
+        properties: 
+            rules:
+              - direction: ingress
+                ethertype: IPv4
+                remote_ip_prefix: 0.0.0.0/0
+
+
+
+ 
+### -------  Server 1
+    s1port01:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: frontend_network }
+            security_groups:
+              - { get_resource: tcp_ports }
+              - { get_resource: udp_ports }
+              - { get_resource: icmp_ports }
+
+    s1port02:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: backend_network }
+            security_groups:
+              - { get_resource: all_ports }
+  
+    server1:
+        type: OS::Nova::Server
+        properties:
+            name:
+                str_replace:
+                    template: $stackname-node1
+                    params:
+                        $stackname: { get_param: "OS::stack_name" }
+            image: { get_param: image } 
+            flavor: { get_param: flavor }
+            key_name: { get_param: sshkey }
+            # user_data: { get_param: userdata_script }
+            user_data:
+                str_replace:
+                    template: |
+                        #!/bin/bash
+                        import sys
+                        cat << EOF > /tmp/helper.py
+                        #!/usr/bin/env python
+                        import sys
+                        def calcDottedNetmask(mask):
+                            bits = 0
+                            for i in xrange(32-mask,32):
+                                bits |= (1 << i)
+                            return "%d.%d.%d.%d" % ((bits & 0xff000000) >> 24, (bits & 0xff0000) >> 16, (bits & 0xff00) >> 8 , (bits & 0xff))
+                        print(calcDottedNetmask(int(sys.argv[1].split('/')[1])))
+                        EOF
+                
+                        cat << EOF | sudo tee /etc/sysconfig/network-scripts/ifcfg-eth0
+                        DEVICE=eth0
+                        BOOTPROTO=static
+                        ONBOOT=yes
+                        NM_CONTROLLED=no
+                        IPADDR=$port1_ipaddr
+                        NETMASK=`python /tmp/helper.py $port1_netmask`
+                        GATEWAY=$port1_gateway
+                        DNS1=$port1_dns1
+                        DNS2=$port1_dns2
+                        EOF
+    
+                        cat << EOF | sudo tee /etc/sysconfig/network-scripts/ifcfg-eth1
+                        DEVICE=eth1
+                        BOOTPROTO=static
+                        ONBOOT=yes
+                        NM_CONTROLLED=no
+                        IPADDR=$port2_ipaddr
+                        NETMASK=`python /tmp/helper.py $port2_netmask`
+                        EOF
+                        rm -f /tmp/helper.py || true 
+                        sudo yum install -y epel-release
+                        sudo yum update -y 
+                        sudo reboot
+                    params:
+                        $port1_ipaddr:  { get_attr: [ s1port01, fixed_ips, 0, ip_address ]}
+                        $port1_netmask: { get_attr: [ s1port01, subnets, 0, cidr ]}
+                        $port1_gateway: { get_attr: [ s1port01, subnets, 0, gateway_ip ]}
+                        $port1_dns1:    { get_attr: [ s1port01, subnets, 0, dns_nameservers, 0 ]}
+                        $port1_dns2:    { get_attr: [ s1port01, subnets, 0, dns_nameservers, 1 ]}
+                        $port2_ipaddr:  { get_attr: [ s1port02, fixed_ips, 0, ip_address ]}
+                        $port2_netmask: { get_attr: [ s1port02, subnets, 0, cidr ]}
+            networks: [ port: { get_resource: s1port01 }, port: { get_resource: s1port02 }]
+
+ 
+### -------  Server 2
+    s2port01:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: frontend_network }
+            security_groups:
+              - { get_resource: tcp_ports }
+              - { get_resource: udp_ports }
+              - { get_resource: icmp_ports }
+
+    s2port02:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: backend_network }
+            security_groups:
+              - { get_resource: all_ports }
+  
+    server2:
+        type: OS::Nova::Server
+        properties:
+            name:
+                str_replace:
+                    template: $stackname-node2
+                    params:
+                        $stackname: { get_param: "OS::stack_name" }
+            image: { get_param: image } 
+            flavor: { get_param: flavor }
+            key_name: { get_param: sshkey }
+            # user_data: { get_param: userdata_script }
+            user_data:
+                str_replace:
+                    template: |
+                        #!/bin/bash
+                        import sys
+                        cat << EOF > /tmp/helper.py
+                        #!/usr/bin/env python
+                        import sys
+                        def calcDottedNetmask(mask):
+                            bits = 0
+                            for i in xrange(32-mask,32):
+                                bits |= (1 << i)
+                            return "%d.%d.%d.%d" % ((bits & 0xff000000) >> 24, (bits & 0xff0000) >> 16, (bits & 0xff00) >> 8 , (bits & 0xff))
+                        print(calcDottedNetmask(int(sys.argv[1].split('/')[1])))
+                        EOF
+                
+                        cat << EOF | sudo tee /etc/sysconfig/network-scripts/ifcfg-eth0
+                        DEVICE=eth0
+                        BOOTPROTO=static
+                        ONBOOT=yes
+                        NM_CONTROLLED=no
+                        IPADDR=$port1_ipaddr
+                        NETMASK=`python /tmp/helper.py $port1_netmask`
+                        GATEWAY=$port1_gateway
+                        DNS1=$port1_dns1
+                        DNS2=$port1_dns2
+                        EOF
+    
+                        cat << EOF | sudo tee /etc/sysconfig/network-scripts/ifcfg-eth1
+                        DEVICE=eth1
+                        BOOTPROTO=static
+                        ONBOOT=yes
+                        NM_CONTROLLED=no
+                        IPADDR=$port2_ipaddr
+                        NETMASK=`python /tmp/helper.py $port2_netmask`
+                        EOF
+                        rm -f /tmp/helper.py || true 
+                        sudo yum install -y epel-release
+                        sudo yum update -y 
+                        sudo reboot
+                    params:
+                        $port1_ipaddr:  { get_attr: [ s2port01, fixed_ips, 0, ip_address ]}
+                        $port1_netmask: { get_attr: [ s2port01, subnets, 0, cidr ]}
+                        $port1_gateway: { get_attr: [ s2port01, subnets, 0, gateway_ip ]}
+                        $port1_dns1:    { get_attr: [ s2port01, subnets, 0, dns_nameservers, 0 ]}
+                        $port1_dns2:    { get_attr: [ s2port01, subnets, 0, dns_nameservers, 1 ]}
+                        $port2_ipaddr:  { get_attr: [ s2port02, fixed_ips, 0, ip_address ]}
+                        $port2_netmask: { get_attr: [ s2port02, subnets, 0, cidr ]}
+            networks: [ port: { get_resource: s2port01 }, port: { get_resource: s2port02 }]
+
+ 
+### -------  Server 3
+    s3port01:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: frontend_network }
+            security_groups:
+              - { get_resource: tcp_ports }
+              - { get_resource: udp_ports }
+              - { get_resource: icmp_ports }
+
+    s3port02:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: backend_network }
+            security_groups:
+              - { get_resource: all_ports }
+  
+    server3:
+        type: OS::Nova::Server
+        properties:
+            name:
+                str_replace:
+                    template: $stackname-node3
+                    params:
+                        $stackname: { get_param: "OS::stack_name" }
+            image: { get_param: image } 
+            flavor: { get_param: flavor }
+            key_name: { get_param: sshkey }
+            # user_data: { get_param: userdata_script }
+            user_data:
+                str_replace:
+                    template: |
+                        #!/bin/bash
+                        import sys
+                        cat << EOF > /tmp/helper.py
+                        #!/usr/bin/env python
+                        import sys
+                        def calcDottedNetmask(mask):
+                            bits = 0
+                            for i in xrange(32-mask,32):
+                                bits |= (1 << i)
+                            return "%d.%d.%d.%d" % ((bits & 0xff000000) >> 24, (bits & 0xff0000) >> 16, (bits & 0xff00) >> 8 , (bits & 0xff))
+                        print(calcDottedNetmask(int(sys.argv[1].split('/')[1])))
+                        EOF
+                
+                        cat << EOF | sudo tee /etc/sysconfig/network-scripts/ifcfg-eth0
+                        DEVICE=eth0
+                        BOOTPROTO=static
+                        ONBOOT=yes
+                        NM_CONTROLLED=no
+                        IPADDR=$port1_ipaddr
+                        NETMASK=`python /tmp/helper.py $port1_netmask`
+                        GATEWAY=$port1_gateway
+                        DNS1=$port1_dns1
+                        DNS2=$port1_dns2
+                        EOF
+    
+                        cat << EOF | sudo tee /etc/sysconfig/network-scripts/ifcfg-eth1
+                        DEVICE=eth1
+                        BOOTPROTO=static
+                        ONBOOT=yes
+                        NM_CONTROLLED=no
+                        IPADDR=$port2_ipaddr
+                        NETMASK=`python /tmp/helper.py $port2_netmask`
+                        EOF
+                        rm -f /tmp/helper.py || true 
+                        sudo yum install -y epel-release
+                        sudo yum update -y 
+                        sudo reboot
+                    params:
+                        $port1_ipaddr:  { get_attr: [ s3port01, fixed_ips, 0, ip_address ]}
+                        $port1_netmask: { get_attr: [ s3port01, subnets, 0, cidr ]}
+                        $port1_gateway: { get_attr: [ s3port01, subnets, 0, gateway_ip ]}
+                        $port1_dns1:    { get_attr: [ s3port01, subnets, 0, dns_nameservers, 0 ]}
+                        $port1_dns2:    { get_attr: [ s3port01, subnets, 0, dns_nameservers, 1 ]}
+                        $port2_ipaddr:  { get_attr: [ s3port02, fixed_ips, 0, ip_address ]}
+                        $port2_netmask: { get_attr: [ s3port02, subnets, 0, cidr ]}
+            networks: [ port: { get_resource: s3port01 }, port: { get_resource: s3port02 }]
+
+ 
+### -------  Server 4
+    s4port01:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: frontend_network }
+            security_groups:
+              - { get_resource: tcp_ports }
+              - { get_resource: udp_ports }
+              - { get_resource: icmp_ports }
+
+    s4port02:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: backend_network }
+            security_groups:
+              - { get_resource: all_ports }
+  
+    server4:
+        type: OS::Nova::Server
+        properties:
+            name:
+                str_replace:
+                    template: $stackname-node4
+                    params:
+                        $stackname: { get_param: "OS::stack_name" }
+            image: { get_param: image } 
+            flavor: { get_param: flavor }
+            key_name: { get_param: sshkey }
+            # user_data: { get_param: userdata_script }
+            user_data:
+                str_replace:
+                    template: |
+                        #!/bin/bash
+                        import sys
+                        cat << EOF > /tmp/helper.py
+                        #!/usr/bin/env python
+                        import sys
+                        def calcDottedNetmask(mask):
+                            bits = 0
+                            for i in xrange(32-mask,32):
+                                bits |= (1 << i)
+                            return "%d.%d.%d.%d" % ((bits & 0xff000000) >> 24, (bits & 0xff0000) >> 16, (bits & 0xff00) >> 8 , (bits & 0xff))
+                        print(calcDottedNetmask(int(sys.argv[1].split('/')[1])))
+                        EOF
+                
+                        cat << EOF | sudo tee /etc/sysconfig/network-scripts/ifcfg-eth0
+                        DEVICE=eth0
+                        BOOTPROTO=static
+                        ONBOOT=yes
+                        NM_CONTROLLED=no
+                        IPADDR=$port1_ipaddr
+                        NETMASK=`python /tmp/helper.py $port1_netmask`
+                        GATEWAY=$port1_gateway
+                        DNS1=$port1_dns1
+                        DNS2=$port1_dns2
+                        EOF
+    
+                        cat << EOF | sudo tee /etc/sysconfig/network-scripts/ifcfg-eth1
+                        DEVICE=eth1
+                        BOOTPROTO=static
+                        ONBOOT=yes
+                        NM_CONTROLLED=no
+                        IPADDR=$port2_ipaddr
+                        NETMASK=`python /tmp/helper.py $port2_netmask`
+                        EOF
+                        rm -f /tmp/helper.py || true 
+                        sudo yum install -y epel-release
+                        sudo yum update -y 
+                        sudo reboot
+                    params:
+                        $port1_ipaddr:  { get_attr: [ s4port01, fixed_ips, 0, ip_address ]}
+                        $port1_netmask: { get_attr: [ s4port01, subnets, 0, cidr ]}
+                        $port1_gateway: { get_attr: [ s4port01, subnets, 0, gateway_ip ]}
+                        $port1_dns1:    { get_attr: [ s4port01, subnets, 0, dns_nameservers, 0 ]}
+                        $port1_dns2:    { get_attr: [ s4port01, subnets, 0, dns_nameservers, 1 ]}
+                        $port2_ipaddr:  { get_attr: [ s4port02, fixed_ips, 0, ip_address ]}
+                        $port2_netmask: { get_attr: [ s4port02, subnets, 0, cidr ]}
+            networks: [ port: { get_resource: s4port01 }, port: { get_resource: s4port02 }]
+
+ 
+### -------  Server 5
+    s5port01:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: frontend_network }
+            security_groups:
+              - { get_resource: tcp_ports }
+              - { get_resource: udp_ports }
+              - { get_resource: icmp_ports }
+
+    s5port02:
+        type: OS::Neutron::Port
+        properties:
+            network_id: { get_param: backend_network }
+            security_groups:
+              - { get_resource: all_ports }
+  
+    server5:
+        type: OS::Nova::Server
+        properties:
+            name:
+                str_replace:
+                    template: $stackname-node5
+                    params:
+                        $stackname: { get_param: "OS::stack_name" }
+            image: { get_param: image } 
+            flavor: { get_param: flavor }
+            key_name: { get_param: sshkey }
+            # user_data: { get_param: userdata_script }
+            user_data:
+                str_replace:
+                    template: |
+                        #!/bin/bash
+                        import sys
+                        cat << EOF > /tmp/helper.py
+                        #!/usr/bin/env python
+                        import sys
+                        def calcDottedNetmask(mask):
+                            bits = 0
+                            for i in xrange(32-mask,32):
+                                bits |= (1 << i)
+                            return "%d.%d.%d.%d" % ((bits & 0xff000000) >> 24, (bits & 0xff0000) >> 16, (bits & 0xff00) >> 8 , (bits & 0xff))
+                        print(calcDottedNetmask(int(sys.argv[1].split('/')[1])))
+                        EOF
+                
+                        cat << EOF | sudo tee /etc/sysconfig/network-scripts/ifcfg-eth0
+                        DEVICE=eth0
+                        BOOTPROTO=static
+                        ONBOOT=yes
+                        NM_CONTROLLED=no
+                        IPADDR=$port1_ipaddr
+                        NETMASK=`python /tmp/helper.py $port1_netmask`
+                        GATEWAY=$port1_gateway
+                        DNS1=$port1_dns1
+                        DNS2=$port1_dns2
+                        EOF
+    
+                        cat << EOF | sudo tee /etc/sysconfig/network-scripts/ifcfg-eth1
+                        DEVICE=eth1
+                        BOOTPROTO=static
+                        ONBOOT=yes
+                        NM_CONTROLLED=no
+                        IPADDR=$port2_ipaddr
+                        NETMASK=`python /tmp/helper.py $port2_netmask`
+                        EOF
+                        rm -f /tmp/helper.py || true 
+                        sudo yum install -y epel-release
+                        sudo yum update -y 
+                        sudo reboot
+                    params:
+                        $port1_ipaddr:  { get_attr: [ s5port01, fixed_ips, 0, ip_address ]}
+                        $port1_netmask: { get_attr: [ s5port01, subnets, 0, cidr ]}
+                        $port1_gateway: { get_attr: [ s5port01, subnets, 0, gateway_ip ]}
+                        $port1_dns1:    { get_attr: [ s5port01, subnets, 0, dns_nameservers, 0 ]}
+                        $port1_dns2:    { get_attr: [ s5port01, subnets, 0, dns_nameservers, 1 ]}
+                        $port2_ipaddr:  { get_attr: [ s5port02, fixed_ips, 0, ip_address ]}
+                        $port2_netmask: { get_attr: [ s5port02, subnets, 0, cidr ]}
+            networks: [ port: { get_resource: s5port01 }, port: { get_resource: s5port02 }]
+
+ 
+
+
+outputs:
+
+    srv1port1_ip: { value: { get_attr: [ s1port01, fixed_ips, 0, ip_address ]}}
+    srv1port2_ip: { value: { get_attr: [ s1port02, fixed_ips, 0, ip_address ]}}
+
+    srv2port1_ip: { value: { get_attr: [ s2port01, fixed_ips, 0, ip_address ]}}
+    srv2port2_ip: { value: { get_attr: [ s2port02, fixed_ips, 0, ip_address ]}}
+
+    srv3port1_ip: { value: { get_attr: [ s3port01, fixed_ips, 0, ip_address ]}}
+    srv3port2_ip: { value: { get_attr: [ s3port02, fixed_ips, 0, ip_address ]}}
+
+    srv4port1_ip: { value: { get_attr: [ s4port01, fixed_ips, 0, ip_address ]}}
+    srv4port2_ip: { value: { get_attr: [ s4port02, fixed_ips, 0, ip_address ]}}
+
+    srv5port1_ip: { value: { get_attr: [ s5port01, fixed_ips, 0, ip_address ]}}
+    srv5port2_ip: { value: { get_attr: [ s5port02, fixed_ips, 0, ip_address ]}}
+
+ 

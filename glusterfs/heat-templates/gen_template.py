@@ -12,6 +12,8 @@ def main():
     parser.add_argument("-o", "--output", required=False, type=str, default=None, help="Path to file to save a rendered template") 
     parser.add_argument("-f", "--publicnetwork", required=False, type=str, default=None, help="Public/Frontend network")
     parser.add_argument("-b", "--privatenetwork", required=False, type=str, default=None, help="Private/Backend network")
+    parser.add_argument("-k", "--keypair", required=False, type=str, default=None, help="SSH key pair")
+
 
 
     args = parser.parse_args()
@@ -21,6 +23,7 @@ def main():
         num_servers = args.count,
         frontend_network = args.publicnetwork,
         backend_network = args.privatenetwork,
+        ssh_keypair = args.keypair,
     )
     if args.output != None:
         open(args.output, 'w').write(output)

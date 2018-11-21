@@ -15,24 +15,25 @@ parameters:
         type: string    
         label: Flavor ID or Name
         description: A flavor for a server(s)
-        default: n1.small
+        default: v1.small
 
     frontend_network:
         type: string
-        label: Network ID or Name
+        label: Subnet ID or Name
         description: A public network for connecting clients to a cluster
         default: {{ frontend_network }}
 
     backend_network:
         type: string
-        label: Network ID or Name
-        descrption: A private network for the cluster's internals
+        label: Subnet ID or Name
+        description: A private network for the cluster's internals
         default: {{ backend_network }}
 
     sshkey:
         type: string
         label: SSHPair ID or Name
         description: SSH keypair, those public key will be injected into the cluster nodes
+        default: {{ ssh_keypair }}
 
     allowed_tcp_ports:
         type: comma_delimited_list
@@ -53,9 +54,30 @@ parameters:
             #!/bin/bash
             sudo yum install -y epel-release
             sudo yum update -y
+            sudo reboot
         description: A script that is being executed once a system is run first time
 
 resources:
+
+
+    boot_script:
+        type: OS::Heat::SoftwareConfig
+        properties:
+            group: ungrouped
+            config: |
+                #!/bin/bash
+                cat << EOF | sudo tee /etc/sysconfig/network-scripts/ifcfg-eth1 
+                DEVICE=eth1
+                BOOTPROTO=static
+                ONBOOT=yes
+                NM_CONTROLLED=no
+                IPADDR=
+                NETMASK=
+                EOF
+                sudo yum install -y epel-release
+                sudo yum update -y 
+                echo "This is all done under "`whoami`
+                sudo reboot
 
     tcp_ports:
         type: OS::Neutron::SecurityGroup
@@ -63,7 +85,7 @@ resources:
             rules:
                 repeat:
                     for_each:
-                        <%port%> { get_param: allowed_tcp_ports }
+                        <%port%>: { get_param: allowed_tcp_ports }
                     template:
                         direction: ingress
                         ethertype: IPv4
@@ -78,7 +100,7 @@ resources:
             rules:
                 repeat:
                     for_each:
-                        <%port%> { get_param: allowed_udp_ports }
+                        <%port%>: { get_param: allowed_udp_ports }
                     template:
                         direction: ingress
                         ethertype: IPv4
@@ -100,7 +122,7 @@ resources:
         type: OS::Neutron::SecurityGroup
         properties: 
             rules:
-              - directon: ingress
+              - direction: ingress
                 ethertype: IPv4
                 remote_ip_prefix: 0.0.0.0/0
 
@@ -127,10 +149,63 @@ resources:
     server{{ loop.index }}:
         type: OS::Nova::Server
         properties:
+            name:
+                str_replace:
+                    template: $stackname-node{{ loop.index }}
+                    params:
+                        $stackname: { get_param: "OS::stack_name" }
             image: { get_param: image } 
             flavor: { get_param: flavor }
             key_name: { get_param: sshkey }
-            user_data: { get_param: userdata_script }
+            # user_data: { get_param: userdata_script }
+            user_data:
+                str_replace:
+                    template: |
+                        #!/bin/bash
+                        import sys
+                        cat << EOF > /tmp/helper.py
+                        #!/usr/bin/env python
+                        import sys
+                        def calcDottedNetmask(mask):
+                            bits = 0
+                            for i in xrange(32-mask,32):
+                                bits |= (1 << i)
+                            return "%d.%d.%d.%d" % ((bits & 0xff000000) >> 24, (bits & 0xff0000) >> 16, (bits & 0xff00) >> 8 , (bits & 0xff))
+                        print(calcDottedNetmask(int(sys.argv[1].split('/')[1])))
+                        EOF
+                
+                        cat << EOF | sudo tee /etc/sysconfig/network-scripts/ifcfg-eth0
+                        DEVICE=eth0
+                        BOOTPROTO=static
+                        ONBOOT=yes
+                        NM_CONTROLLED=no
+                        IPADDR=$port1_ipaddr
+                        NETMASK=`python /tmp/helper.py $port1_netmask`
+                        GATEWAY=$port1_gateway
+                        DNS1=$port1_dns1
+                        DNS2=$port1_dns2
+                        EOF
+    
+                        cat << EOF | sudo tee /etc/sysconfig/network-scripts/ifcfg-eth1
+                        DEVICE=eth1
+                        BOOTPROTO=static
+                        ONBOOT=yes
+                        NM_CONTROLLED=no
+                        IPADDR=$port2_ipaddr
+                        NETMASK=`python /tmp/helper.py $port2_netmask`
+                        EOF
+                        rm -f /tmp/helper.py || true 
+                        sudo yum install -y epel-release
+                        sudo yum update -y 
+                        sudo reboot
+                    params:
+                        $port1_ipaddr:  { get_attr: [ s{{ loop.index }}port01, fixed_ips, 0, ip_address ]}
+                        $port1_netmask: { get_attr: [ s{{ loop.index }}port01, subnets, 0, cidr ]}
+                        $port1_gateway: { get_attr: [ s{{ loop.index }}port01, subnets, 0, gateway_ip ]}
+                        $port1_dns1:    { get_attr: [ s{{ loop.index }}port01, subnets, 0, dns_nameservers, 0 ]}
+                        $port1_dns2:    { get_attr: [ s{{ loop.index }}port01, subnets, 0, dns_nameservers, 1 ]}
+                        $port2_ipaddr:  { get_attr: [ s{{ loop.index }}port02, fixed_ips, 0, ip_address ]}
+                        $port2_netmask: { get_attr: [ s{{ loop.index }}port02, subnets, 0, cidr ]}
             networks: [ port: { get_resource: s{{ loop.index }}port01 }, port: { get_resource: s{{ loop.index }}port02 }]
 
 {% endfor %} 
@@ -138,7 +213,7 @@ resources:
 
 outputs:
 {% for num in range(0, num_servers) %}
-    srv{{ loop.index }}port1_ip: { get_attr: { s{{ loop.index }}port01, fixed_ips, 0, ip_address }}
-    srv{{ loop.index }}port2_ip: { get_attr: { s{{ loop.index }}port02, fixed_ips, 0, ip_address }}
+    srv{{ loop.index }}port1_ip: { value: { get_attr: [ s{{ loop.index }}port01, fixed_ips, 0, ip_address ]}}
+    srv{{ loop.index }}port2_ip: { value: { get_attr: [ s{{ loop.index }}port02, fixed_ips, 0, ip_address ]}}
 {% endfor %}
-    
+ 
