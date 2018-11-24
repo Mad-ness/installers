@@ -133,6 +133,7 @@ resources:
         properties:
             network_id: { get_param: frontend_network }
             security_groups:
+              - { get_resource: all_ports }
               - { get_resource: tcp_ports }
               - { get_resource: udp_ports }
               - { get_resource: icmp_ports }
