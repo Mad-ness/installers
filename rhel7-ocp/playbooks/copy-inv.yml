@@ -19,11 +19,19 @@
       content: |
         127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
         ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+        
+        {% for host in groups['nodes'] + groups['lb'] %}
+        {{ hostvars[host].openshift_ip }} {{ hostvars[host].openshift_hostname }} {{ host }}
+        {% endfor %}
 
-        54.91.229.41  master01.ocp.local
-        35.171.8.164  utility.ocp.learning
-        3.87.191.63   node01.ocp.local
       dest: /etc/hosts
+
+  - name: Create directory /etc/origin/master
+    file:
+      path: /etc/origin/master
+      state: directory
+      recurse: true
+
   - name: Copy openshift  users
     copy:
       content: '{{ htusers }}'

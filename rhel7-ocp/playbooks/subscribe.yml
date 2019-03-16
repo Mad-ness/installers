@@ -3,17 +3,19 @@
   - lb
   become: true
   tasks:
+  - include_vars: ../vars/safedata.vault.yml
+
   - name: Subscribe the clients
     redhat_subscription:
       state: present
       pool_ids: 8a85f98b62f8eb2c0162fc2ff7d319b7
-      username: '{{ subsription_id }}'
-      password: '{{ subscription_pid }}'
+      username: '{{ subscription_id }}'
+      password: '{{ subscription_pin }}'
 
 
   - name: Disable repos
     shell: |
-      subscription-manager repos --disable="*"
+      subscription-manager repos --disable='*';
       yum-config-manager --disable \*
 
   - name: Enable needed repos
@@ -26,6 +28,6 @@
       --enable="rhel-7-server-ansible-2.4-rpms"
   - name: Update all packages
     yum: 
-      name: *
+      name: '*'
       state: latest
 

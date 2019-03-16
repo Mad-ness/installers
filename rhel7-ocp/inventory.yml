@@ -43,11 +43,12 @@ all:
         masters:
             hosts:
                 master.ocp.local:
-                    ansible_host: 3.83.178.77
+                    ansible_host: 192.168.3.11
                     ansible_ssh_port: 22
                     # ansible_ssh_private_key_file: "../.vagrant/machines/master01/virtualbox/private_key"
                     net2_ip: "{{ ansible_host }}"
-                    openshift_ip: 172.31.51.10
+                    openshift_ip: 192.168.3.11
+                    openshift_hostname: master.ocp.local
             vars:
                 # openshift_node_group_name: 'node-config-compute'
                 openshift_node_group_name: 'node-config-master-infra'
@@ -55,10 +56,11 @@ all:
         lb:
             hosts:
                 utility.ocp.learning: 
-                    ansible_host: 52.23.160.41
+                    ansible_host: 192.168.3.12
                     ansible_ssh_port: 22
                     net2_ip: "{{ ansible_host }}"
-                    openshift_ip: 172.31.56.188
+                    openshift_ip: 192.168.3.12
+                    openshift_hostname: lb.ocp.local
                     # ansible_ssh_private_key_file: "../.vagrant/machines/lb01/virtualbox/private_key"
                     # net2_ip: 192.168.3.12
                     # openshift_ip: 192.168.3.12
@@ -67,10 +69,11 @@ all:
               masters:
             hosts:
                 node01.ocp.local:
-                    ansible_host: 54.227.202.88
+                    ansible_host: 192.168.3.21
                     ansible_ssh_port: 22
                     net2_ip: "{{ ansible_host }}"
-                    openshift_ip: 172.31.60.29
+                    openshift_ip: 192.168.3.21
+                    openshift_hostname: node01.ocp.local
                     # ansible_ssh_private_key_file: "../.vagrant/machines/node01/virtualbox/private_key"
                     # net2_ip: 192.168.3.21
                     # openshift_ip: 192.168.3.21
@@ -88,9 +91,9 @@ all:
     vars:
         net2_netmask: 255.255.255.0
         net2_devname: eth1
-        # ansible_ssh_user: vagrant
+        ansible_ssh_user: vagrant
         cluster_domain_name: "ocp.local"
-        ansible_user: ec2-user
+        # ansible_user: ec2-user
         # internal_docker_registry_hostname: 'registry.ocp.local'
         htusers: |
           admin:$apr1$rCLo5mio$KfUZfKEiekvOp/k/2jvjC0
@@ -102,7 +105,4 @@ all:
           user6:$apr1$qd.Ud1Uj$cWFhGt.vil34L38OR4zLS/
           user7:$apr1$BQArM7wu$JjubY1jOHLSVLEmk0eK4R.
           user8:$apr1$m0dhKXEk$/SY2L.wjulsDFUG4ppvDL/
-
-
-
 
