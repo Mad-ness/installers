@@ -7,8 +7,8 @@
     redhat_subscription:
       state: present
       pool_ids: 8a85f98b62f8eb2c0162fc2ff7d319b7
-      username: 'Dmitriy.Mostovschikov.GDC@ts.fujitsu.com'
-      password: 'uNZGk_blKo1G2crwrVdn'
+      username: '{{ subsription_id }}'
+      password: '{{ subscription_pid }}'
 
 
   - name: Disable repos
