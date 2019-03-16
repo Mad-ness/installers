@@ -1,0 +1,101 @@
+- hosts: lb
+  become: true
+  vars:
+    install_proxy: true
+    rpm_cache_dir: /tmp/rpm-cache
+  tasks:
+
+
+  - name: Disable SELinux
+    lineinfile:
+      path: /etc/sysconfig/selinux
+      regexp: '^SELINUX='
+      line: 'SELINUX=permissive'
+    register: selinux_disabled
+
+  - name: Disable SELinux
+    command: /usr/sbin/setenforce 0
+
+  - name: Install Squid 3 proxy
+    block:
+      - name: Install needed packages
+        yum: name='{{ item }}' state=present
+        loop:
+          - squid
+          - git
+          - epel-release
+      - name: Install golang package
+        yum: name=golang state=present
+
+      - name: Getting squid-rpm-cache git source
+        git:
+          dest: '{{ rpm_cache_dir }}'
+          clone: true
+          repo: https://github.com/yevmel/squid-rpm-cache.git
+
+      - name: Build store_id_program
+        shell: |
+          cd {{ rpm_cache_dir }}/store_id_program && go build && mv store_id_program /etc/squid/store_id_program
+
+      - name: Run squid with default config
+        service: name=squid state=started enabled=on
+
+      - name: Deploy config /etc/squid/squid.conf
+        copy:
+          content: |
+              acl localnet src 10.0.0.0/8	# RFC1918 possible internal network
+              acl localnet src 172.16.0.0/12	# RFC1918 possible internal network
+              acl localnet src 192.168.0.0/16	# RFC1918 possible internal network
+              acl localnet src fc00::/7       # RFC 4193 local private network range
+              acl localnet src fe80::/10      # RFC 4291 link-local (directly plugged) machines
+              acl SSL_ports port 443
+              acl Safe_ports port 80		# http
+              acl Safe_ports port 21		# ftp
+              acl Safe_ports port 443		# https
+              acl Safe_ports port 70		# gopher
+              acl Safe_ports port 210		# wais
+              acl Safe_ports port 1025-65535	# unregistered ports
+              acl Safe_ports port 280		# http-mgmt
+              acl Safe_ports port 488		# gss-http
+              acl Safe_ports port 591		# filemaker
+              acl Safe_ports port 777		# multiling http
+              acl CONNECT method CONNECT
+              http_access deny !Safe_ports
+              http_access deny CONNECT !SSL_ports
+              http_access allow localhost manager
+              http_access deny manager
+              http_access allow localnet
+              http_access allow localhost
+              http_access deny all
+              http_port 3128
+              coredump_dir /var/spool/squid
+              refresh_pattern ^ftp:		1440	20%	10080
+              refresh_pattern ^gopher:	1440	0%	1440
+              refresh_pattern -i (/cgi-bin/|\?) 0	0%	0
+              refresh_pattern .		0	20%	4320            
+              #                 3 month    12 month
+              refresh_pattern . 129600 33% 525600
+              cache_dir ufs /var/spool/squid 10000 16 256
+
+              store_id_program /etc/squid/store_id_program
+              store_id_children 5 startup=1
+              
+              # have not seen a larger RPM yet
+              maximum_object_size 1 GB
+              
+              # cache RPMs only
+              acl rpm_only urlpath_regex \.rpm
+              cache allow rpm_only
+              cache deny all
+          dest: /etc/squid/squid.conf
+          validate: squid -k check -f %s
+        register: squid_conf_updated
+
+      - name: Restart squid if needed
+        service: name=squid state=restarted enabled=on
+        when: squid_conf_updated is changed
+
+    when: install_proxy | default(true)
+
+
+

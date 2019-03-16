@@ -1,0 +1,20 @@
+---
+- name: Install needed packages
+  yum: name='{{ item }}' state=present
+  loop: "{{ ocp_needed_packages }}"
+
+# - name: Install packages on masters
+#  yum: name=origin-node state=present
+#  when: inventory_hostname in groups['masters']
+
+- name: Install Docker
+  yum: name=docker state=present
+
+- name: Start Docker
+  service: name=docker enabled=on state=started
+
+#- name: Make sure file /etc/sysconfig/origin-node exists
+#  file: 
+#    path: /etc/sysconfig/origin-node
+#    state: touch
+

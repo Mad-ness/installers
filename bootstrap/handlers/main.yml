@@ -1,0 +1,14 @@
+---
+# handlers file for bootstrap
+- name: Restart Network
+  service: name=NetworkManager state=restarted
+
+- name: Restart SSHd service
+  service: name=sshd state=restarted
+
+- name: Restart HAProxy
+  service: name=haproxy state=restarted
+
+- name: Restart Docker
+  service: name=docker state=restarted
+

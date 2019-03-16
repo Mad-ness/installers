@@ -1,0 +1,108 @@
+all:
+    children:
+        OSEv3:
+            children:
+                nodes:
+                masters:
+                etcd:
+                lb:
+            vars:
+                # containerized: true
+                ansible_become: true
+                openshift_deployment_type: origin
+                openshift_release: '3.9'
+                openshift_ip_check: true
+                openshift_master_identity_providers:
+                  - name: htpasswd_auth
+                    login: true
+                    challenge: true
+                    kind: HTPasswdPasswordIdentityProvider
+                    filename: /etc/origin/master/htpasswd
+                # system_images_registry: 'registry.ocp.local:5000'
+                # openshift_docker_insecure_registries: 'registry.ocp.local:5000'
+                openshift_master_default_subdomain: 'apps.dmost.pro'
+                # oreg_url: 'registry.ocp.local:5000/openshift/origin-${component}:${version}'
+                openshift_master_cluster_hostname: 'master01.ocp.local'
+                # openshift_master_cluster_method: native
+                openshift_master_cluster_public_hostname: 'lb.ocp.local'
+                # openshift_use_crio: true
+                # openshift_use_crio_only: false
+                # openshift_crio_enable_docker_gc: true
+                # openshift_enable_excluders: false
+                openshift_docker_selinux_enabled: false
+                openshift_disable_check: 
+                - disk_availability
+                - memory_availability
+                - docker_image_availability
+#                - package_version
+#                - package_availability
+                - docker_storage
+        etcd:
+            children:
+                masters:
+        masters:
+            hosts:
+                master.ocp.local:
+                    ansible_host: 3.83.178.77
+                    ansible_ssh_port: 22
+                    # ansible_ssh_private_key_file: "../.vagrant/machines/master01/virtualbox/private_key"
+                    net2_ip: "{{ ansible_host }}"
+                    openshift_ip: 172.31.51.10
+            vars:
+                # openshift_node_group_name: 'node-config-compute'
+                openshift_node_group_name: 'node-config-master-infra'
+                openshift_schedulable: true
+        lb:
+            hosts:
+                utility.ocp.learning: 
+                    ansible_host: 52.23.160.41
+                    ansible_ssh_port: 22
+                    net2_ip: "{{ ansible_host }}"
+                    openshift_ip: 172.31.56.188
+                    # ansible_ssh_private_key_file: "../.vagrant/machines/lb01/virtualbox/private_key"
+                    # net2_ip: 192.168.3.12
+                    # openshift_ip: 192.168.3.12
+        nodes:
+            children:
+              masters:
+            hosts:
+                node01.ocp.local:
+                    ansible_host: 54.227.202.88
+                    ansible_ssh_port: 22
+                    net2_ip: "{{ ansible_host }}"
+                    openshift_ip: 172.31.60.29
+                    # ansible_ssh_private_key_file: "../.vagrant/machines/node01/virtualbox/private_key"
+                    # net2_ip: 192.168.3.21
+                    # openshift_ip: 192.168.3.21
+#                 node02.ocp.local: 
+#                     ansible_host: localhost
+#                     ansible_ssh_port: 4022
+#                     ansible_ssh_private_key_file: "../.vagrant/machines/node02/virtualbox/private_key"
+#                     net2_ip: 192.168.3.22
+#                     openshift_ip: 192.168.3.22
+            vars:
+              dummy: test
+              # openshift_node_group_name: node-config-all-in-one
+              # openshift_node_group_name: 'node-config-master-infra'
+              openshift_node_group_name: 'node-config-compute'
+    vars:
+        net2_netmask: 255.255.255.0
+        net2_devname: eth1
+        # ansible_ssh_user: vagrant
+        cluster_domain_name: "ocp.local"
+        ansible_user: ec2-user
+        # internal_docker_registry_hostname: 'registry.ocp.local'
+        htusers: |
+          admin:$apr1$rCLo5mio$KfUZfKEiekvOp/k/2jvjC0
+          user1:$apr1$cLundJ1F$xFPdgnROO05Ik5.N2ORv0.
+          user2:$apr1$N4BrshXY$5oAI8qJQMf3HFNYrEeNhc1
+          user3:$apr1$oCGwvLKK$1hR7oDJn1Uhriwkad8W5E.
+          user4:$apr1$xUilZQhW$4mJRslht6zIj4WT8LkhR40
+          user5:$apr1$l0y4CuNk$0AjI.sy/TwhMY9l9/IkdH1
+          user6:$apr1$qd.Ud1Uj$cWFhGt.vil34L38OR4zLS/
+          user7:$apr1$BQArM7wu$JjubY1jOHLSVLEmk0eK4R.
+          user8:$apr1$m0dhKXEk$/SY2L.wjulsDFUG4ppvDL/
+
+
+
+

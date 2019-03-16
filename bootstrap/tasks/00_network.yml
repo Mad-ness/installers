@@ -1,0 +1,20 @@
+- name: 'Configure network interface {{ dev_name }}'
+  copy:
+    content: |
+      DEVICE={{ dev_name }}
+      NAME={{ dev_name }}
+      BOOTPROTO=static
+      ONBOOT=yes
+      TYPE=Ethernet
+      NM_CONTROLLED=yes
+      IPV6INIT=no
+      PEERDNS=no
+      IPADDR={{ dev_ip }}
+      NETMASK={{ dev_netmask }}
+    dest: '/etc/sysconfig/network-scripts/ifcfg-{{ dev_name }}'
+    mode: '0644'
+    owner: root
+    group: root
+  notify:
+    - Restart Network
+

@@ -1,0 +1,103 @@
+---
+
+- name: Installing DNS server
+  block:
+
+    - name: Create output dir {{ dns_configs_dir }}
+      file:
+        path: '{{ dns_configs_dir }}'
+        mode: 0755
+        state: directory
+
+    - name: Render DNS server configs
+      template:
+        src: '{{ item.src }}'
+        dest: '{{ dns_configs_dir }}/{{ item.file }}'
+      loop:
+        - { src: named.conf.j2, file: named.conf }
+        - { src: zone.conf.j2, file: "zone.{{ domain_name }}.conf" }
+
+    - name: Installing Docker engine
+      yum: name='{{ item }}' state=present
+      loop:
+        - python-docker-py
+        - docker
+
+    - name: Ensure Docker engine is running
+      service: name=docker state=started enabled=on
+
+    - name: Create Dockerfile
+      copy: 
+        content: |
+          FROM {{ dns_server_base_image }}
+          MAINTAINER Dmitrii Mostovshchikov at dmadm2008@gmail.com
+          ADD ./named.conf /etc/bind
+          ADD ./zone.{{ domain_name }}.conf /var/bind
+        dest: '{{ dns_configs_dir }}/Dockerfile'
+        mode: '0644'
+
+    - name: "Building a needed docker image {{ dns_server_build_name }}:{{ dns_server_build_tag }}"
+      docker_image:
+        name: '{{ dns_server_build_name }}'
+        path: '{{ dns_configs_dir }}'
+        state: present
+        tag: '{{ dns_server_build_tag }}'
+
+    - name: Run a Bind DNS server in a docker container
+      docker_container:
+        name: '{{ dns_server_container_name }}'
+        image:  '{{ dns_server_build_name }}:{{ dns_server_build_tag }}'
+        published_ports:
+          - "53:53/udp"
+#          - "53:53"
+        state: started
+        dns_servers:
+        - 8.8.8.8
+        - 8.4.4.4
+        - 1.1.1.1
+        recreate: true
+        restart_policy: always
+
+  when: inventory_hostname in groups[dns_servers_group_name]
+
+
+
+- name: Update ifcfg-eth0 with new dns ip
+  lineinfile:
+    regexp: '{{ item.what }}'
+    line: '{{ item.to }}'
+    path: /etc/sysconfig/network-scripts/ifcfg-eth0
+    state: present
+  notify:
+  - Restart Network
+  loop:
+    - { what: "^DNS1=.*$", to: "DNS1=\"{{ hostvars[groups[dns_servers_group_name][0]]['ansible_'+net2_devname].ipv4.address }}\"" }
+    - { what: "^PEERDNS=.*$", to: "PEERDNS=\"no\"" }
+    - { what: "^IPV6INIT=.*$", to: "IPV6INIT=\"no\"" }
+    - { what: "^DOMAIN=.*$", to: "DOMAIN=\"{{ cluster_domain_name }}\""}
+
+
+- name: Update /etc/resolv.conf
+  lineinfile:
+    regexp: '^nameserver.*$'
+    line: "nameserver {{ hostvars[groups[dns_servers_group_name][0]]['ansible_'+net2_devname].ipv4.address }}"
+    path: /etc/resolv.conf
+
+- name: Update /etc/hosts
+  lineinfile:
+    regexp: '^.*{{ ansible_hostname }}.*$'
+    line: '{{ dev_ip }} {{ ansible_fqdn }} {{ ansible_hostname }}'
+    state: present
+    path: /etc/hosts
+
+- name: Update /etc/resolv.conf
+  copy:
+    content: |
+      # == managed by ansible == #
+      search {{ domain_name }}
+      {% for host in groups[dns_servers_group_name] %}
+      nameserver {{ hostvars[host]['ansible_'+net2_devname].ipv4.address }}
+      {% endfor %}
+    dest: /etc/resolv.conf
+
+

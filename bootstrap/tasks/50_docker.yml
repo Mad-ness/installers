@@ -1,0 +1,26 @@
+---
+- name: Installing Docker
+  yum: name='{{ item }}' state=present
+  loop:
+  - docker
+  - python-docker-py
+
+- name: Create a directory for the docker registry
+  file:
+    path: '/docker-registry'
+    state: directory
+    mode: '1777'
+   
+
+- name: Run a local docker registry
+  docker_container:
+    name: 'registry'
+    image:  'registry:2'
+    published_ports:
+      - "5000:5000"
+    volumes:
+      - "/docker-registry:/var/lib/registry" 
+    state: started
+    recreate: true
+    restart_policy: always  
+

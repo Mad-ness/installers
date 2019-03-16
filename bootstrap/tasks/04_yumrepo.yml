@@ -1,0 +1,26 @@
+- name: Place a good repo CentOS-Base file
+  copy:
+    content: |
+      [base]
+      name=CentOS-$releasever - Base
+      baseurl=http://mirror.centos.org/centos/$releasever/os/$basearch/
+      gpgcheck=1
+      gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+      [updates]
+      name=CentOS-$releasever - Updates
+      baseurl=http://mirror.centos.org/centos/$releasever/updates/$basearch/
+      gpgcheck=1
+      gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+      [extras]
+      name=CentOS-$releasever - Extras
+      baseurl=http://mirror.centos.org/centos/$releasever/extras/$basearch/
+      gpgcheck=1
+      gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+      [centosplus]
+      name=CentOS-$releasever - Plus
+      mirrorlist=http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&repo=centosplus&infra=$infra
+      gpgcheck=1
+      enabled=0
+      gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+    dest: /etc/yum.repos.d/CentOS-Base.repo
+

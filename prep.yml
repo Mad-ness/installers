@@ -1,0 +1,46 @@
+- hosts:
+  - nodes
+  - lb
+
+  become: true
+  tasks:
+  
+
+  - name: Install needed packages
+    yum: 
+      name: '{{ item }}'
+      state: latest
+    loop:
+    - git 
+    - net-tools 
+    - bind-utils 
+    - yum-utils 
+    - iptables-services 
+    - bridge-utils 
+    - bash-completion 
+    - kexec-tools 
+    - psacct
+    - sos
+    register: is_upgraded
+
+  - name: Upgrade all packages
+    yum:
+      name: '*'
+      state: latest
+    register: is_upgraded
+  
+  - name: Reboot the host
+    shell: "sleep 3 && reboot"
+    async: 1
+    poll: 0
+    when: is_upgraded.changed
+  
+  - name: Wait for the host is being up
+    wait_for_connection:
+      connect_timeout: 30
+      sleep: 5
+      delay: 5
+      timeout: 600
+    when: is_upgraded is changed
+
+

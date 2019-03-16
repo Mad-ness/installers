@@ -1,0 +1,9 @@
+---
+- name: Update /etc/docker/daemon.json
+  lineinfile:
+    regexp: '^INSECURE_REGISTRY=.*$'
+    line: "INSECURE_REGISTRY='--insecure-registry registry.ocp.local:5000'"
+    path: /etc/sysconfig/docker
+  notify:
+  - Restart Docker
+

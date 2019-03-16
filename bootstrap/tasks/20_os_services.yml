@@ -1,0 +1,17 @@
+---
+
+- name: Update SSHd configuration
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^\s*{{ item.option }}\s*.*$'
+    line: '{{ item.option }} {{ item.value }}'
+    validate: 'sshd -t -f %s'
+  loop:
+  - { option: "PermitRootLogin", value: "yes" }
+  - { option: "PasswordAuthentication", value: "yes" }
+  notify:
+    - Restart SSHd service
+
+- name: Flush handlers
+  meta: flush_handlers
+

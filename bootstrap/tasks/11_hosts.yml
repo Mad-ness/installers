@@ -1,0 +1,13 @@
+- name: Update /etc/hosts
+  copy:
+    content: |
+      127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+      ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+      192.168.3.21  node01.ocp.local    node01
+      192.168.3.12  lb.ocp.local        lb01
+      192.168.3.12  registry.ocp.local  registry
+      192.168.3.11  master01.ocp.local  master01
+    dest: /etc/hosts
+  tags:
+    - etc_hosts
+

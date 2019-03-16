@@ -1,0 +1,17 @@
+---
+- name: Deploy /etc/environment file
+  lineinfile:
+    path: /etc/yum.conf
+    regexp: '^proxy=.*$'
+    line: 'proxy=http://{{ hostvars[groups["lb"][0]].openshift_ip }}:3128'
+    state: present
+  tags:
+  - yum_proxy
+
+#  copy:
+#    content: |
+#      http_proxy=lb.ocp.local:3128
+#      https_proxy=lb.ocp.local:3128
+#      no_proxy=.ocp.local,10.0.0.1,10.0.0.2,10.0.0.3,.cluster.local,.svc,localhost,127.0.0.1,172.30.0.1
+#    dest: /etc/environment
+

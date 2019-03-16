@@ -1,0 +1,38 @@
+options {
+    listen-on           port 53 { 0.0.0.0/0; };
+    directory           "/var/bind";
+//    dump-file           "/var/bind/data/cache_dump.db";
+//    statistics-file     "/var/bind/data/bind_stats.txt";
+//    memstatistics-file  "/var/bind/data/bind_mem_stats.txt";
+    allow-query         { 0.0.0.0/0; };
+    // check-names         master ignore;
+    // check-names         slave ignore;
+    // check-names         response ignore;
+    forwarders          { 1.1.1.1; 8.8.8.8; };
+    recursion           yes;
+//    dnssec-enable       yes;
+//    dnssec-validation   no;
+//    bindkeys-file       "/etc/bind.iscdlv.key";
+//    managed-keys-directory "/var/bind/dynamic";
+//    pid-file            "/run/bind/bind.pid";
+//    session-keyfile     "/run/bind/session.key";
+};
+/*
+logging {
+    channel default_debug {
+        file            "data/bind.run";
+        severity        dynamic;
+    };
+};
+zone "." IN {
+    type hint;
+    file "bind.ca";
+};
+*/
+zone "{{ domain_name }}" IN {
+    type master;
+    file "zone.{{ domain_name }}.conf";
+};
+// include               "/etc/bind.rfc1912.zones";
+// include               "/etc/bind.root.key";
+// include                  "/etc/bind/zone.{{ domain_name }}.conf";

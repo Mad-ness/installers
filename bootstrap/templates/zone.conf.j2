@@ -1,0 +1,19 @@
+$TTL 86400
+$ORIGIN {{ domain_name }}.
+@       IN      SOA     ns.{{ domain_name }}. root.{{ domain_name }}. (
+              2014092222    ; Serial
+                  3h        ; Refresh
+                  1h        ; Retry
+                  1w        ; Expiry
+                  3h        ; TTL
+                  )
+
+@         IN NS           ns.{{ domain_name }}.
+@   IN  A           {{ dns_ip }}
+ns  IN  A           {{ dns_ip }}
+lb        IN A            192.168.3.12
+master01  IN A            192.168.3.11
+node01    IN A            192.168.3.21
+node02    IN A            192.168.3.22
+registry  CNAME           lb.ocp.local.
+

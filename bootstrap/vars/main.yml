@@ -1,0 +1,30 @@
+---
+# vars file for bootstrap
+
+dns_configs_dir: /named
+dns_server_base_image: resystit/bind9
+dns_server_build_name: dnsserver
+dns_server_container_name: dnsserver
+dns_server_build_tag: v1 
+
+ocp_needed_packages:
+  - skopeo
+  - buildah
+  - PyYAML
+  - python-ipaddress
+#  - centos-release-openshift-origin311
+  - wget
+  - git
+  - net-tools
+  - bind-utils
+  - yum-utils
+  - iptables-services
+  - bridge-utils
+  - bash-completion
+  - kexec-tools
+  - sos
+  - psacct
+  - tcpdump
+  - telnet
+
+

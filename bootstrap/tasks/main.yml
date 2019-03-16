@@ -1,0 +1,43 @@
+---
+# tasks file for bootstrap
+
+- import_tasks: 00_network.yml
+#  vars:
+#    dev_name: '{{ net2_devname }}'
+#    dev_netmask: '{{ net2_netmask }}'
+#    dev_ip: '{{ net2_ip }}'
+  tags:
+    - network
+
+# - import_tasks: 10_dns.yml
+- import_tasks: 11_hosts.yml
+- import_tasks: 60_proxy.yml
+#  vars:
+#    dns_ip: '{{ hostvars["lb.ocp.local"].net2_ip }}'
+#    domain_name: '{{ cluster_domain_name }}'
+#    dns_servers_group_name: 'lb'
+  tags:
+    - network
+
+- meta: flush_handlers
+
+- import_tasks: 04_yumrepo.yml
+- import_tasks: 05_system.yml
+- name: Tasks over masters and nodes
+  block:
+  - import_tasks: 20_os_services.yml
+  - import_tasks: 30_ocp.yml
+  - import_tasks: 51_docker_client.yml
+  when: inventory_hostname in groups['masters'] or inventory_hostname in groups['nodes']
+
+- name: Tasks over LB hosts
+  block:
+  - import_tasks: 40_loadbalancer.yml
+  - import_tasks: 50_docker.yml
+  when: inventory_hostname in groups[lb_servers_group_name]
+  tags:
+  - docker
+  - dns
+
+- import_tasks: 51_docker_client.yml
+

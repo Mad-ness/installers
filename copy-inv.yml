@@ -1,0 +1,35 @@
+- hosts:
+  - lb
+  - nodes
+  become: true
+  gather_facts: false
+  tasks:
+
+  - name: Copy file(s)
+    copy:
+      src: '{{ item }}'
+      dest: ~/
+    loop:
+    - '../ansible.cfg'
+    - '../inventory.yml'
+    when: inventory_hostname in groups['lb']
+
+  - name: Copy /etc/hosts
+    copy:
+      content: |
+        127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+        ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+
+        54.91.229.41  master01.ocp.local
+        35.171.8.164  utility.ocp.learning
+        3.87.191.63   node01.ocp.local
+      dest: /etc/hosts
+  - name: Copy openshift  users
+    copy:
+      content: '{{ htusers }}'
+      dest: '{{ openshift_master_identity_providers.0.filename }}'
+
+  - name: Install ansible
+    yum: name=ansible state=latest
+    when: inventory_hostname in groups['lb']
+

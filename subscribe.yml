@@ -1,0 +1,31 @@
+- hosts:
+  - nodes
+  - lb
+  become: true
+  tasks:
+  - name: Subscribe the clients
+    redhat_subscription:
+      state: present
+      pool_ids: 8a85f98b62f8eb2c0162fc2ff7d319b7
+      username: 'Dmitriy.Mostovschikov.GDC@ts.fujitsu.com'
+      password: 'uNZGk_blKo1G2crwrVdn'
+
+
+  - name: Disable repos
+    shell: |
+      subscription-manager repos --disable="*"
+      yum-config-manager --disable \*
+
+  - name: Enable needed repos
+    shell: |
+      subscription-manager repos \
+      --enable="rhel-7-server-rpms" \
+      --enable="rhel-7-server-extras-rpms" \
+      --enable="rhel-7-server-ose-3.9-rpms" \
+      --enable="rhel-7-fast-datapath-rpms" \
+      --enable="rhel-7-server-ansible-2.4-rpms"
+  - name: Update all packages
+    yum: 
+      name: *
+      state: latest
+
