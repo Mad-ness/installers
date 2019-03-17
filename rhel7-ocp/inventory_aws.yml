@@ -38,6 +38,8 @@ all:
 #                - package_availability
                 - docker_storage
                 openshift_metrics_cassandra_storage_type: emptydir
+                openshift_metrics_install_metrics: true
+                openshift_metrics_hawkular_hostname: openshift-metrics.apps.dmost.pro
                 osm_use_cockpit: false
 
         etcd:
