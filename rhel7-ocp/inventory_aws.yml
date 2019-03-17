@@ -9,7 +9,6 @@ all:
             vars:
                 # containerized: true
                 ansible_become: true
-                openshift_deployment_type: origin
                 openshift_release: '3.9'
                 openshift_ip_check: true
                 openshift_deployment_type: openshift-enterprise
