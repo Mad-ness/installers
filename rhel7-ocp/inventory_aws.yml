@@ -13,6 +13,8 @@ all:
                 openshift_release: '3.9'
                 openshift_ip_check: true
                 openshift_deployment_type: openshift-enterprise
+                os_sdn_network_plugin_name: redhat/openshift-ovs-multitenant
+                openshift_use_openshift_sdn: true
                 openshift_master_identity_providers:
                   - name: htpasswd_auth
                     login: true
@@ -58,6 +60,9 @@ all:
             vars:
                 # openshift_node_group_name: 'node-config-compute'
                 openshift_node_group_name: 'node-config-master-infra'
+                openshift_node_labels: 
+                  region: infra
+                  zone: east
                 openshift_schedulable: true
         lb:
             hosts:
