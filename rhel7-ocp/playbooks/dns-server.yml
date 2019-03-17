@@ -11,18 +11,17 @@
     copy: 
       content: |
         options {
-                listen-on port 53 { 127.0.0.1; };
-                listen-on-v6 port 53 { ::1; };
+                listen-on port 53 { 0.0.0.0/0; };
                 directory       "/var/named";
                 dump-file       "/var/named/data/cache_dump.db";
                 statistics-file "/var/named/data/named_stats.txt";
                 memstatistics-file "/var/named/data/named_mem_stats.txt";
                 recursing-file  "/var/named/data/named.recursing";
                 secroots-file   "/var/named/data/named.secroots";
-                allow-query     { localhost; };
+                allow-query     { 0.0.0.0/0; };
                 recursion yes;
                 dnssec-enable yes;
-                dnssec-validation yes;
+                dnssec-validation no;
                 forwarders { 1.1.1.1; };
                 /* Path to ISC DLV key */
                 bindkeys-file "/etc/named.iscdlv.key";
@@ -32,22 +31,78 @@
         };
         logging { channel default_debug { file "data/named.run"; severity dynamic; }; };
         zone "." IN { type hint; file "named.ca"; };
-        zone "ocp.local" IN { type master; file "ocp.local.conf"; };
+        zone "{{ cluster_domain_name }}" IN { type master; file "{{ cluster_domain_name }}.conf"; };
         include "/etc/named.rfc1912.zones";
         include "/etc/named.root.key";
 
       dest: /etc/named.conf
-      register: bind_updated
+    register: bind_updated
 
   - name: Deploy ocp.local.conf zone
     copy: 
       content: |
-      
-      dest: /var/named/ocp.local.conf
+        $TTL 86400
+        $ORIGIN {{ cluster_domain_name }}.
+        @     IN      SOA     {{ cluster_domain_name }}. root.{{ cluster_domain_name }}. (
+        	    10    ; Serial
+            	3h		; Refresh
+              1h		; Retry
+              1w		; Expiry
+              3h		; TTL
+                    )
+        
+        @ IN NS {{ hostvars[groups['lb'][0]].openshift_hostname }}.
+        @ IN A  {{ hostvars[groups['lb'][0]].openshift_ip }}
+        {% for host in groups['nodes'] + groups['lb'] %}
+        {{ hostvars[host].openshift_hostname.split('.')[0] }} IN A {{ hostvars[host].openshift_ip }}
+        {% endfor %}
+      dest: "/var/named/{{ cluster_domain_name }}.conf"
     register: zone_updated
 
   - name: Restart named
     service: name=named state=restarted
     when: bind_updated is changed or zone_updated is changed
 
+
+  - name: Start namedd
+    service: name=named state=started enabled=on
+
+
+
+- hosts:
+  - lb
+  - nodes
+  become: true
+  gather_facts: false
+  tasks:
+
+  - name: Update /etc/hosts 
+    copy:
+      content: |
+        127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+        ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+
+      dest: /etc/hosts
+
+  - name: Update ifcfg-eth0
+    lineinfile:
+      regexp: '^PEERDNS='
+      line: 'PEERDNS=no'
+      path: /etc/sysconfig/network-scripts/ifcfg-eth0
+    register: restart_network
+
+  - name: Update /etc/resolv.conf
+    copy: 
+      content: |
+        search {{ cluster_domain_name }}
+        {% for host in groups['lb'] %}
+        nameserver {{ hostvars[host].openshift_ip }}
+        {% endfor %}
+      dest: /etc/resolv.conf
+
+
+
+  - name: Restart network, if needed
+    service: name=NetworkManager state=restarted
+    when: restart_network
 
