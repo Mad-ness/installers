@@ -1,0 +1,53 @@
+- hosts:
+  - lb[0]
+  become: true
+  gather_facts: false
+  tasks:
+
+  - name: Install Bind
+    yum: name=bind state=present
+
+  - name: Install configs
+    copy: 
+      content: |
+        options {
+                listen-on port 53 { 127.0.0.1; };
+                listen-on-v6 port 53 { ::1; };
+                directory       "/var/named";
+                dump-file       "/var/named/data/cache_dump.db";
+                statistics-file "/var/named/data/named_stats.txt";
+                memstatistics-file "/var/named/data/named_mem_stats.txt";
+                recursing-file  "/var/named/data/named.recursing";
+                secroots-file   "/var/named/data/named.secroots";
+                allow-query     { localhost; };
+                recursion yes;
+                dnssec-enable yes;
+                dnssec-validation yes;
+                forwarders { 1.1.1.1; };
+                /* Path to ISC DLV key */
+                bindkeys-file "/etc/named.iscdlv.key";
+                managed-keys-directory "/var/named/dynamic";
+                pid-file "/run/named/named.pid";
+                session-keyfile "/run/named/session.key";
+        };
+        logging { channel default_debug { file "data/named.run"; severity dynamic; }; };
+        zone "." IN { type hint; file "named.ca"; };
+        zone "ocp.local" IN { type master; file "ocp.local.conf"; };
+        include "/etc/named.rfc1912.zones";
+        include "/etc/named.root.key";
+
+      dest: /etc/named.conf
+      register: bind_updated
+
+  - name: Deploy ocp.local.conf zone
+    copy: 
+      content: |
+      
+      dest: /var/named/ocp.local.conf
+    register: zone_updated
+
+  - name: Restart named
+    service: name=named state=restarted
+    when: bind_updated is changed or zone_updated is changed
+
+

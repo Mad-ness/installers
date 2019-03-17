@@ -30,7 +30,7 @@ all:
                 # openshift_crio_enable_docker_gc: true
                 # openshift_enable_excluders: false
                 openshift_docker_selinux_enabled: false
-                openshift_disable_check: 
+                openshift_disable_check:
                 - disk_availability
                 - memory_availability
                 - docker_image_availability
@@ -55,7 +55,7 @@ all:
                 openshift_schedulable: true
         lb:
             hosts:
-                utility.ocp.learning: 
+                utility.ocp.learning:
                     ansible_host: 3.209.89.210
                     ansible_ssh_port: 22
                     net2_ip: "{{ ansible_host }}"
@@ -77,7 +77,7 @@ all:
                     # ansible_ssh_private_key_file: "../.vagrant/machines/node01/virtualbox/private_key"
                     # net2_ip: 192.168.3.21
                     # openshift_ip: 192.168.3.21
-#                 node02.ocp.local: 
+#                 node02.ocp.local:
 #                     ansible_host: localhost
 #                     ansible_ssh_port: 4022
 #                     ansible_ssh_private_key_file: "../.vagrant/machines/node02/virtualbox/private_key"
@@ -91,7 +91,8 @@ all:
     vars:
         net2_netmask: 255.255.255.0
         net2_devname: eth1
-        ansible_ssh_user: vagrant
+        ansible_ssh_private_key_file: "~/.ssh/aws.key"
+        ansible_ssh_user: ec2-user
         cluster_domain_name: "ocp.local"
         # ansible_user: ec2-user
         # internal_docker_registry_hostname: 'registry.ocp.local'
