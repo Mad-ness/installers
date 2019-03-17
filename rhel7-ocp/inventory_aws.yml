@@ -22,9 +22,9 @@ all:
                 # openshift_docker_insecure_registries: 'registry.ocp.local:5000'
                 openshift_master_default_subdomain: 'apps.dmost.pro'
                 # oreg_url: 'registry.ocp.local:5000/openshift/origin-${component}:${version}'
-                openshift_master_cluster_hostname: 'master01.ocp.local'
+                openshift_master_cluster_hostname: 'master.ocp.local'
                 # openshift_master_cluster_method: native
-                openshift_master_cluster_public_hostname: 'lb.ocp.local'
+                openshift_master_cluster_public_hostname: 'master.apps.dmost.pro'
                 # openshift_use_crio: true
                 # openshift_use_crio_only: false
                 # openshift_crio_enable_docker_gc: true
@@ -37,13 +37,16 @@ all:
 #                - package_version
 #                - package_availability
                 - docker_storage
+                openshift_metrics_cassandra_storage_type: emptydir
+                osm_use_cockpit: false
+
         etcd:
             children:
                 masters:
         masters:
             hosts:
                 master.ocp.local:
-                    ansible_host: 3.82.191.146
+                    ansible_host: 3.84.234.15
                     ansible_ssh_port: 22
                     # ansible_ssh_private_key_file: "../.vagrant/machines/master01/virtualbox/private_key"
                     net2_ip: "{{ ansible_host }}"
@@ -69,7 +72,7 @@ all:
               masters:
             hosts:
                 node01.ocp.local:
-                    ansible_host: 52.87.240.162
+                    ansible_host: 52.90.40.222
                     ansible_ssh_port: 22
                     net2_ip: "{{ ansible_host }}"
                     openshift_ip: 172.31.49.177
@@ -85,6 +88,7 @@ all:
 #                     openshift_ip: 192.168.3.22
             vars:
               dummy: test
+              openshift_schedulable: true
               # openshift_node_group_name: node-config-all-in-one
               # openshift_node_group_name: 'node-config-master-infra'
               openshift_node_group_name: 'node-config-compute'
