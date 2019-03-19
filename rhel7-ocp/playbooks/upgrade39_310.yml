@@ -1,0 +1,47 @@
+- hosts:
+  - masters
+  - nodes
+  - etcd
+  become: true  
+  gather_facts: false
+  vars:
+    files_to_backup:
+    - "/usr/lib/systemd/system/atomic-openshift-master-api.service"
+    - "/usr/lib/systemd/system/atomic-openshift-master-controllers.service"
+    - "/etc/sysconfig/atomic-openshift-master-api"
+    - "/etc/sysconfig/atomic-openshift-master-controllers"
+    - "/etc/origin/master/master-config.yaml"
+    - "/etc/origin/master/scheduler.json"
+    - "/usr/lib/systemd/system/atomic-openshift-*.service"
+    - "/etc/origin/node/node-config.yaml"
+    - "/etc/etcd/etcd.conf"
+  tasks:
+
+  - name: Take a backup of some files
+    archive:
+      path: '{{ files_to_backup }}'
+      dest: '/var/tmp/ocp3.9.tar.bz2'
+      format: bz2
+
+
+  - name: Disable not needed repos
+    rhsm_repository:
+      name: '{{ item.repo }}'
+      state: '{{ item.state | default("enabled") }}'
+    loop:
+      - { repo: "rhel-7-server-ose-3.9-rpms", state: disabled }
+      - { repo: "rhel-7-server-ose-3.10-rpms" }
+      - { repo: "rhel-7-server-rpms" }
+      - { repo: "rhel-7-server-extras-rpms" }
+      - { repo: "rhel-7-server-ansible-2.4-rpms" }
+
+  - name: Update openshift-ansible package
+    yum:
+      name: openshift-ansible
+      state: latest
+
+ 
+
+
+
+

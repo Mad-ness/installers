@@ -1,0 +1,8 @@
+limits:
+  - max:
+      cpu: "1"
+      memory: "2Gi"
+    min:
+      cpu: "4"
+      memory: 6Gi
+    type: Pod

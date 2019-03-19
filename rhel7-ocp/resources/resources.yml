@@ -1,64 +1,115 @@
 openshift_clusters:
-  - openshift_host_env: '{{ openshift_master_cluster_public_hostname }}'
-    resource_path:
-    - resources
-    cluster_resources:
-    - clusterroles/group-developer.yml
-    cluster_role_bindings:
-    - role: cluster-admin
-      users:
-      - system:admin
-      groups:
-      - system:cluster-admins
-      - admins
-      remove_unlisted: true
-    - role: cluster-reader
-      users:
-      - system:serviceaccount:default:cluster-reader
-      remove_unlisted: false
+- openshift_host_env: '{{ openshift_master_cluster_public_hostname }}'
+  resource_path:
+  - resources
+  cluster_resources:
+  - clusterroles/group-developer.yml
+
+  cluster_role_bindings:
+  - role: cluster-admin
+    users:
+    - system:admin
     groups:
-      - name: users
-        members:
-          - admin
-          - user1
-          - user2
-          - user3
-          - user4
-          - user5
-          - user6
-          - user7
-      - name: admins
-        members:
-          - admin
-          - user1
-          - user2
-        remove_unlisted_members: true
-      - name: app-admin
-        members:
-          - user3
-          - user4
-        remove_unlisted_members: true
+    - system:cluster-admins
+    - admins
+    remove_unlisted: true
 
-    projects:
-      - name: jenkins
-        description: Jenkins Agent Project
-        labels:
-          app: jenkins
-        service_accounts:
-          - name: jenkins
-        role_bindings:
-          - role: edit
-            users:
-              - system:serviceaccount:jenkins:jenkins
+  groups:
+    - name: users
+      members:
+        - admin
+        - user1
+        - user2
+        - user3
+        - user4
+        - user5
+        - user6
+        - user7
+    - name: admins
+      members:
+        - admin
+        - user1
+        - user2
+      remove_unlisted_members: true
+    - name: app-admin
+      members:
+        - user3
+        - user4
+      remove_unlisted_members: true
 
-#    cluster_role_bindings:
-#      - role: self-provisioner
-#        users:
-#          - system:serviceaccount:app-dev:jenkins
-#      - role: network-joiner
-#        users:
-#          - system:serviceaccount:app-dev:jenkins
-#        groups:
-#          - app-admin
-#        remove_unlisted: true
+  projects:
+    - name: jenkins
+      description: Jenkins Agent Project
+      labels:
+        app: jenkins
+      service_accounts:
+        - name: jenkins
+      role_bindings:
+        - role: edit
+          users:
+            - system:serviceaccount:jenkins:jenkins
+      resources:
+      - apiVersion: v1
+        kind: ResourceQuota
+        metadata:
+          name: compute-and-ephemeral
+          labels:
+            project: jenkins
+        spec:
+          hard:
+            configmaps: "2"
+            persistentvolumeclaims: "0"
+            replicationcontrollers: "3"
+            secrets: "12"
+            services: "1"
+
+      - apiVersion: v1
+        kind: ResourceQuota
+        metadata:
+          name: high-priority
+        spec:
+          hard:
+            pods: "3"
+            requests.cpu: "1"
+            requests.memory: 1Gi
+            limits.cpu: "2"
+            limits.memory: 2Gi
+          scopeSelector:
+            matchExpression:
+              - operator: In
+                scopeName: PriorityClass
+                values: ["high"]
+
+      - apiVersion: v1
+        kind: ResourceQuota
+        metadata:
+          name: high-medium
+        spec:
+          hard:
+            pods: "3"
+            requests.cpu: "1"
+            requests.memory: 256Mi
+            limits.cpu: "1"
+            limits.memory: 128Mi
+          scopeSelector:
+            matchExpression:
+              - operator: In
+                scopeName: PriorityClass
+                values: ["medium"]
+
+
+
+      - apiVersion: v1
+        kind: LimitRange
+        metadata:
+          name: compute
+        spec: 
+          limits:
+            - max: 
+                cpu: "1"
+                memory: 2400Mi
+              min:
+                cpu: "1"
+                memory: 300Mi
+              type: Pod
 
