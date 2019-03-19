@@ -1,0 +1,8 @@
+- hosts: masters[0]
+  tasks:
+    - include_vars:
+        file: resources/resources.yml
+
+    - include_role:
+        name: openshift-provision
+

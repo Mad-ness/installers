@@ -1,0 +1,20 @@
+openshift_provision:
+  connection:
+    server: https://master.apps.dmost.pro:8443
+    token: kc_UYmzEYc0QtKQXYMglAGTqhUBFsWrVBZw9LzX2I-Y
+
+
+  cluster_resources:
+    - apiVersion: v1
+      kind: ClusterRole
+      metadata:
+        creattionTimestamp: null
+        name: network-joiner
+      rules:
+        - apiGroups:
+          - network.openshift.io
+          - ""
+          attributeRestrictions: null
+          resources: 
+            - netnamespaces
+

@@ -50,11 +50,11 @@ all:
         masters:
             hosts:
                 master.ocp.local:
-                    ansible_host: 3.84.234.15
+                    ansible_host: 3.91.239.247
                     ansible_ssh_port: 22
                     # ansible_ssh_private_key_file: "../.vagrant/machines/master01/virtualbox/private_key"
                     net2_ip: "{{ ansible_host }}"
-                    openshift_ip: 172.31.62.168
+                    openshift_ip: 172.31.51.120
                     openshift_hostname: master.ocp.local
             vars:
                 # openshift_node_group_name: 'node-config-compute'
@@ -69,7 +69,7 @@ all:
                     ansible_host: 3.209.89.210
                     ansible_ssh_port: 22
                     net2_ip: "{{ ansible_host }}"
-                    openshift_ip: 172.31.60.175
+                    openshift_ip: 172.31.52.131
                     openshift_hostname: lb.ocp.local
                     # ansible_ssh_private_key_file: "../.vagrant/machines/lb01/virtualbox/private_key"
                     # net2_ip: 192.168.3.12
@@ -79,10 +79,10 @@ all:
               masters:
             hosts:
                 node01.ocp.local:
-                    ansible_host: 52.90.40.222
+                    ansible_host: 18.208.145.41
                     ansible_ssh_port: 22
                     net2_ip: "{{ ansible_host }}"
-                    openshift_ip: 172.31.49.177
+                    openshift_ip: 172.31.60.96
                     openshift_hostname: node01.ocp.local
                     # ansible_ssh_private_key_file: "../.vagrant/machines/node01/virtualbox/private_key"
                     # net2_ip: 192.168.3.21
@@ -102,7 +102,7 @@ all:
     vars:
         net2_netmask: 255.255.255.0
         net2_devname: eth1
-        ansible_ssh_private_key_file: "~/.ssh/aws.key"
+        # ansible_ssh_private_key_file: "~/.ssh/aws.key"
         ansible_ssh_user: ec2-user
         cluster_domain_name: "ocp.local"
         # ansible_user: ec2-user

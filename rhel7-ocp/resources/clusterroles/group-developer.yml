@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ClusterRole
+metadata:
+  name: group-developer
+  annotations:
+    group_base_project_label: application
+    group_name_extension: -developer
+rules: []
+
